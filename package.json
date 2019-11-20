@@ -1,0 +1,22 @@
+{
+  "name": "leegionbot",
+  "version": "1.0.0",
+  "description": "Discord Bot for Leegion",
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r esm src/index.js",
+    "test": "test"
+  },
+  "author": "Glanyx",
+  "license": "ISC",
+  "dependencies": {
+    "aws-amplify": "^1.2.3",
+    "discord.js": "^11.5.1",
+    "enmap": "^5.2.1",
+    "esm": "^3.2.25",
+    "twitter": "^1.7.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.556.0"
+  }
+}
