@@ -34,6 +34,8 @@ client.login(config.token);
 const stream = require('./libs/twitter-lib').run();
 
 stream.on('data', event => {
-    console.log(event);
+    if (event.user.id !== config.twitter.id){
+        return;
+    };
     twitterHandler.handler(client, event);
 })
