@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node -r esm src/index.js",
+    "stop": "pkill --signal SIGINT leegionbot",
     "test": "test"
   },
   "author": "Glanyx",
