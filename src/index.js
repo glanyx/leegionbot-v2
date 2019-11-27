@@ -8,6 +8,8 @@ const client = new Discord.Client();
 
 const twitterHandler = require('./handlers/twitter');
 
+process.title = 'leegionBot';
+
 fs.readdir("./src/events/", (err, files) => {
     if (err) return console.error(err);
     files.forEach(file => {
