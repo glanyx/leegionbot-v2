@@ -7,7 +7,9 @@ exports.run = async (client, message, args) => {
         if (livechat.state){
             message.channel.send('Livechat is already active!');
         } else {
-            start();
+            message.channel.send(`Hey @everyone! The Patreon Livechat is will be starting soon! :sparkles: Please be considerate to other users during the chat! Push-to-Talk is enforced on this voice channel so please be aware that web users will not be able to speak! By joining the Livechat you agree that you shall not record or publically share recordings of the Livechat. :star2: HAVE FUN! :star2:`).then(() => {
+                start(message.guild);
+            });
         }
 
     } else {

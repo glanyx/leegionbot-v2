@@ -6,6 +6,7 @@ exports.run = async (client, message, args) => {
 
         if (livechat.state){
             end();
+            message.channel.send(`The Patreon Livechat has now ended. :star2: Thanks for tuning in, until next month! :star2:`)
         } else {
             message.channel.send('There is no Livechat active!');
         }
