@@ -26,10 +26,6 @@ exports.run = async (client, message, args) => {
             profile.themes = await getThemes(message.author);
         }
 
-        console.log(profile.themes);
-
-        return;
-
         // Store the data provided by the user
         await store(message.author, profile);
 
