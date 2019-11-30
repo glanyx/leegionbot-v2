@@ -22,7 +22,9 @@ exports.run = async (client, message, args) => {
         };
 
         // Grab themes
-        profile.themes = await getThemes(message.author);
+        while (themes === []){
+            profile.themes = await getThemes(message.author);
+        }
 
         // Store the data provided by the user
         await store(message.author, profile);
@@ -208,21 +210,21 @@ async function getRegion (user) {
                 }
 
                 collector.on('collect', async m => {
-                    if (m.content.toLowerCase().includes('europe') || m.content.toLowerCase().includes('eu')) {
+                    if (m.content.toLowerCase().includes('europe') || m.content.toLowerCase() === 'eu') {
                         await regionConfirm(user, `eu`);
-                    } else if (m.content.toLowerCase().includes('north america') || m.content.toLowerCase().includes('na') || m.content.toLowerCase().includes('usa')) {
+                    } else if (m.content.toLowerCase().includes('north america') || m.content.toLowerCase() === 'na' || m.content.toLowerCase().includes('usa')) {
                         await regionConfirm(user, `na`);
-                    } else if (m.content.toLowerCase().includes('south america') || m.content.toLowerCase().includes('sa')) {
+                    } else if (m.content.toLowerCase().includes('south america') || m.content.toLowerCase() === 'sa') {
                         await regionConfirm(user, `sa`);
-                    } else if (m.content.toLowerCase().includes('canada') || m.content.toLowerCase().includes('ca')) {
+                    } else if (m.content.toLowerCase().includes('canada') || m.content.toLowerCase() === 'ca') {
                         await regionConfirm(user, `ca`);
-                    } else if (m.content.toLowerCase().includes('asia') || m.content.toLowerCase().includes('as')) {
+                    } else if (m.content.toLowerCase().includes('asia') || m.content.toLowerCase() === 'as') {
                         await regionConfirm(user, `as`);
-                    } else if (m.content.toLowerCase().includes('australia') || m.content.toLowerCase().includes('aus') || m.content.toLowerCase().includes('au')) {
+                    } else if (m.content.toLowerCase().includes('australia') || m.content.toLowerCase().includes('aus') || m.content.toLowerCase() === 'au') {
                         await regionConfirm(user, `au`);
-                    } else if (m.content.toLowerCase().includes('middle east') || m.content.toLowerCase().includes('me')) {
+                    } else if (m.content.toLowerCase().includes('middle east') || m.content.toLowerCase() === 'me') {
                         await regionConfirm(user, `me`);
-                    } else if (m.content.toLowerCase().includes('africa') || m.content.toLowerCase().includes('af')) {
+                    } else if (m.content.toLowerCase().includes('africa') || m.content.toLowerCase() === 'af') {
                         await regionConfirm(user, `af`);
                     } else {
                         user.send(`I couldn't recognize that Region. Please try again.`);
@@ -243,7 +245,7 @@ async function getThemes (user) {
     return new Promise(
         async (resolve, reject) => {
 
-            user.send(`We're almost there! We don't want to make this really difficult for your Secret Santa and we'd like you to receive a gift you would like. Please share with me a maximum of 3 themes that you would like to receive a gift for. If you can't think of 3 themes, don't worry, you can finish this part of the registration process by typing \`done\`.\n\nPlease send me each theme as a **NEW** message!`
+            user.send(`We're almost there! We don't want to make this really difficult for your Secret Santa and we'd like you to receive a gift you would like. Please share with me a maximum of 3 themes that you would like to receive a gift for. You must add at least 1 theme, but if you can't think of 3, don't worry, you can finish this part of the registration process by typing \`done\`.\n\nPlease send me each theme as a **NEW** message!`
             ).then(message => {
                 const collector = message.channel.createMessageCollector(message => user === message.author, {
                     max: 3,
