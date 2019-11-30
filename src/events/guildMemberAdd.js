@@ -14,7 +14,7 @@ module.exports = async (client, member) => {
         const conf = await dynamoDbLib.call("get", params);
         if (conf.Item){
             const channelId  = conf.Item.channelId;
-            member.guild.channels.get("id", channelId).send(`${member.user.username} joined the server.`);
+            member.guild.channels.get(channelId).send(`${member.user.username} joined the server.`);
         } else {
             return;
         }

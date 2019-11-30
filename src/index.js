@@ -40,4 +40,8 @@ stream.on('data', event => {
         return;
     };
     twitterHandler.handler(client, event);
-})
+});
+
+stream.on('error', e => {
+    console.log(e);
+});
