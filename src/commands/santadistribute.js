@@ -111,8 +111,7 @@ exports.run = async (client, message, args) => {
             for (let i = 0; i < arrays[key].length; i++){
 
                 // Send the actual profile
-                // const santa = await client.fetchUser(arrays[key][i][0]);
-                const santa = await client.fetchUser('454731055291695125');
+                const santa = await client.fetchUser(arrays[key][i][0]);
                 const recipient = await client.fetchUser(arrays[key][i][1]);
 
                 await storeDB(santa.id, recipient.id);
