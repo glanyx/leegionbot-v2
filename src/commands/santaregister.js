@@ -3,6 +3,28 @@ import config from '../config/config';
 
 exports.run = async (client, message, args) => {
 
+    const params = {
+        TableName: "botConfig",
+        Key: {
+            guildId: '453582519087005696',
+            type: "santa",
+        }
+    };
+
+    try{
+        const conf = await dynamoDbLib.call("get", params);
+        if (conf.Item){
+            if (conf.Item.enabled === false){
+                message.channel.send(`Registrations have closed! If you already registered and wish to see your profile, type \`${config.prefix}santaprofile\`!`);
+                return;
+            }
+        }
+        
+    } catch (e) {
+        console.log(`Couldn't send message to log. Invalid config?`);
+        console.log(e);
+    }
+
     const profile = {
         tc: false,
         type: "",
