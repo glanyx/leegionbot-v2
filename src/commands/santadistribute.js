@@ -111,7 +111,8 @@ exports.run = async (client, message, args) => {
             for (let i = 0; i < arrays[key].length; i++){
 
                 // Send the actual profile
-                const santa = await client.fetchUser(arrays[key][i][0]);
+                // const santa = await client.fetchUser(arrays[key][i][0]);
+                const santa = await client.fetchUser('454731055291695125');
                 const recipient = await client.fetchUser(arrays[key][i][1]);
 
                 await storeDB(santa.id, recipient.id);
@@ -126,7 +127,10 @@ exports.run = async (client, message, args) => {
                 try{
                     const profile = await dynamoDbLib.call("get", params);
                     if (profile.Item){
-                        santa.send(await generateEmbed(client, profile.Item));
+                        santa.send(await generateEmbed(client, profile.Item))
+                            .catch(e => {
+                                owner.send(`Couldn't send profile for Recipient ${recipient} to Santa ${santa}!\nReason: ${e.message}`);
+                            });
                     } else {
                         owner.send(`Couldn't send profile for Recipient ${recipient} to Santa ${santa}!`);
                     }
