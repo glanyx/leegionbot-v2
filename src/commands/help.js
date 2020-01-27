@@ -15,7 +15,7 @@ exports.run = async (client, message, args) => {
       0
     );
 
-    let output = `**= Command List =**\n\n[Use ${config.prefix}help <commandname> for details]\n`;
+    let output = `= Command List =\n\n[Use ${config.prefix}help <commandname> for details]\n`;
     const sorted = commands
       .array()
       .sort((p, c) =>
@@ -28,13 +28,13 @@ exports.run = async (client, message, args) => {
 
     let curCategory;
     sorted.forEach(c => {
-      const category = c.help.category.toProperCase();
+      const category = c.help.category;
       if (curCategory !== category) {
-        output += `\u200b\n**= ${category} =**\n`;
+        output += `\u200b\n= ${category} =\n`;
         curCategory = category;
       }
       output += `${config.prefix}${c.help.name}${" ".repeat(
-        (longest = c.help.name.length)
+        (longest - c.help.name.length)
       )} :: ${c.help.description}\n`;
     });
     message.channel.send(output, {
@@ -45,7 +45,7 @@ exports.run = async (client, message, args) => {
     if (commands.has(args[0])) {
       const command = commands.get(args[0]);
       message.channel.send(
-        `**= ${command.help.name} =**\n${command.help.description}\nUsage:: ${command.help.usage}`,
+        `= ${command.help.name} =\n${command.help.description}\nUsage:: ${command.help.usage}`,
         { code: "asciidoc" }
       );
     }
