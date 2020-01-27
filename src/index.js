@@ -1,4 +1,5 @@
 import config from './config/config';
+import TwitterLib from './libs/twitter-lib';
 
 const Enmap = require("enmap");
 const fs = require("fs");
@@ -33,7 +34,7 @@ fs.readdir("./src/commands/", (err, files) => {
 });
 
 client.login(config.token);
-const stream = require('./libs/twitter-lib').run();
+let stream = TwitterLib.run();
 
 stream.on('data', event => {
     if (event.user.id !== config.twitter.id){
@@ -45,3 +46,8 @@ stream.on('data', event => {
 stream.on('error', e => {
     console.log(e);
 });
+
+stream.on('disconnect', e => {
+    console.log(e);
+    stream = TwitterLib.run();
+})

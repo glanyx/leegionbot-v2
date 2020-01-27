@@ -1,15 +1,16 @@
-import config from '../config/config';
+import config from "../config/config";
 
 module.exports = (client, message) => {
+  if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+  const args = message.content
+    .slice(config.prefix.length)
+    .trim()
+    .split(/ +/g);
+  const command = args.shift().toLowerCase();
+  const cmd = client.commands.get(command);
 
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-    const cmd = client.commands.get(command);
+  if (!cmd) return;
 
-    if (!cmd) return;
-
-    cmd.run(client, message, args);
-
-}
+  cmd.run(client, message, args);
+};
