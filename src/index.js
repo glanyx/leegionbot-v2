@@ -1,5 +1,5 @@
 import config from './config/config';
-import TwitterLib from './libs/twitter-lib';
+import * as TwitterLib from './libs/twitter-lib';
 
 const Enmap = require("enmap");
 const fs = require("fs");
