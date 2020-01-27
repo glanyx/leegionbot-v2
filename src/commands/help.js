@@ -33,7 +33,7 @@ exports.run = async (client, message, args) => {
         output += `\u200b\n= ${category} =\n`;
         curCategory = category;
       }
-      output += `${config.prefix}${c.help.name}${" ".repeat(
+      output += ` ${config.prefix}${c.help.name}${" ".repeat(
         (longest - c.help.name.length)
       )} :: ${c.help.description}\n`;
     });
