@@ -1,6 +1,6 @@
 import config from "../config/config";
 
-function Message(client, message) {
+module.exports = (client, message) => {
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const args = message.content
@@ -13,6 +13,4 @@ function Message(client, message) {
   if (!cmd) return;
 
   cmd.run(client, message, args);
-}
-
-export default Message;
+};
