@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { connected, skip } from '../handlers/songHandler';
+import { connected, stop } from '../handlers/songHandler';
 
 /**
  * 
@@ -11,12 +11,7 @@ export const run = async (client, message, args) => {
 
   if (connected(message.guild.id)) {
 
-    try{
-      stop(message.guild.id);
-    } catch (e) {
-      message.channel.send(e);
-      return;
-    }
+    stop(message.guild.id);
 
   } else {
     message.channel.send(`I'm not in a Voice Channel!`);
