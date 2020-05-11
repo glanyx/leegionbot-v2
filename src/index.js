@@ -45,12 +45,12 @@ stream.on('data', event => {
 
 stream.on('error', e => {
   console.log(e);
-  client.guilds.get('259715388462333952').channels.get('259715388462333952').send('Twitter Error:');
-  client.guilds.get('259715388462333952').channels.get('259715388462333952').send(e);
+  client.guilds['259715388462333952'].channels.get('259715388462333952').send('Twitter Error:');
+  client.guilds['259715388462333952'].channels.get('259715388462333952').send(e);
 });
 
 stream.on('disconnect', e => {
-  client.guilds.get('259715388462333952').channels.get('259715388462333952').send('Twitter Disconnect:');
-  client.guilds.get('259715388462333952').channels.get('259715388462333952').send(e);
+  client.guilds['259715388462333952'].channels.get('259715388462333952').send('Twitter Disconnect:');
+  client.guilds['259715388462333952'].channels.get('259715388462333952').send(e);
   stream = TwitterLib.run();
 })
