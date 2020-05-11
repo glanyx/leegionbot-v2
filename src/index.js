@@ -23,31 +23,34 @@ fs.readdir("./src/events/", (err, files) => {
 client.commands = new Enmap();
 
 fs.readdir("./src/commands/", (err, files) => {
-    if (err) return console.error(err);
-    files.forEach(file => {
-        if (!file.endsWith(".js")) return;
-        let props = require(`./commands/${file}`);
-        let commandName = file.split(".")[0];
-        console.log(`Attempting to load command ${commandName}`);
-        client.commands.set(commandName, props);
-    });
+  if (err) return console.error(err);
+  files.forEach(file => {
+    if (!file.endsWith(".js")) return;
+    let props = require(`./commands/${file}`);
+    let commandName = file.split(".")[0];
+    console.log(`Attempting to load command ${commandName}`);
+    client.commands.set(commandName, props);
+  });
 });
 
 client.login(config.token);
 let stream = TwitterLib.run();
 
 stream.on('data', event => {
-    if (event.user.id !== config.twitter.id){
-        return;
-    };
-    twitterHandler.handler(client, event);
+  if (event.user.id !== config.twitter.id){
+    return;
+  };
+  twitterHandler.handler(client, event);
 });
 
 stream.on('error', e => {
-    console.log(e);
+  console.log(e);
+  client.guilds.get('259715388462333952').channels.get('259715388462333952').send('Twitter Error:');
+  client.guilds.get('259715388462333952').channels.get('259715388462333952').send(e);
 });
 
 stream.on('disconnect', e => {
-    console.log(e);
-    stream = TwitterLib.run();
+  client.guilds.get('259715388462333952').channels.get('259715388462333952').send('Twitter Disconnect:');
+  client.guilds.get('259715388462333952').channels.get('259715388462333952').send(e);
+  stream = TwitterLib.run();
 })
