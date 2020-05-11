@@ -43,7 +43,7 @@ export const addSong = async (guildId, url) => {
   }
 }
 
-export const connected = (guildId) => {
+export const connected = guildId => {
   return queue.has(guildId);
 }
 
@@ -114,7 +114,7 @@ export const stop = guildId => {
   const instance = getInstance(guildId);
   instance.songs = [];
 
-  message.channel.send('Stopped playing music!');
+  instance.textChannel.send('Stopped playing music!');
   instance.connection.dispatcher.end();
   disconnectClient(guildId);
 }
