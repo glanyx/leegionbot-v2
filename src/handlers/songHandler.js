@@ -111,10 +111,16 @@ export const skip = guildId => {
 }
 
 export const stop = guildId => {
-  const instance = getInstance(guildId);
-  instance.songs = [];
+  try {
+    const instance = getInstance(guildId);
+    instance.songs = [];
 
-  instance.textChannel.send('Stopped playing music!');
-  instance.connection.dispatcher.end();
-  disconnectClient(guildId);
+    instance.textChannel.send('Stopped playing music!');
+    instance.connection.dispatcher.end();
+    instance.voiceChannel.leave();
+    clearTimeout(instance.timer);
+    queue.delete(guildId);
+  } catch (e) {
+    console.log(e);
+  }
 }
