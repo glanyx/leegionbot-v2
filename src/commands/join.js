@@ -1,6 +1,6 @@
 // import * as s3Lib from "../libs/s3-lib";
 import { Message } from 'discord.js';
-import { QueueObject, createQueue } from '../handlers/songHandler';
+import { QueueObject, createQueue, connected } from '../handlers/songHandler';
 
 /**
  * 
@@ -15,6 +15,11 @@ export const run = async (client, message, args) => {
     const perms = message.member.voiceChannel.permissionsFor(message.client.user);
     if (!perms.has('CONNECT') || !perms.has('SPEAK')) {
       message.channel.send('Please add permissions for CONNECT and SPEAK to me. Then try again!');
+      return;
+    }
+
+    if (connected(message.guild.id)) {
+      message.channel.send(`I'm already in a voice channel!`);
       return;
     }
 
