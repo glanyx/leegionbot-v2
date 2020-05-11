@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { connected, stop } from '../handlers/songHandler';
+import { connected, playing, stop } from '../handlers/songHandler';
 
 /**
  * 
@@ -10,6 +10,11 @@ import { connected, stop } from '../handlers/songHandler';
 export const run = async (client, message, args) => {
 
   if (connected(message.guild.id)) {
+
+    if (!playing(message.guild.id)) {
+      message.channel.send(`I'm not playing anything right now!`);
+      return;
+    }
 
     stop(message.guild.id);
 

@@ -1,7 +1,7 @@
 import { VoiceChannel, TextChannel } from "discord.js";
 import ytdl from 'ytdl-core';
 
-const TIMEOUT = 180000;
+const TIMEOUT = 10000;
 
 const queue = new Map();
 
@@ -47,6 +47,10 @@ export const connected = guildId => {
   return queue.has(guildId);
 }
 
+export const playing = guildId => {
+  return getInstance(guildId).playing;
+}
+
 export class QueueObject {
 
   /**
@@ -67,9 +71,14 @@ export class QueueObject {
 
 const disconnectClient = guildId => {
   const instance = getInstance(guildId);
-  instance.voiceChannel.leave();
-  instance.textChannel.send('Left the voice channel due to inactivity!');
-  queue.delete(guildId);
+  try {
+    instance.voiceChannel.leave();
+    instance.textChannel.send('Left the voice channel due to inactivity!');
+    queue.delete(guildId);
+  } catch (e) {
+    console.log('Error disconnecting voice client');
+    console.log(e);
+  }
 }
 
 export const play = guildId => {
@@ -83,6 +92,7 @@ export const play = guildId => {
     return;
   }
 
+  instance.playing = true;
   const dispatcher = instance.connection
     .playStream(ytdl(instance.songs[0].url))
     .on('start', () => {
@@ -107,6 +117,7 @@ export const skip = guildId => {
     throw 'There are no songs in the queue to skip!';
   }
 
+  instance.textChannel.send('Skipping..');
   instance.connection.dispatcher.end();
 }
 
@@ -116,9 +127,10 @@ export const stop = guildId => {
     instance.songs = [];
 
     instance.textChannel.send('Stopped playing music!');
+    
     instance.connection.dispatcher.end();
-    instance.voiceChannel.leave();
     clearTimeout(instance.timer);
+    instance.voiceChannel.leave();
     queue.delete(guildId);
   } catch (e) {
     console.log(e);

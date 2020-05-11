@@ -1,6 +1,6 @@
 import config from '../config/config';
 import { Message } from 'discord.js';
-import { connected, addSong, play, getInstance } from '../handlers/songHandler';
+import { connected, addSong, play, getInstance, playing } from '../handlers/songHandler';
 
 /**
  * 
@@ -19,14 +19,16 @@ export const run = async (client, message, args) => {
         message.channel.send(e);
         return;
       }
+    } else {
+      if (getInstance(message.guild.id).songs.length === 0) {
+        message.channel.send('The song queue is empty!');
+        return;
+      }
     }
 
-    if (getInstance(message.guild.id).songs.length === 0) {
-      message.channel.send('The song queue is empty!');
-      return;
+    if (!playing(message.guild.id)) {
+      play(message.guild.id);
     }
-
-    play(message.guild.id);
 
   } else {
     message.channel.send(`I'm not in a Voice Channel! Use \`${config.prefix}join\` so I can join your channel!`);
