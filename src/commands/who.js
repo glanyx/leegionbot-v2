@@ -1,39 +1,51 @@
-import Discord from "discord.js";
+import { MessageEmbed, Guild, GuildMember } from "discord.js";
 import * as dateFormatLib from "../libs/dateformat-lib";
 
 exports.run = async (client, message, args) => {
   if (message.mentions.members.first()) {
     message.mentions.members.forEach(async member => {
-      const embed = generateProfile(message.guild, member);
+      const embed = await generateProfile(message.guild, member);
       await message.channel.send(embed);
     });
     return;
   }
-  const embed = generateProfile(message.guild, message.member);
+  const embed = await generateProfile(message.guild, message.member);
   message.channel.send(embed);
 };
 
-function generateProfile(guild, gMember) {
+/**
+ * 
+ * @param {Guild} guild 
+ * @param {GuildMember} gMember 
+ */
+
+const generateProfile = async (guild, gMember) => {
   let joinPos = 1;
   let roleString = "";
 
-  guild.members.forEach(member => {
+  await guild.members.fetch()
+  await guild.roles.fetch()
+
+  guild.members.cache.forEach(member => {
     if (member !== gMember) {
       if (member.joinedAt < gMember.joinedAt) {
         joinPos++;
       }
     }
   });
-  gMember.roles.forEach(role => {
+
+  gMember.roles.cache.forEach(role => {
     if (role.name !== "@everyone") {
       roleString += `${role}\n`;
     }
   });
 
-  return new Discord.RichEmbed()
-    .setAuthor(gMember.user.tag, gMember.user.avatarURL)
-    .setThumbnail(gMember.user.avatarURL)
-    .setColor(gMember.highestRole.color)
+  const highestRole = gMember.roles.highest
+
+  return new MessageEmbed()
+    .setAuthor(gMember.user.tag, gMember.user.avatarURL())
+    .setThumbnail(gMember.user.avatarURL())
+    .setColor(highestRole.color)
     .setTimestamp()
     .setFooter(`Powered by ${gMember.client.user.username}`)
     .addField("**User**", `${gMember.user.username} [${gMember.user}]`, true)

@@ -1,4 +1,4 @@
-import { Client, User, Message, RichEmbed } from "discord.js";
+import { Client, User, Message, MessageEmbed } from "discord.js";
 import * as dynamoDbLib from "../libs/dynamodb-lib";
 
 /**
@@ -190,7 +190,7 @@ function confirmInput(user, input, prompt) {
  * @param {User} bot - LeegionBot
  */
 function buildEmbed(profile, bot) {
-  let embed = new RichEmbed()
+  let embed = new MessageEmbed()
     .setImage(
       "https://img.etimg.com/thumb/msid-67267294,width-643,imgsize-671579,resizemode-4/santaa.jpg"
     )

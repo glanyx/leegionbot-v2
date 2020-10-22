@@ -1,5 +1,12 @@
+import { Client, Message, MessageEmbed } from 'discord.js';
 import * as dateFormatLib from "../libs/dateformat-lib";
 
+/**
+ * 
+ * @param {Client} client 
+ * @param {Message} message 
+ * @param {Array<String>} args 
+ */
 exports.run = (client, message, args) => {
   const roles = [
     "super vip",
@@ -13,64 +20,38 @@ exports.run = (client, message, args) => {
   ];
 
   let onlineCount = 0;
-  message.guild.members.forEach(member => {
+  message.guild.members.cache.forEach(member => {
     if (member.user.presence.status !== "offline") {
       onlineCount++;
     }
   });
 
-  let roleString = "";
+  let roleString = ""
+  const guildRoles = message.guild.roles.cache.array()
+  const filteredRoles = guildRoles.filter(role =>
+    roles.includes(role.name.toLowerCase())
+  )
 
-  roles.forEach(preRole => {
-    message.guild.roles.forEach(role => {
-      if (role.name.toLowerCase() === preRole) {
-        roleString += `${role}: ${role.members.size} Total Members\n`;
-      }
-    });
-  });
+  filteredRoles.sort((c, p) => 
+    c.position < p.position ? 1 : -1
+  ).forEach(role =>
+    roleString += `${role}: ${role.members.size} Total Members\n`
+  )
 
-  message.channel.send({
-    embed: {
-      title: `**=== ${message.guild.name.toUpperCase()} STATS ===**`,
-      description: "",
-      author: {
-        name: client.user.username,
-        icon_url: client.user.avatarURL
-      },
-      timestamp: new Date(),
-      color: 16622136,
-      footer: {
-        icon_url: message.guild.iconURL,
-        text: message.guild.name
-      },
-      fields: [
-        {
-          name: "**Server Name**",
-          value: message.guild.name
-        },
-        {
-          name: "**Server Owner**",
-          value: `${message.guild.owner.user}`
-        },
-        {
-          name: "**Server Creation Date**",
-          value: dateFormatLib.format(message.guild.createdAt)
-        },
-        {
-          name: "**Total Members**",
-          value: `${message.guild.members.size} Total Members`
-        },
-        {
-          name: "**Roles**",
-          value: roleString
-        },
-        {
-          name: "**Channels**",
-          value: `${message.guild.channels.size} Total Channels`
-        }
-      ]
-    }
-  });
+  const embed = new MessageEmbed()
+    .setTitle(`**=== ${message.guild.name.toUpperCase()} STATS ===**`)
+    .setAuthor(client.user.username,client.user.avatarURL())
+    .setTimestamp()
+    .setColor(16622136)
+    .setFooter(message.guild.name, message.guild.iconURL())
+    .addField('**Server Name**', message.guild.name)
+    .addField('**Server Owner**', message.guild.owner.user)
+    .addField('**Server Creation Date**', message.guild.createdAt)
+    .addField('**Total Members**', `${message.guild.members.cache.size} (${onlineCount} online)`)
+    .addField('**Roles**', roleString ? roleString : 'None')
+    .addField('**Channels**', message.guild.channels.cache.size)
+
+  message.channel.send(embed);
 };
 
 exports.help = {
