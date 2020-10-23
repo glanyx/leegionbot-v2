@@ -1,4 +1,9 @@
-exports.run = (client, message, args) => {
+import { Client, Message } from 'discord.js'
+
+export const run = (client: Client, message: Message, args: string[]) => {
+
+  if (!client.user) return
+
   message.channel.send({
     embed: {
       title: "** ===ABOUT LEEANDLIE=== **",
@@ -18,7 +23,7 @@ exports.run = (client, message, args) => {
   });
 };
 
-exports.help = {
+export const help = {
   name: "about",
   category: "System",
   description: "Displays general information about LeeandLie.",
