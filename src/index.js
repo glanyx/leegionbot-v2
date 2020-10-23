@@ -27,7 +27,7 @@ client.commands = new Enmap();
 fs.readdir("./src/commands/", (err, files) => {
   if (err) return console.error(err);
   files.forEach(file => {
-    if (!file.endsWith(".js")) return;
+    if (!file.endsWith(".js") && !file.endsWith(".ts")) return;
     let props = require(`./commands/${file}`);
     let commandName = file.split(".")[0];
     console.log(`Attempting to load command ${commandName}`);
