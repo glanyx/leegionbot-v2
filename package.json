@@ -11,11 +11,14 @@
   "author": "Glanyx",
   "license": "ISC",
   "dependencies": {
+    "@types/uuid": "^8.3.0",
+    "axios": "^0.21.0",
     "discord.js": "^12.2.0",
     "enmap": "^5.2.4",
     "esm": "^3.2.25",
     "node-opus": "^0.3.3",
     "twitter": "^1.7.1",
+    "uuid": "^8.3.1",
     "ytdl-core": "^2.1.2"
   },
   "devDependencies": {
