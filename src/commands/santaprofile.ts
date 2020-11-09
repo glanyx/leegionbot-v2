@@ -1,5 +1,4 @@
 import { Client, Message } from 'discord.js'
-import * as dynamoDbLib from "../libs/dynamodb-lib"
 import config from "../config/config"
 import { SecretSantaMap } from '../handlers/SecretSanta'
 

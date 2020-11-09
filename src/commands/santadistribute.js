@@ -241,10 +241,10 @@ exports.run = async (client, message, args) => {
 //   }
 }
 
-// exports.help = {
-//   name: "santadistribute",
-//   category: "Secret Santa",
-//   description:
-//     "Distributes all currently registered users based on their participation tiers and region.\nOnly available to Server Admins or the Bot Owner.",
-//   usage: "santadistribute"
-// };
+exports.help = {
+  name: "santadistribute",
+  category: "Secret Santa",
+  description:
+    "Distributes all currently registered users based on their participation tiers and region.\nOnly available to Server Admins or the Bot Owner.",
+  usage: "santadistribute"
+};
