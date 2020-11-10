@@ -1,13 +1,12 @@
 import { Client, Message, MessageEmbed } from 'discord.js';
 import * as dateFormatLib from "../libs/dateformat-lib";
 
-/**
- * 
- * @param {Client} client 
- * @param {Message} message 
- * @param {Array<String>} args 
- */
-exports.run = (client, message, args) => {
+export const run = async (client: Client, message: Message, args: string[]) => {
+
+  const { author: user, channel, guild } = message
+  const { user: self } = client
+  if (!self) return
+
   const roles = [
     "super vip",
     "vip",
@@ -19,15 +18,23 @@ exports.run = (client, message, args) => {
     "cadet"
   ];
 
+  if (!guild) {
+    channel.send('Please use this command in a server.')
+    return
+  }
+
+  await guild.members.fetch()
+  await guild.roles.fetch()
+
   let onlineCount = 0;
-  message.guild.members.cache.forEach(member => {
+  guild.members.cache.forEach(member => {
     if (member.user.presence.status !== "offline") {
       onlineCount++;
     }
   });
 
   let roleString = ""
-  const guildRoles = message.guild.roles.cache.array()
+  const guildRoles = guild.roles.cache.array()
   const filteredRoles = guildRoles.filter(role =>
     roles.includes(role.name.toLowerCase())
   )
@@ -39,17 +46,17 @@ exports.run = (client, message, args) => {
   )
 
   const embed = new MessageEmbed()
-    .setTitle(`**=== ${message.guild.name.toUpperCase()} STATS ===**`)
-    .setAuthor(client.user.username,client.user.avatarURL())
+    .setTitle(`**=== ${guild.name.toUpperCase()} STATS ===**`)
+    .setAuthor(self.username, self.avatarURL() || undefined)
     .setTimestamp()
     .setColor(16622136)
-    .setFooter(message.guild.name, message.guild.iconURL())
-    .addField('**Server Name**', message.guild.name)
-    .addField('**Server Owner**', message.guild.owner.user)
-    .addField('**Server Creation Date**', message.guild.createdAt)
-    .addField('**Total Members**', `${message.guild.members.cache.size} (${onlineCount} online)`)
+    .setFooter(guild.name, guild.iconURL() || undefined)
+    .addField('**Server Name**', guild.name)
+    .addField('**Server Owner**', guild.owner?.user || '*Unknown*')
+    .addField('**Server Creation Date**', guild.createdAt)
+    .addField('**Total Members**', `${guild.members.cache.size} (${onlineCount} online)`)
     .addField('**Roles**', roleString ? roleString : 'None')
-    .addField('**Channels**', message.guild.channels.cache.size)
+    .addField('**Channels**', guild.channels.cache.size)
 
   message.channel.send(embed);
 };

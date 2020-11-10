@@ -19,6 +19,7 @@ export const run = async (client: Client, message: Message, args: string[]) => {
   }
 
   const santaProfile = serverProfile.profiles.get(user.id)
+  console.log(serverProfile)
 
   if (!santaProfile) {
     channel.send(`It looks like you haven't registered yet! You can register by typing \`${config.prefix}santaregister\`!`)

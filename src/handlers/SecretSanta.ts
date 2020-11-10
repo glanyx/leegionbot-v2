@@ -15,7 +15,7 @@ export const getAllServerConfigs = async () => {
     SecretSantaMap.set(item.guildId, serverProfile)
     item.profiles.forEach(async profile => {
       const santaProfile = await new SantaProfile({ userId: profile, guildId: item.guildId }).load()
-      serverProfile.addProfile(santaProfile)
+      serverProfile.profiles.set(santaProfile.profile.userId, santaProfile)
     })
   })
 }
@@ -54,6 +54,8 @@ export class SantaServerProfile {
   }
 
   save = async () => {
+    console.log('servermap:\n', this)
+    console.log(`profiles:\n`, this.profiles)
     const profileList: string[] = []
     this.profiles.forEach(item => profileList.push(item.profile.userId))
     await saveToDb({
@@ -138,10 +140,10 @@ export class SantaProfile {
         { name: 'Country', value: countryLookup[`${this.profile.address.country}` as 'AD'] || '*None*', inline: true },
         { name: 'State', value: this.profile.address.state || '*None*', inline: true },
         { name: 'Province', value: this.profile.address.province || '*None*', inline: true },
-        { name: 'Postal Code', value: this.profile.address.postcode, inline: true },
-        { name: 'City', value: this.profile.address.city, inline: true },
+        { name: 'Postal Code', value: this.profile.address.postcode || '*None*', inline: true },
+        { name: 'City', value: this.profile.address.city || '*None*', inline: true },
         { name: 'Street', value: this.profile.address.street || '*Unnamed Road*', inline: true },
-        { name: 'House Number', value: this.profile.address.houseNumber, inline: true }
+        { name: 'House Number', value: this.profile.address.houseNumber || '*None*', inline: true }
       ])
     }
 
@@ -149,6 +151,7 @@ export class SantaProfile {
   }
 
   save = async () => {
+    console.log('santaprofile:\n', this)
     const guildConfig = SecretSantaMap.get(this.profile.guildId)
     guildConfig?.addProfile(this)
     await saveToDb({
