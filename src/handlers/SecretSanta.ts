@@ -10,14 +10,15 @@ export const getAllServerConfigs = async () => {
     TableName: 'LeegionBot_Santa_Server_Profiles'
   })
 
-  Items.forEach(item => {
+  await Promise.all(Items.map(async item => {
     const serverProfile = new SantaServerProfile(item.guildId, item.enabled)
     SecretSantaMap.set(item.guildId, serverProfile)
-    item.profiles.forEach(async profile => {
+    await Promise.all(item.profiles.map(async profile => {
       const santaProfile = await new SantaProfile({ userId: profile, guildId: item.guildId }).load()
       serverProfile.profiles.set(santaProfile.profile.userId, santaProfile)
-    })
-  })
+    }))
+    console.log('Loaded server profile:\n', serverProfile)
+  }))
 }
 
 interface ISingleResponse<T> {
@@ -48,12 +49,26 @@ export class SantaServerProfile {
     return this
   }
 
+  public enable() {
+    this.enabled = true
+    this.save()
+    return this
+  }
+
+  public disable() {
+    this.enabled = false
+    this.save()
+    return this
+  }
+
   public addProfile (profile: SantaProfile) {
     this.profiles.set(profile.profile.userId, profile)
     this.save()
+    return this
   }
 
   save = async () => {
+    console.log('Saving Server Profile..')
     console.log('servermap:\n', this)
     console.log(`profiles:\n`, this.profiles)
     const profileList: string[] = []
@@ -80,6 +95,7 @@ interface IProfile {
   postcode?: string
   themes?: string[]
   status?: SantaStatus
+  targetId?: string
 }
 
 export class SantaProfile {
@@ -119,6 +135,11 @@ export class SantaProfile {
     this.profile.status = status
     return this
   }
+  
+  public setTarget(target: string) {
+    this.profile.targetId = target
+    return this
+  }
 
   public addTheme(theme: string) {
     this.profile.themes ? this.profile.themes.push(theme) : this.profile.themes = [theme]
@@ -151,6 +172,7 @@ export class SantaProfile {
   }
 
   save = async () => {
+    console.log('Saving profile..')
     console.log('santaprofile:\n', this)
     const guildConfig = SecretSantaMap.get(this.profile.guildId)
     guildConfig?.addProfile(this)

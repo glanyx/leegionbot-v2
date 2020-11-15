@@ -1,59 +1,100 @@
-import { Client, User, Message, MessageEmbed } from "discord.js";
-import * as dynamoDbLib from "../libs/dynamodb-lib";
+import { Client, User, Message, MessageEmbed, ClientUser } from "discord.js"
+import config from "../config/config"
+import * as dynamoDbLib from "../libs/dynamodb-lib"
+import { SecretSantaMap } from '../handlers/SecretSanta'
+
+interface IGift {
+  item: string[]
+  type: string
+  message: string
+  confirmed: boolean
+}
 
 /**
  * Runs the wizard for gift sending. User is requested multiple inputs. Message will be sent to their recipient matched on DynamoDB, based on santadistribute function.
- * @param {Client} client
- * @param {Message} message
- * @param {string[]} args
  */
-export async function run(client, message, args) {
-  const santa = message.author;
-  const recipient = await client.fetchUser(await getTarget(santa));
-  const gift = {
+export const run = async (client: Client, message: Message, args: string[]) => {
+  
+  const { author: user, channel } = message
+  const self = client.user
+  
+  if (!self) {
+    channel.send('Something seems to have gone wrong. Please contact my owner for assistance.')
+    return
+  }
+  
+  if (!message.guild) {
+    channel.send('Please use this command in the Discord server you registered for. Not to worry, you will be asked about your gift in DMs!')
+    return
+  }
+
+  const serverProfile = SecretSantaMap.get(message.guild.id)
+
+  if (!serverProfile) {
+    channel.send(`It doesn't look like the Secret Santa event is enabled on this server! Please talk to the server owner.`)
+    return
+  }
+
+  const santaProfile = serverProfile.profiles.get(user.id)
+
+  if (!santaProfile) {
+    channel.send(`It looks like you haven't registered yet! You can register by typing \`${config.prefix}santaregister\`!`)
+    return
+  }
+
+  const { targetId } = santaProfile.profile
+
+  if (!targetId) {
+    user.send(`It looks like you haven't been assigned a target yet! Please wait for the server owner or one of the administrators to assign Secret Santas!`)
+    return
+  }
+
+  message.delete()
+
+  const recipient = await client.users.fetch(targetId)
+  const gift: IGift = {
     item: [],
-    type: null,
+    type: '',
     message: "",
     confirmed: false
   };
 
   try {
     while (!gift.confirmed) {
-      gift.item = await getCodes(santa);
-      gift.type = await getType(santa);
-      if (await checkMessage(santa)) {
-        gift.message = await getMessage(santa);
+      gift.item = await getCodes(user);
+      gift.type = await getType(user);
+      if (await checkMessage(user)) {
+        gift.message = await getMessage(user);
       }
       gift.confirmed = await confirmInput(
-        santa,
-        buildEmbed(gift, client.user),
+        user,
+        buildEmbed(gift, self),
         `This is the message that will be sent to **${recipient.username}**. Is this correct?`
       );
     }
-    santa.send(
-      `Thanks ${santa}! **${recipient.username}** should receive their gift in just a moment!`
+    user.send(
+      `Thanks ${user.username}! **${recipient.username}** should receive their gift in just a moment!`
     );
-    recipient.send(buildEmbed(gift, client.user));
+    recipient.send(buildEmbed(gift, self));
   } catch (e) {
     console.log(e);
-    santa.send(e.message);
+    user.send(e.message);
     return;
   }
 }
 
 /**
  * Requests the user for the item they are sending.
- * @param {User} user
- * @returns {Promise<string|string[]>}
+
  */
-function getCodes(user) {
+const getCodes = (user: User): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     getInput(
       user,
       "Ready to send your gift? Great! Please send me your gift code or a URL to the gift.\nIf you have more than 1 gift to send, please send all in a single message with each item separated by a comma `,`!"
     )
       .then(collected => {
-        resolve(collected);
+        resolve(collected.split(",").map(str => str.trim()))
       })
       .catch(e => {
         reject(new Error(e.message));
@@ -63,10 +104,8 @@ function getCodes(user) {
 
 /**
  * Requests the user what type of gift they are sending.
- * @param {User} user
- * @returns {Promise<string|string[]>}
  */
-function getType(user) {
+const getType = (user: User): Promise<string> => {
   return new Promise((resolve, reject) => {
     getInput(
       user,
@@ -83,10 +122,8 @@ function getType(user) {
 
 /**
  * Requests the user if they want to send a message with their gift.
- * @param {User} user
- * @returns {Promise<boolean>}
  */
-function checkMessage(user) {
+const checkMessage = (user: User): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     confirmInput(
       user,
@@ -103,10 +140,8 @@ function checkMessage(user) {
 
 /**
  * Requests a message from the user they would like to send along with their gift.
- * @param {User} user
- * @returns {Promise<string|string[]>}
  */
-function getMessage(user) {
+const getMessage = (user: User): Promise<string> => {
   return new Promise((resolve, reject) => {
     getInput(user, "What message will you send with your gift?")
       .then(collected => {
@@ -120,10 +155,8 @@ function getMessage(user) {
 
 /**
  * Requests input from the user. Returns input from the user.
- * @param {User} user - Discord user instance.
- * @returns {Promise<string|string[]>} - Returns a promise based on the Discord MessageCollector.
  */
-function getInput(user, msg) {
+const getInput = (user: User, msg: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     user
       .send(msg)
@@ -133,12 +166,11 @@ function getInput(user, msg) {
           {
             time: 180000,
             max: 1,
-            errors: ["time"]
           }
         );
 
-        collector.on("collect", async m => {
-          resolve(m.content.split(",").map(str => str.trim()));
+        collector.on("collect", async (m: Message) => {
+          resolve(m.content);
         });
       })
       .catch(e => {
@@ -150,16 +182,10 @@ function getInput(user, msg) {
 
 /**
  * Send a confirmation request to a user based on Discord reactions.
- * @param {User} user - Instance of a Discord User.
- * @param {string|string[]} [input] - Content originally sent by the user.
- * @param {string} [prompt='Is this correct?'] - Message to send to the user.
- * @returns {Promise<boolean>} - Returns a boolean Promise based on the user's confirmation or rejection of the input.
  */
-function confirmInput(user, input, prompt) {
-  return new Promise((resolve, reject) => {
-    if (prompt) {
-      user.send(prompt);
-    }
+const confirmInput = (user: User, input: string | string[] | MessageEmbed, prompt?: string): Promise<boolean> => {
+  return new Promise(async (resolve, reject) => {
+    if (prompt) await user.send(prompt)
 
     user.send(input).then(async message => {
       await message.react("507285695484919809");
@@ -171,7 +197,8 @@ function confirmInput(user, input, prompt) {
           errors: ["time"]
         })
         .then(collected => {
-          if (collected.first().emoji.id === "507285695484919809") {
+          const firstEmoji = collected.first()
+          if (firstEmoji && firstEmoji.emoji.id === "507285695484919809") {
             resolve(true);
           } else {
             resolve(false);
@@ -186,10 +213,8 @@ function confirmInput(user, input, prompt) {
 
 /**
  * Builds the Discord embed message based on the gift
- * @param {Object} profile
- * @param {User} bot - LeegionBot
  */
-function buildEmbed(profile, bot) {
+const buildEmbed = (profile: IGift, bot: ClientUser) => {
   let embed = new MessageEmbed()
     .setImage(
       "https://img.etimg.com/thumb/msid-67267294,width-643,imgsize-671579,resizemode-4/santaa.jpg"
@@ -207,45 +232,7 @@ function buildEmbed(profile, bot) {
   return embed;
 }
 
-/**
- * Fetches the santa's target from the configured DynamoDB
- * @param {User} user
- * @returns {string} - Returns the Discord user ID for the matched santa profile
- */
-async function getTarget(user) {
-  const params = {
-    TableName: "santamatch",
-    Key: {
-      userId: user.id
-    }
-  };
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      const profile = await dynamoDbLib.call("get", params);
-      if (profile.Item) {
-        resolve(profile.Item.recipientId);
-      } else {
-        reject(
-          new Error(
-            `I couldn't find your target, ${user}! Please try again, or if you keep running into this issue, contact my owner.`
-          )
-        );
-        console.log(`No target for ${user.id}!`);
-        return;
-      }
-    } catch (e) {
-      reject(
-        new Error(
-          `I couldn't find you in my records! Are you sure you're a Secret Santa?`
-        )
-      );
-      console.log(e);
-    }
-  });
-}
-
-exports.help = {
+export const help = {
   name: "sendgift",
   category: "Secret Santa",
   description:

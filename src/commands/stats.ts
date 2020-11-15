@@ -42,7 +42,7 @@ export const run = async (client: Client, message: Message, args: string[]) => {
   filteredRoles.sort((c, p) => 
     c.position < p.position ? 1 : -1
   ).forEach(role =>
-    roleString += `${role}: ${role.members.size} Total Members\n`
+    roleString += `<@&${role.id}>: ${role.members.size} Total Members\n`
   )
 
   const embed = new MessageEmbed()

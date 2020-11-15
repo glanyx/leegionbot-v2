@@ -301,23 +301,28 @@ export const countryLookup = {
   'ZW': 'Zimbabwe'
 }
 
-export const regionLookup = [
+interface IRegionLookup {
+  region: string
+  countries: Array<string>
+}
+
+export const regionLookup: IRegionLookup[] = [
   {
     region: 'Canada',
     countries: [
-
+      'CA'
     ]
   },
   {
     region: 'America',
     countries: [
-
+      'US'
     ]
   },
   {
     region: 'Europe',
     countries: [
-
+      'GB'
     ]
   },
   {
@@ -329,13 +334,13 @@ export const regionLookup = [
   {
     region: 'Asia',
     countries: [
-
+      'KR'
     ]
   },
   {
     region: 'Africa',
     countries: [
-
+      'ZA'
     ]
   },
 ]

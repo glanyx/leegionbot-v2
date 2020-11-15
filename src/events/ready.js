@@ -11,7 +11,9 @@ module.exports = async (client) => {
 
     console.log(`Fetching Secret Santa configurations..`)
 
-    getAllServerConfigs()
+    await getAllServerConfigs()
+
+    console.log('Secret Santa configurations loaded.')
 
     console.log(`Now listening for events..`);
 }

@@ -1,7 +1,7 @@
 import { Client, Message, MessageEmbed, Guild, GuildMember } from "discord.js";
 import * as dateFormatLib from "../libs/dateformat-lib";
 
-exports.run = async (client: Client, message: Message, args: string[]) => {
+export const run = async (client: Client, message: Message, args: string[]) => {
 
   const { guild, member } = message
 
@@ -37,7 +37,7 @@ const generateProfile = async (guild: Guild, gMember: GuildMember) => {
 
   gMember.roles.cache.forEach(role => {
     if (role.name !== "@everyone") {
-      roleString += `${role}\n`;
+      roleString += `<@&${role.id}>\n`;
     }
   });
 
