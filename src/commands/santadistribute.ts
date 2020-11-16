@@ -47,7 +47,7 @@ export const run = async (client: Client, message: Message, args: string[]) => {
     return
   }
 
-  if (!message.member.hasPermission("ADMINISTRATOR") || owner !== message.author) {
+  if (!message.member.hasPermission("ADMINISTRATOR") && owner !== message.author) {
     message.channel.send(`You're not allowed to perform this action!`)
     return
   }
@@ -70,7 +70,6 @@ export const run = async (client: Client, message: Message, args: string[]) => {
         const list: SantaProfile[][] = []
 
         serverProfile.profiles.forEach(profile => {
-          console.log(profile)
           if (!profile.profile.address) {
             channel.send(`Registered User <@${profile.profile.userId}> does not seem to have an address on the Physical Tier. Distribution of Secret Santas terminated.`)
             return

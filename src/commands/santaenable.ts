@@ -6,16 +6,14 @@ exports.run = async (client: Client, message: Message, args: string[]) => {
     return application.owner;
   });
 
-  if (!message.guild) {
+  if (!message.guild || !message.member) {
     message.channel.send('Please use this command in the Discord server you wish to enable the Secret Santa event for.')
     return
   }
 
-  if (message.member && !message.member.hasPermission("ADMINISTRATOR")) {
-    if (owner !== message.author) {
-      message.channel.send(`You're not allowed to perform this action!`);
-      return;
-    }
+  if (!message.member.hasPermission("ADMINISTRATOR") && owner !== message.author) {
+    message.channel.send(`You're not allowed to perform this action!`)
+    return
   }
 
   const santaProfile = new SantaServerProfile(message.guild.id)
