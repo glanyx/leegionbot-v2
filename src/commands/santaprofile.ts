@@ -34,7 +34,7 @@ export const run = async (client: Client, message: Message, args: string[]) => {
   }
 }
 
-exports.help = {
+export const help = {
   name: "santaprofile",
   category: "Secret Santa",
   description: "Checks your Secret Santa profile.",

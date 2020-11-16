@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js'
 import { SantaServerProfile } from '../handlers/SecretSanta'
 
-exports.run = async (client: Client, message: Message, args: string[]) => {
+export const run = async (client: Client, message: Message, args: string[]) => {
   const owner = await client.fetchApplication().then(application => {
     return application.owner;
   });
@@ -28,7 +28,7 @@ exports.run = async (client: Client, message: Message, args: string[]) => {
 
 };
 
-exports.help = {
+export const help = {
   name: "santaenable",
   category: "Secret Santa",
   description:
