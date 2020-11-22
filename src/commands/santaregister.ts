@@ -1,7 +1,8 @@
-import { Client, Message, User, ClientUser, MessageEmbed, DataResolver } from 'discord.js'
+import { Client, Message, User, ClientUser, MessageEmbed, MessageReaction } from 'discord.js'
 import config from "../config/config"
 import { SecretSantaMap, SantaProfile, SantaType, SantaStatus, IAddress } from '../handlers/SecretSanta'
 import { getGeoLocation, getStreetData, countryLookup } from '../libs/address-lib'
+import { getTextInput } from '../helpers'
 
 const TIMEOUT = 180000
 
@@ -46,10 +47,32 @@ export const run = async (client: Client, message: Message, args: string[]) => {
     santaProfile
       .setTermsAndConditions(await getTermsAndConditions(user, self, owner))
       .setType(await getType(user))
-      .setAddress(santaProfile.profile.type === SantaType.PHYSICAL ? {
-        ...await getAddress(user),
-        houseNumber: await getHouseNumber(user)
-      }: undefined)
+
+    if (santaProfile.profile.type === SantaType.PHYSICAL) {
+      const addressInputType = await getManualOrAutomated(user)
+
+      if (addressInputType === 'automated') {
+        santaProfile
+          .setAddress({
+            ...await getAddress(user),
+            houseNumber: await getHouseNumber(user)
+          })
+  
+      } else if (addressInputType === 'manual') {
+        santaProfile
+          .setAddress({
+            country: await getCountry(user),
+            state: await getState(user),
+            province: await getProvince(user),
+            city: await getCity(user),
+            postcode: await getPostcode(user),
+            street: await getStreet(user),
+            houseNumber: await getHouseNumber(user)
+          })
+      }
+    }
+
+    santaProfile
       .setThemes(await getThemes(user))
       .setStatus(SantaStatus.COMPLETE)
       .save()
@@ -270,29 +293,78 @@ const getAddress = async (user: User) => {
   })
 }
 
-const getHouseNumber = async (user: User) => {
+const getCountry = async (user: User) => {
+  return new Promise<string>(async resolve => {
+    let country = undefined
+    while (!country){
+      const output = await getTextInput({
+       user,
+       prompt: 'What country do you live in? Please type the full name of your country. (It should be part of this list (https://www.worldometers.info/geography/alphabetical-list-of-countries/)',
+       timeout: TIMEOUT,
+       limit: 1
+     })
+     country = Object.keys(countryLookup).find(key => countryLookup[key as 'AF'].toLowerCase() === output.toLowerCase())
+     if (!country) await user.send(`I couldn't recognize that country. Let's try that again.`)
+    }
+    resolve(country)
+  })
+}
 
-  return new Promise<string>((resolve, reject) => {
+const getState = async (user: User) => {
+  const state = await getTextInput({
+    user,
+    prompt: `And what State is this in? If this doesn't apply to you, just type \`none\``,
+    timeout: TIMEOUT,
+    limit: 1
+  })
 
-    user.send('And what is the house number, flat or appartment?')
-      .then(message => {
-        const collector = message.channel.createMessageCollector(m =>
-          user === m.author,
-          {
-            max: 1,
-            time: TIMEOUT
-          }
-        )
+  return state !== 'none' ? state : undefined
+}
 
-        collector.on("collect", (m: Message) => {
-          collector.stop()
-          resolve(m.content)
-        })
-      
-      }).catch(e => {
-        console.log(e)
-        reject(new Error('Message timed out.'))
-      })
+const getProvince = async (user: User) => {
+  const province = await getTextInput({
+    user,
+    prompt: `What is the Province this is in? Again, if this doesn't apply to you, just type \`none\``,
+    timeout: TIMEOUT,
+    limit: 1
+  })
+  
+  return province !== 'none' ? province : undefined
+}
+
+const getCity = (user: User) => {
+  return getTextInput({
+    user,
+    prompt: `Great. And what City is this in?`,
+    timeout: TIMEOUT,
+    limit: 1
+  })
+}
+
+const getPostcode = (user: User) => {
+  return getTextInput({
+    user,
+    prompt: `Next I'll need your Postcode please.`,
+    timeout: TIMEOUT,
+    limit: 1
+  })
+}
+
+const getStreet = (user: User) => {
+  return getTextInput({
+    user,
+    prompt: `Almost there. What Street do you live on?`,
+    timeout: TIMEOUT,
+    limit: 1
+  })
+}
+
+const getHouseNumber = (user: User) => {
+  return getTextInput({
+    user,
+    prompt: 'And what is the house number, flat or appartment?',
+    timeout: TIMEOUT,
+    limit: 1
   })
 }
 
@@ -339,6 +411,40 @@ const getThemes = (user: User) => {
         reject(new Error("Message Time Out"));
       });
   });
+}
+
+const getManualOrAutomated = (user: User) => {
+
+  const embed = new MessageEmbed()
+    .setColor(16622136)
+    .setTitle('Your Address')
+    .setDescription('I can use your postcode to try to determine your address, however it might be somewhat inaccurate. Do you want to use this automated address lookup feature or do you wish to input your address manually? You can always change your address later!\n1️⃣ - Automated\n2️⃣ - Manual')
+
+  return new Promise<string>((resolve, reject) => {
+    user.send(embed).then(async message => {
+      await message.react('1️⃣')
+      await message.react('2️⃣')
+      await message.awaitReactions((reaction: MessageReaction, userA: User) =>
+        (reaction.emoji.name === '1️⃣' || reaction.emoji.name === '2️⃣') && userA === user,
+        {
+          max: 1,
+          time: TIMEOUT,
+          errors: ['time']
+        }
+      ).then(async collected => {
+        const firstEmoji = collected.first()
+        if (firstEmoji && firstEmoji.emoji.name === '1️⃣') {
+          resolve('automated')
+        } else {
+          resolve('manual')
+        }
+      }).catch( e => {
+        console.log(e)
+        user.send('This message timed out.')
+        reject(new Error('Message Timed Out'))
+      })
+    })
+  })
 }
 
 export const help = {

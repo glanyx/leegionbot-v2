@@ -17,7 +17,6 @@ export const getAllServerConfigs = async () => {
       const santaProfile = await new SantaProfile({ userId: profile, guildId: item.guildId }).load()
       serverProfile.profiles.set(santaProfile.profile.userId, santaProfile)
     }))
-    console.log('Loaded server profile:\n', serverProfile)
   }))
 }
 
