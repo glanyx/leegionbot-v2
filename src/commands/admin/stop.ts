@@ -42,7 +42,7 @@ export class Stop {
 
       if (reaction.emoji.id === '507287289282428962') {
         embedMessage.reactions.removeAll()
-        channel.send('Cancelling shutdown process')
+        channel.send('Cancelling shutdown process..')
       } else if (reaction.emoji.id === '507285695484919809') {
 
         await channel.send('Terminating node process.').then(() => {
