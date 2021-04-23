@@ -1,6 +1,6 @@
 import { Help, Config, IExecuteArgs, TextChannel, MessageEmbed } from "discord.js"
 import { Suggestion as SuggestionModel, GuildSetting } from '../../db/models'
-import { updateSuggestion, SuggestionStatus, SuggestionState, logger } from '../../utils'
+import { updateSuggestion, SuggestionStatus, SuggestionState, Paginator, logger } from '../../utils'
 
 
 const configs: Config = {
@@ -52,7 +52,7 @@ export class Suggestion {
   }
 
   public static get subcommands() {
-    return [Edit, Approve, Complete, Decline]
+    return [Edit, Approve, Complete, Decline, List]
   }
 
   public static get help() {
@@ -474,6 +474,64 @@ class Decline {
 
   public static get alias() {
     return declineAlias
+  }
+
+}
+
+const listHelp: Help = {
+  name: "list",
+  category: "Features",
+  description: "Lists pending suggestions on the server.",
+  usage: "suggestion list",
+  example: [
+    'suggestion list',
+  ]
+}
+
+const listConfigs: Config = {
+  permissions: [
+    'MANAGE_MESSAGES'
+  ]
+}
+
+const listAlias = [
+  'l'
+]
+
+class List {
+
+  public static async run({
+    message,
+    args
+  }: IExecuteArgs) {
+
+    const { guild, channel, member, author } = message
+    if (!guild || !member) return
+
+    SuggestionModel.fetchByGuildId(guild.id, true).then(({ items: suggestions }) => {
+
+      new Paginator({
+        title: 'Submitted or Approved Suggestions',
+        channel,
+        author,
+        items: suggestions.map(sg => `**ID ${sg.id}**\n**Requested by:** <@${sg.userId}>\n**Status:** ${sg.status}\n**Suggestion:** ${sg.updatedText || sg.text}`),
+        displayCount: 10
+      })
+
+    })
+
+  }
+
+  public static get help() {
+    return listHelp
+  }
+
+  public static get configs() {
+    return listConfigs
+  }
+
+  public static get alias() {
+    return listAlias
   }
 
 }

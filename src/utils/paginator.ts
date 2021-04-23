@@ -140,10 +140,7 @@ export class Paginator implements IPaginator {
     }
   
     if (!this.useHeaders && !this.useOptions) {
-      let descriptionString = this.description ? `${this.description}\n` : ''
-      this.items[this.currentPage - 1].forEach(item => {
-        descriptionString += `${typeof(item) === 'string' ? item : item.content}\n`
-      })
+      const descriptionString = `${this.description ? `${this.description}\n` : ''}${this.items[this.currentPage - 1].map(item => typeof(item) === 'string' ? item : item.content).join('\n\n')}`
       embed.setDescription(descriptionString)
     } else if (this.useHeaders) {
       this.items[this.currentPage - 1].forEach(item => {

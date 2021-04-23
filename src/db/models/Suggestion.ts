@@ -50,6 +50,18 @@ export class Suggestion extends DBModel<ISuggestion> {
     `, Suggestion)
   }
 
+  public static fetchByGuildId(guildId: string, pending?: boolean) {
+    return super.query<Suggestion>(`
+      SELECT * FROM ${collection}
+        WHERE "guildId" = '${guildId}'
+        ${pending ? `AND (
+          status = '${SuggestionStatus.SUBMITTED}'
+          OR
+          status = '${SuggestionStatus.APPROVED}'
+        )` : ''}
+    `, Suggestion)
+  }
+
   public async update() {
     return super.edit<Suggestion>(`
       UPDATE ${collection} SET
