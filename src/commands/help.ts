@@ -65,43 +65,41 @@ export class Help {
       message.channel.send(output, {
         code: "asciidoc",
         split: { char: "\u200b" }
-      });
+      })
     } else {
-      if (commands.has(args[0])) {
-        
-        let i = 0
-        const commandArray: Array<Command> = []
-        const command = Commands.find(command => command.help.name.toLowerCase() === args[0])
 
-        if (!command) {
-          message.channel.send(`Unable to find command \`${args[0]}\`!`)
+      let i = 0
+      const commandArray: Array<Command> = []
+      const command = Commands.find(command => command.help.name.toLowerCase() === args[0].toLowerCase()) || (Commands as Array<Command>).find(cmd => cmd.alias ? cmd.alias.includes(args[0].toLowerCase()) : false)
+
+      if (!command) {
+        message.channel.send(`Unable to find command \`${args[0]}\`!`)
+        return
+      }
+
+      i++
+      commandArray.push(command)
+
+      while (args[i]) {
+
+        const cur = commandArray[commandArray.length - 1]
+        const subcommand = cur.subcommands?.find(sub => sub.help.name === args[i]) || cur.subcommands?.find(sbcmd => sbcmd.alias ? sbcmd.alias.includes(args[0].toLowerCase()) : false)
+
+        if (!subcommand) {
+          message.channel.send(`Unable to find subcommand \`${args[i]}\` for command \`${commandArray.map(cmd => cmd.help.name).join(' > ')}\`!`)
           return
         }
 
+        commandArray.push(subcommand)
         i++
-        commandArray.push(command)
-
-        while (args[i]) {
-
-          const cur = commandArray[commandArray.length - 1]
-          const subcommand = cur.subcommands?.find(sub => sub.help.name === args[i])
-
-          if (!subcommand) {
-            message.channel.send(`Unable to find subcommand \`${args[i]}\` for command \`${commandArray.map(cmd => cmd.help.name).join(' > ')}\`!`)
-            return
-          }
-
-          commandArray.push(subcommand)
-          i++
-        }
-
-        const cmd = commandArray[commandArray.length - 1]
-
-        message.channel.send(
-          `= ${commandArray.map(cmd => cmd.help.name).join(' | ')} =\n${cmd.help.description}\nUsage:: ${cmd.help.usage}${cmd.subcommands ? `\nSubcommands:: ${cmd.subcommands.map(s => s.help.name).join(', ')}` : ''}\nExample::\n${cmd.help.example?.join('\n')}`,
-          { code: "asciidoc" }
-        );
       }
+
+      const cmd = commandArray[commandArray.length - 1]
+
+      message.channel.send(
+        `= ${commandArray.map(cmd => cmd.help.name).join(' | ')} =\n${cmd.help.description}\nUsage:: ${cmd.help.usage}${cmd.subcommands ? `\nSubcommands:: ${cmd.subcommands.map(s => s.help.name).join(', ')}` : ''}\nExample::\n${cmd.help.example?.join('\n')}`,
+        { code: "asciidoc" }
+      );
     }
   }
 
