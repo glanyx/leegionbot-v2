@@ -2,18 +2,18 @@ import { Help, Config, IExecuteArgs, MessageReaction, User, MessageEmbed } from 
 import { logger } from '../../utils'
 
 const help: Help = {
-  name: "stop",
+  name: "shutdown",
   category: "Admin",
-  description: "Displays detailed bot information.",
-  usage: "stop",
-  example: ['stop']
+  description: "Shuts the bot down.",
+  usage: "shutdown",
+  example: ['shutdown']
 }
 
 const configs: Config = {
   ownerOnly: true
 }
 
-export class Stop {
+export class Shutdown {
 
   public static async run({
     client,

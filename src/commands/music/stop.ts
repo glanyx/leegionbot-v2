@@ -4,7 +4,7 @@ import { logger, QueueObject } from "../../utils"
 const help: Help = {
   name: "stop",
   category: "Music",
-  description: "",
+  description: "Stops playing music.",
   usage: "stop",
   example: [
     'stop',

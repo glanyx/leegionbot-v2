@@ -1,5 +1,5 @@
 import { VoiceChannel, TextChannel, VoiceConnection } from "discord.js";
-import ytdl from 'ytdl-core';
+import ytdl from 'ytdl-core-discord';
 import logger from "./logger";
 
 const TIMEOUT = 30000;
@@ -52,21 +52,23 @@ export class QueueObject {
   }
 
   public async addSong(url: string) {
-    try {
-      const song = await ytdl.getInfo(url);
-      this.songs.push({
-        title: song.title,
-        url: song.video_url,
-      });
-      this.textChannel.send(`Added **${song.title}** to the music queue!`);
-      return true;
-    } catch {
-      logger.debug(`Couldn't find a song for argument: ${url}`);
-      throw `Couldn't find a song for ${url}!`;
-    }
+    return ytdl.getInfo(url)
+      .then(song => {
+        const { videoDetails } = song
+        this.songs.push({
+          title: videoDetails.title,
+          url: videoDetails.video_url
+        })
+        this.textChannel.send(`Added **${videoDetails.title}** to the music queue!`)
+      })
+      .catch(e => {
+        logger.debug(`Couldn't find a song for argument: ${url}`)
+        throw `Couldn't find a song for ${url}!`
+      })
+
   }
 
-  public play() {
+  public async play() {
     if (this.songs.length === 0) {
       this.timer = setTimeout(() => {
         this.disconnectClient()
@@ -76,9 +78,7 @@ export class QueueObject {
 
     this.playing = true
     const dispatcher = this.connection
-      .play(ytdl(this.songs[0].url, {
-        quality: 'highestaudio'
-      }))
+      .play(await ytdl(this.songs[0].url), { type: 'opus' })
       .on('start', () => {
         if (this.timer) clearTimeout(this.timer)
       })

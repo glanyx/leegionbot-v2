@@ -1,2 +1,2 @@
-export * from './stop'
+export * from './shutdown'
 export * from './config'
