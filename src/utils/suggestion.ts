@@ -8,6 +8,11 @@ export enum SuggestionStatus {
   DECLINED = 'declined'
 }
 
+export const SuggestionState = {
+  FINAL: [SuggestionStatus.COMPLETED, SuggestionStatus.DECLINED],
+  PENDING: [SuggestionStatus.SUBMITTED, SuggestionStatus.APPROVED]
+}
+
 interface SuggestionArgs {
   user: User,
   editor?: User,
@@ -19,7 +24,7 @@ export const updateSuggestion = (args: SuggestionArgs) => {
 
   const embed = new MessageEmbed()
     .setTitle(`Suggestion by ${args.user.username}#${args.user.discriminator}`)
-    .setDescription(args.suggestion.text)
+    .setDescription(args.suggestion.updatedText || args.suggestion.text)
     .setFooter(`Suggestion ID: ${args.suggestion.id}`)
     .addField('Status', `${args.suggestion.status.capitalize()}`, true)
     .addField('Author', `<@${args.user}>`, true)
