@@ -23,12 +23,37 @@ export class About {
     const owner = (await client.fetchApplication()).owner
     const clientUser = client.user as ClientUser
 
-    const embed = new MessageEmbed()
-      .setAuthor(clientUser.username, clientUser.avatarURL() || undefined)
-      .setDescription(`Leegionbot is a private Discord Bot, custom created by <@${owner}>, especially for use by LeeandLie.`)
-      .addField('Questions, suggestions or concerns?', `Please DM my owner <@${owner}>!`)
+  
+    await client.generateInvite({ permissions: [
+      'ADMINISTRATOR',
+      'MANAGE_GUILD',
+      'MANAGE_ROLES',
+      'MANAGE_CHANNELS',
+      'KICK_MEMBERS',
+      'BAN_MEMBERS',
+      'CHANGE_NICKNAME',
+      'MANAGE_NICKNAMES',
+      'VIEW_CHANNEL',
+      'SEND_MESSAGES',
+      'MANAGE_MESSAGES',
+      'EMBED_LINKS',
+      'ATTACH_FILES',
+      'READ_MESSAGE_HISTORY',
+      'USE_EXTERNAL_EMOJIS',
+      'ADD_REACTIONS',
+      'MUTE_MEMBERS',
+      'DEAFEN_MEMBERS',
+      'MOVE_MEMBERS'
+    ]}).then(url => {
 
-    channel.send(embed)
+      const embed = new MessageEmbed()
+        .setAuthor(clientUser.username, clientUser.avatarURL() || undefined)
+        .setDescription(`LeegionBot is a Discord Bot especially created for the LeeandLie Discord server, by <@${owner}>. Do you want LeegionBot to help manage your server? You can invite the bot [here](${url})!`)
+        .addField('Questions, suggestions or concerns?', `Please DM my owner <@${owner}>!`)
+  
+      channel.send(embed)
+
+    })
   }
 
   public static get help() {
