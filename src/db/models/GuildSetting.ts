@@ -45,7 +45,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
     return super.edit<GuildSetting>(`
       UPDATE ${collection} SET
         "mutedRoleId" = ${this.data.mutedRoleId ? `'${this.data.mutedRoleId}'` : null},
-        "mmessageLogChannelId" = ${this.data.messageLogChannelId ? `'${this.data.messageLogChannelId}'` : null},
+        "messageLogChannelId" = ${this.data.messageLogChannelId ? `'${this.data.messageLogChannelId}'` : null},
         "memberLogChannelId" = ${this.data.memberLogChannelId ? `'${this.data.memberLogChannelId}'` : null},
         "modLogChannelId" = ${this.data.modLogChannelId ? `'${this.data.modLogChannelId}'` : null},
         "suggestionChannelId" = ${this.data.suggestionChannelId ? `'${this.data.suggestionChannelId}'` : null},
