@@ -31,6 +31,8 @@ export class Suggestion {
     const { guild, author } = message
     if (!guild) return
 
+    message.delete()
+
     if (!content || content === '') return message.channel.send('Please add some text for your suggestion!').then(msg => msg.delete({ timeout: 5000 }))
 
     const settings = await GuildSetting.fetchByGuildId(guild.id)
@@ -510,12 +512,14 @@ class List {
 
     SuggestionModel.fetchByGuildId(guild.id, true).then(({ items: suggestions }) => {
 
+      if (suggestions.length === 0) return channel.send('There are no open suggestions!')
+
       new Paginator({
         title: 'Submitted or Approved Suggestions',
         channel,
         author,
         items: suggestions.map(sg => `**ID ${sg.id}**\n**Requested by:** <@${sg.userId}>\n**Status:** ${sg.status}\n**Suggestion:** ${sg.updatedText || sg.text}`),
-        displayCount: 10
+        displayCount: 5
       })
 
     })
