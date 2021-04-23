@@ -7,6 +7,8 @@ interface ISuggestion extends INewSuggestion {
   status: SuggestionStatus
   editorId?: string
   modId?: string
+  updatedText?: string
+  reason?: string
 }
 
 interface INewSuggestion {
@@ -14,6 +16,12 @@ interface INewSuggestion {
   channelId: string
   text: string
   userId: string
+}
+
+interface IFetchArgs {
+  id: number
+  userId?: string
+  guildId?: string
 }
 
 const collection = 'suggestions'
@@ -33,10 +41,24 @@ export class Suggestion extends DBModel<ISuggestion> {
     `, Suggestion)
   }
 
+  public static fetchById(args: IFetchArgs) {
+    return super.fetchOne<Suggestion>(`
+      SELECT * FROM ${collection}
+        WHERE id = ${args.id}
+        ${args.guildId ? `AND "guildId" = '${args.guildId}'` : ''}
+        ${args.userId ? `AND "guildId" = '${args.userId}'` : ''}
+    `, Suggestion)
+  }
+
   public async update() {
     return super.edit<Suggestion>(`
       UPDATE ${collection} SET
-        "messageId" = '${this.data.messageId}'
+        ${this.data.updatedText ? `updatedText = '${this.data.updatedText.replace(/'/g, "''")}',` : ''}
+        ${this.data.messageId ? `"messageId" = '${this.data.messageId}',` : ''}
+        ${this.data.editorId ? `"editorId" = '${this.data.editorId}',` : ''}
+        ${this.data.modId ? `"modId" = '${this.data.modId}',` : ''}
+        ${this.data.reason ? `reason = '${this.data.reason.replace(/'/g, "''")}',` : ''}
+        status = '${this.data.status}'
       WHERE id = ${this.data.id}
     `, Suggestion)
   }
@@ -66,6 +88,15 @@ export class Suggestion extends DBModel<ISuggestion> {
     return this.data.text
   }
 
+  public get updatedText() {
+    return this.data.updatedText
+  }
+
+  public setUpdatedText(text: string) {
+    this.data.updatedText = text
+    return this
+  }
+
   public get userId() {
     return this.data.userId
   }
@@ -74,12 +105,36 @@ export class Suggestion extends DBModel<ISuggestion> {
     return this.data.editorId
   }
 
+  public setEditorId(id: string) {
+    this.data.editorId = id
+    return this
+  }
+
   public get modId() {
     return this.data.modId
   }
 
+  public setModId(id: string) {
+    this.data.modId = id
+    return this
+  }
+
   public get status() {
     return this.data.status
+  }
+
+  public setStatus(status: SuggestionStatus) {
+    this.data.status = status
+    return this
+  }
+
+  public get reason() {
+    return this.data.reason
+  }
+
+  public setReason(reason: string) {
+    this.data.reason = reason
+    return this
   }
   
 }
