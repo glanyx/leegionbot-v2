@@ -55,34 +55,38 @@ export class Ban {
         .setColor('#FF0000')
 
       if (settings && settings.alertOnAction) {
-        let success = false
-        try {
-          await member.send(`You were banned from the \`${guild.name}\` Discord server for the following reason:\n${reason}`)
-          success = true
-        } catch (e) {
-          logger.error(`${e.message} - User ID: ${member.user.id}`)
-        }
-        embed.addField('Received DM?', success ? 'Yes' : 'No')
+        member.send(`You were banned from the \`${guild.name}\` Discord server for the following reason:\n${reason}`)
+          .then(msg => {
+            return msg
+          })
+          .catch(e => {
+            logger.error(`Ban Error | User ID: ${member.user.id} | ${e.message}`)
+          })
+          .then(msg => {
+            member.ban({ reason: reason.length > 512 ? `${reason.substr(0, 510)}..` : reason })
+              .then(() => {
+                ModLog.storeNewAction({
+                  guildId: guild.id,
+                  userId: author.id,
+                  targetId: member.user.id,
+                  action: ModeratorAction.BAN,
+                  reason
+                }).then(action => {
+                  embed.setTitle(`ID ${action.id} | Ban`)
+                  embed.addField('Received DM?', msg ? 'Yes' : 'No')
+                  modlogNotify(guild, embed, (channel as TextChannel))
+                }).catch(e => {
+                  const text = `Ban executed, but unable to store \`ban\` action for User ID ${member.user.id}!`
+                  logger.error(`${text}\n${e}`)
+                  return message.channel.send(text)
+                })
+              })
+            .catch(() => {
+              if (msg) msg.delete()
+              channel.send(`Unable to ban user <@${member}>.${msg ? ' **User may have seen notification of their ban.**' : ''} Please try again later.`)
+            })
+        })
       }
-  
-      await member.ban()
-  
-      await ModLog.storeNewAction({
-        guildId: guild.id,
-        userId: author.id,
-        targetId: member.user.id,
-        action: ModeratorAction.BAN,
-        reason
-      }).then(action => {
-        embed.setTitle(`ID ${action.id} | Ban`)
-      }).catch(e => {
-        const text = `Unable to store \`ban\` action for User ID ${member.user.id}!`
-        logger.error(`${text}\n${e}`)
-        return message.channel.send(text)
-      })
-
-      modlogNotify(guild, embed, (channel as TextChannel))
-
     } catch (e) {
       (await message.channel.send(`An error occured trying to ban the specified user. Please try again later.`)).delete({ timeout: 10 })
       logger.error(e)

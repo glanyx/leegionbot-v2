@@ -212,7 +212,7 @@ export class AutoMod {
 
       const { modLogChannelId } = settings
       if (!modLogChannelId) return
-      const ch = await guild.channels.cache.get(modLogChannelId) as TextChannel
+      const ch = guild.channels.cache.get(modLogChannelId) as TextChannel
       if (!ch) return
       await ch.fetch()
 

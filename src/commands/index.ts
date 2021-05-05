@@ -38,5 +38,5 @@ export default [
   Skip,
   Stop,
 
-  Help
+  Help,
 ]
