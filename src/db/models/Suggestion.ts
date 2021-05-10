@@ -59,6 +59,7 @@ export class Suggestion extends DBModel<ISuggestion> {
           OR
           status = '${SuggestionStatus.APPROVED}'
         )` : ''}
+      ORDER BY id ASC
     `, Suggestion)
   }
 

@@ -14,7 +14,7 @@ export const SuggestionState = {
 }
 
 interface SuggestionArgs {
-  user: User,
+  user?: User,
   editor?: User,
   mod?: User,
   suggestion: Suggestion
@@ -22,13 +22,20 @@ interface SuggestionArgs {
 
 export const updateSuggestion = (args: SuggestionArgs) => {
 
-  const embed = new MessageEmbed()
-    .setTitle(`Suggestion by ${args.user.username}#${args.user.discriminator}`)
-    .setDescription(args.suggestion.updatedText || args.suggestion.text)
-    .setFooter(`Suggestion ID: ${args.suggestion.id}`)
-    .addField('Status', `${args.suggestion.status.capitalize()}`, true)
-    .addField('Author', `<@${args.user}>`, true)
+  const { user, suggestion } = args
 
+  const embed = new MessageEmbed()
+    .setDescription(suggestion.updatedText || suggestion.text)
+    .setFooter(`Suggestion ID: ${suggestion.id}`)
+    .addField('Status', `${suggestion.status.capitalize()}`, true)
+
+  if (user) {
+    embed.setTitle(`Suggestion by ${user.username}#${user.discriminator}`)
+    embed.addField('Author', `<@${user}>`, true)
+  } else {
+    embed.setTitle(`Suggestion by ${suggestion.userId}`)
+    embed.addField('Author', `<@${suggestion.userId}>`, true)
+  }
   if (args.editor) embed.addField(`Edited by`, `<@${args.editor.id}>`, true)
   if (args.mod) embed.addField(`${args.suggestion.status.capitalize()} by`, `<@${args.mod.id}>`, true)
   if (args.suggestion.reason) embed.addField('Comment', args.suggestion.reason)

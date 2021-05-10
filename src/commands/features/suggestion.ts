@@ -227,7 +227,6 @@ class Approve {
         .setModId(author.id)
 
       const sgUser = await guild.members.fetch(suggestion.userId)
-      if (!sgUser) return
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -236,8 +235,8 @@ class Approve {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user,
-        editor: author,
+        user: sgUser.user || undefined,
+        mod: author,
         suggestion
       }))
       .then(() => {
@@ -328,7 +327,6 @@ class Complete {
         .setModId(author.id)
 
       const sgUser = await guild.members.fetch(suggestion.userId)
-      if (!sgUser) return
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -337,8 +335,8 @@ class Complete {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user,
-        editor: author,
+        user: sgUser.user || undefined,
+        mod: author,
         suggestion
       }))
       .then(() => {
@@ -430,7 +428,6 @@ class Decline {
         .setModId(author.id)
 
       const sgUser = await guild.members.fetch(suggestion.userId)
-      if (!sgUser) return
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -439,8 +436,8 @@ class Decline {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user,
-        editor: author,
+        user: sgUser.user || undefined,
+        mod: author,
         suggestion
       }))
       .then(() => {
