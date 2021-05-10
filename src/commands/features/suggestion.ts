@@ -123,8 +123,7 @@ class Edit {
         .setUpdatedText(text)
         .setEditorId(author.id)
 
-      const sgUser = await guild.members.fetch(suggestion.userId)
-      if (!sgUser) return
+      const sgUser = await guild.members.fetch(suggestion.userId).catch(() => undefined)
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -133,7 +132,7 @@ class Edit {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user,
+        user: sgUser?.user,
         editor: author,
         suggestion
       }))
@@ -226,7 +225,7 @@ class Approve {
         .setStatus(SuggestionStatus.APPROVED)
         .setModId(author.id)
 
-      const sgUser = await guild.members.fetch(suggestion.userId)
+      const sgUser = await guild.members.fetch(suggestion.userId).catch(() => undefined)
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -235,7 +234,7 @@ class Approve {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user || undefined,
+        user: sgUser?.user,
         mod: author,
         suggestion
       }))
@@ -326,7 +325,7 @@ class Complete {
         .setStatus(SuggestionStatus.COMPLETED)
         .setModId(author.id)
 
-      const sgUser = await guild.members.fetch(suggestion.userId)
+      const sgUser = await guild.members.fetch(suggestion.userId).catch(() => undefined)
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -335,7 +334,7 @@ class Complete {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user || undefined,
+        user: sgUser?.user,
         mod: author,
         suggestion
       }))
@@ -427,7 +426,7 @@ class Decline {
         .setStatus(SuggestionStatus.DECLINED)
         .setModId(author.id)
 
-      const sgUser = await guild.members.fetch(suggestion.userId)
+      const sgUser = await guild.members.fetch(suggestion.userId).catch(() => undefined)
 
       const sgChannel = guild.channels.cache.get(suggestion.channelId) as TextChannel
       if (!sgChannel) return
@@ -436,7 +435,7 @@ class Decline {
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
       sgMessage.edit(updateSuggestion({
-        user: sgUser.user || undefined,
+        user: sgUser?.user,
         mod: author,
         suggestion
       }))
