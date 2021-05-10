@@ -31,6 +31,7 @@ export const updateSuggestion = (args: SuggestionArgs) => {
 
   if (args.editor) embed.addField(`Edited by`, `<@${args.editor.id}>`, true)
   if (args.mod) embed.addField(`${args.suggestion.status.capitalize()} by`, `<@${args.mod.id}>`, true)
+  if (args.suggestion.reason) embed.addField('Comment', args.suggestion.reason)
 
   switch (args.suggestion.status) {
     case SuggestionStatus.SUBMITTED:
