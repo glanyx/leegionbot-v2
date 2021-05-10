@@ -143,7 +143,7 @@ class Edit {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser}>`, updatedEmbed)
+        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
         
         const embed = new MessageEmbed()
           .setColor('#00FF00')
@@ -245,7 +245,7 @@ class Approve {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser}>`, updatedEmbed)
+        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
         
         const embed = new MessageEmbed()
           .setColor('#00FF00')
@@ -345,7 +345,7 @@ class Complete {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser}>`, updatedEmbed)
+        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
         
         const embed = new MessageEmbed()
           .setColor('#00FF00')
@@ -446,7 +446,7 @@ class Decline {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser}>`, updatedEmbed)
+        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
         
         const embed = new MessageEmbed()
           .setColor('#00FF00')
