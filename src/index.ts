@@ -7,13 +7,18 @@ import Events from './events'
 import Commands from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchClient } from './utils'
+import { logger, TwitchClient, TwitterClient } from './utils'
 import TwitchEvents from './events/twitch'
+import TwitterEvents from './events/twitter'
 
 const client = new Client()
 client.commands = new Collection()
 
 const twitchClient = new TwitchClient().track('leeandlie').start()
+const twitterClient = new TwitterClient()
+twitterClient.addRule('453582519087005696', {
+  from: 'LeeandLie'
+})
 
 process.title = 'leegionbot'
 
@@ -41,6 +46,14 @@ TwitchEvents.forEach((event: any) => {
   twitchClient.on(eventName, event.execute.bind(null, {
     discordClient: client,
     twitchClient
+  }))
+})
+
+TwitterEvents.forEach((event: any) => {
+  const eventName = event.name.toCamelCase()
+  twitterClient.on(eventName, event.execute.bind(null, {
+    discordClient: client,
+    twitterClient
   }))
 })
 

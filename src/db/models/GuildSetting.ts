@@ -12,6 +12,7 @@ interface IGuildSetting extends INewGuildSetting {
   messageTimeframe: number
   muteDuration: number
   suggestionChannelId: string
+  announcementChannelId: string
 }
 
 interface INewGuildSetting {
@@ -49,6 +50,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "memberLogChannelId" = ${this.data.memberLogChannelId ? `'${this.data.memberLogChannelId}'` : null},
         "modLogChannelId" = ${this.data.modLogChannelId ? `'${this.data.modLogChannelId}'` : null},
         "suggestionChannelId" = ${this.data.suggestionChannelId ? `'${this.data.suggestionChannelId}'` : null},
+        "announcementChannelId" = ${this.data.announcementChannelId ? `'${this.data.announcementChannelId}'` : null},
         "alertOnAction" = ${this.data.alertOnAction},
         blacklist = ARRAY[${this.data.blacklist.join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
@@ -164,6 +166,15 @@ export class GuildSetting extends DBModel<IGuildSetting> {
 
   public setSuggestionChannelId(id: string) {
     this.data.suggestionChannelId = id
+    return this
+  }
+
+  public get announcementChannelId() {
+    return this.data.announcementChannelId
+  }
+
+  public setAnnouncementChannelId(id: string) {
+    this.data.announcementChannelId = id
     return this
   }
 
