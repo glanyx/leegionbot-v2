@@ -4,7 +4,7 @@
   "description": "Private Discord Bot for LeeandLie",
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config build/src/index.js",
+    "start": "ts-node -r dotenv/config src/index.ts",
     "stop": "pkill --signal SIGINT leegionbot",
     "test": "jest",
     "build": "tsc",
