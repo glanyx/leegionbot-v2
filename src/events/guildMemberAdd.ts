@@ -45,8 +45,8 @@ export class GuildMemberAdd {
           .setColor('#00FF00')
           .addField('Using Discord Since', format(member.user.createdAt))
 
-        if (channel.type === 'text') {
-          (channel as TextChannel).send(embed)
+        if (channel.type === 'GUILD_TEXT') {
+          (channel as TextChannel).send({ embeds: [embed] })
         }
         
       }

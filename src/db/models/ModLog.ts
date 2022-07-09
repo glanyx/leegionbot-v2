@@ -34,7 +34,7 @@ export class ModLog extends DBModel<IModLog> {
         '${action.guildId}',
         '${action.userId}',
         '${action.targetId}', 
-        ${action.action}',
+        '${action.action}',
         '${action.reason.replace(/'/g, "''")}',
         ${action.muteTime ? `to_timestamp(${action.muteTime.getOffsetTime()} / 1000.0)` : null},
         ${action.muteTime ? true : null}

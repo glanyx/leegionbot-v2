@@ -3,11 +3,12 @@ import { Config } from './configuration'
 import { Countdown, Suggestion } from './features'
 import { About, Avatar, Info, Ping, User } from './informational'
 import { Ban, Blacklist, Kick, Modlog, Mute, Purge, Slowmode, Unban, Unmute, Warn } from './moderation'
-import { Join, Play, Queue, Skip, Stop } from './music'
+import { Command } from 'discord.js'
+// import { Join, Play, Queue, Skip, Stop } from './music'
 
 import { Help } from './help'
 
-export default [
+export const Commands: Array<Command> = [
   Shutdown,
   
   Config,
@@ -32,11 +33,11 @@ export default [
   Slowmode,
   Warn,
 
-  Join,
-  Play,
-  Queue,
-  Skip,
-  Stop,
+  // Join,
+  // Play,
+  // Queue,
+  // Skip,
+  // Stop,
 
   Help,
 ]

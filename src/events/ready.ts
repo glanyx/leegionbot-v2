@@ -1,7 +1,7 @@
 import { Client } from 'discord.js'
 import { DBClient } from '../db'
-import { Countdown, ModLog, GuildSetting } from '../db/models'
-import { logger, Blacklist, CountdownTimer, MuteManager } from '../utils'
+import { Countdown } from '../db/models'
+import { logger, Blacklist, CountdownTimer, ModActions } from '../utils'
 
 export class Ready {
 
@@ -35,22 +35,16 @@ export class Ready {
 
     
     logger.info('Fetching active mutes..')
-    const { items: mutes } = await ModLog.fetchActiveMutes()
-    mutes.map(async mute => {
-      const guild = client.guilds.cache.get(mute.guildId)
-      if (!guild) return
-      const settings = await GuildSetting.fetchByGuildId(guild.id)
-      if (!settings) return
-      const { mutedRoleId } = settings
-      const member = guild.members.cache.get(mute.targetId)
-      const role = guild.roles.cache.get(mutedRoleId)
-      if (!member || !role) return
-      await member.fetch()
-      if (!mute.muteTime) return
-      MuteManager.add(mute.id, member, role, mute.muteTime.getTime())
-    })
+    ModActions.loadAllMutes(client)
+    ModActions.monitorMutes()
 
-    await client.generateInvite({ permissions: [
+    const url = client.generateInvite({ 
+      scopes: [
+        'bot',
+        'applications.commands',
+        'connections'
+      ],
+      permissions: [
       'ADMINISTRATOR',
       'MANAGE_GUILD',
       'MANAGE_ROLES',
@@ -69,10 +63,10 @@ export class Ready {
       'ADD_REACTIONS',
       'MUTE_MEMBERS',
       'DEAFEN_MEMBERS',
-      'MOVE_MEMBERS'
-    ]}).then(url => {
-      logger.info(`Invite me at: ${url}`);
-    });
+      'MOVE_MEMBERS',
+    ]})
+    
+    logger.info(`Invite me at: ${url}`)
 
     logger.info(`Now listening for events..`);
   }

@@ -3,21 +3,39 @@ import './typings/native/string.extension'
 
 import { Client, Collection } from 'discord.js'
 
-import Events from './events'
-import Commands from './commands'
+import { Events } from './events'
+import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchClient, TwitterClient } from './utils'
+import { logger, TwitchClient, TwitterClient, SpamFilter } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
 
-const client = new Client()
+const client = new Client({
+  intents: [
+    'GUILDS',
+    'GUILD_MEMBERS',
+    'GUILD_BANS',
+    'GUILD_PRESENCES',
+    'GUILD_MESSAGES',
+    'GUILD_MESSAGE_REACTIONS',
+    'DIRECT_MESSAGES',
+    'DIRECT_MESSAGE_REACTIONS',
+  ],
+  partials: [
+    'CHANNEL'
+  ]
+})
 client.commands = new Collection()
 
-const twitchClient = new TwitchClient().track('leeandlie').start()
+// const twitchClient = new TwitchClient().track('leeandlie').start()
 const twitterClient = new TwitterClient()
-twitterClient.addRule('453582519087005696', {
-  from: 'LeeandLie'
+// twitterClient.addRule('453582519087005696', {
+//   from: 'LeeandLie'
+// })
+
+twitterClient.addRule('259715388462333952', {
+  from: 'MikeFfatb'
 })
 
 process.title = 'leegionbot'
@@ -41,13 +59,13 @@ Commands.forEach(command => {
   client.commands.set(commandName, command)
 })
 
-TwitchEvents.forEach((event: any) => {
-  const eventName = event.name.toCamelCase()
-  twitchClient.on(eventName, event.execute.bind(null, {
-    discordClient: client,
-    twitchClient
-  }))
-})
+// TwitchEvents.forEach((event: any) => {
+//   const eventName = event.name.toCamelCase()
+//   twitchClient.on(eventName, event.execute.bind(null, {
+//     discordClient: client,
+//     twitchClient
+//   }))
+// })
 
 TwitterEvents.forEach((event: any) => {
   const eventName = event.name.toCamelCase()
@@ -58,3 +76,5 @@ TwitterEvents.forEach((event: any) => {
 })
 
 client.login(process.env.DISCORD_TOKEN)
+
+const filter = new SpamFilter(client)

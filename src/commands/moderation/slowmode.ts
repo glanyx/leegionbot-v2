@@ -56,11 +56,11 @@ export class Slowmode {
 
     if (!channel) return
     
-    if (channel.type === 'text') {
+    if (channel.type === 'GUILD_TEXT') {
       logger.info(`Updating slowmode in Guild ID ${guild.id}, Channel ID ${channel.id} to ${duration} seconds`);
       (channel as TextChannel).setRateLimitPerUser(duration)
     } else {
-      message.channel.send('Unable to set slowmode on specified channel.').then(m => m.delete({ timeout: 5000 }))
+      message.channel.send('Unable to set slowmode on specified channel.').then(msg => setTimeout(() => msg.delete(), 5000))
       return
     }
 

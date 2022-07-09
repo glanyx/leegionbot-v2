@@ -33,7 +33,7 @@ export class UserUpdate {
           .addField('New Username', `${user.username}`, true)
           .setTimestamp()
     
-        channel.send(embed)
+        channel.send({ embeds: [embed] })
       })
     
     }
@@ -70,7 +70,7 @@ export class UserUpdate {
           .setThumbnail(userOld.avatarURL() || defaultImage)
           .setTimestamp()
     
-        channel.send(embed)
+        channel.send({ embeds: [embed] })
       })
     
     }

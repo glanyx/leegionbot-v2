@@ -27,7 +27,7 @@ export class GuildMemberUpdate {
         .addField('New Nickname', `${member.nickname || '*None*'}`, true)
         .setTimestamp()
   
-      channel.send(embed)
+      channel.send({ embeds: [embed] })
 
     }
 

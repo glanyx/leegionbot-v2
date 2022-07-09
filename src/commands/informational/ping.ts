@@ -22,14 +22,14 @@ export class Ping {
       .setColor('#FFA500')
       .setTitle('🏓 Pong!')
 
-    await channel.send(embed).then(msg => {
+    await channel.send({ embeds: [embed] }).then(msg => {
       embed
         .setColor('#00ff00')
         .setTitle(`🏓 Pong!`)
         .addField('Bot Latency', `${msg.createdTimestamp - message.createdTimestamp}ms`, true)
         .addField('API Latency', `${client.ws.ping}ms`, true)
       
-        msg.edit(embed)
+        msg.edit({ embeds: [embed] })
     })
 
   }

@@ -29,8 +29,8 @@ export class GuildMemberRemove {
           .setColor('#FF0000')
           .addField('Joined on', member.joinedAt ? format(member.joinedAt) : '*Unknown*')
 
-        if (channel.type === 'text') {
-          (channel as TextChannel).send(embed)
+        if (channel.type === 'GUILD_TEXT') {
+          (channel as TextChannel).send({ embeds: [embed] })
         }
         
       }

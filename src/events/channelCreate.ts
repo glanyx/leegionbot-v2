@@ -6,7 +6,7 @@ export class ChannelCreate {
 
   public static async execute(_: Client, channel: DMChannel | GuildChannel) {
 
-    if (channel.type !== 'dm') {
+    if (channel.type !== 'DM') {
 
       const { guild } = (channel as GuildChannel)
       logger.debug(`New Channel on Guild ID ${guild.id}`)
@@ -17,7 +17,7 @@ export class ChannelCreate {
       const { mutedRoleId } = settings
       if (!mutedRoleId) return
 
-      (channel as GuildChannel).createOverwrite(mutedRoleId, {
+      (channel as GuildChannel).permissionOverwrites.create(mutedRoleId, {
         SEND_MESSAGES: false,
         ATTACH_FILES: false,
         ADD_REACTIONS: false,

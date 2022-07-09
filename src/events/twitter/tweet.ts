@@ -31,7 +31,7 @@ export class Tweet {
           .setTimestamp()
           .setURL(`https://twitter.com/${rule.from}`)
 
-        channel.send(embed)
+        channel.send({ embeds: [embed] })
 
       })
 

@@ -1,8 +1,8 @@
 import { Command, User, Client, Message as DiscordMessage } from 'discord.js'
 import { GuildSetting } from '../db/models'
-import { logger, hasPerms, AutoMod, Blacklist } from '../utils'
+import { logger, hasPerms, Blacklist } from '../utils'
 
-export class Message {
+export class MessageCreate {
 
   public static async execute(client: Client, message: DiscordMessage) {
 
@@ -11,18 +11,19 @@ export class Message {
     const { guild, member, channel } = message
     if (!guild || !member) return
 
-    const owner = (await client.fetchApplication()).owner as User
-    const setting = await GuildSetting.fetchByGuildId(guild.id)
+    const app = client.application
+    if (!app) return
+    await app.fetch()
+    const owner = app.owner as User
 
     const prefix = process.env.DISCORD_PREFIX || '='
 
     // Allow members with manage_messages to pass through automod / blacklist
-    if (!member.hasPermission('MANAGE_MESSAGES')) {
-      AutoMod.add(client, member, message)
+    if (!member.permissions.has('MANAGE_MESSAGES')) {
       if (message.guild) {
         if (Blacklist.compare(guild.id, message.content.startsWith(prefix) ? message.content.slice(prefix.length) : message.content)) {
           await message.delete()
-          channel.send(`Please mind the language, <@${member.id}>!`).then(m => m.delete({ timeout: 5000 }))
+          channel.send(`Please mind the language, <@${member.id}>!`).then(m => setTimeout(() => m.delete(), 5000))
           return
         }
       }
@@ -39,7 +40,7 @@ export class Message {
   
     if (!command) return
               
-    const cmd = client.commands.get(command) || client.commands.find(cmd => cmd.alias ? cmd.alias.includes(command) : false)
+    const cmd = client.commands.get(command) || client.commands.find((cmd: Command) => cmd.alias ? cmd.alias.includes(command) : false)
     
     if (!cmd) return
 

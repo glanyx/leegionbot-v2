@@ -1,4 +1,4 @@
-import { Help, IExecuteArgs, MessageEmbed, ClientUser } from "discord.js"
+import { Help, IExecuteArgs, MessageEmbed, ClientUser, User } from "discord.js"
 
 const help: Help = {
   name: "about",
@@ -20,11 +20,20 @@ export class About {
     const { guild, channel } = message
     if (!guild) return
 
-    const owner = (await client.fetchApplication()).owner
+    const app = client.application
+    if (!app) return
+    await app.fetch()
+    const owner = app.owner as User
     const clientUser = client.user as ClientUser
 
   
-    await client.generateInvite({ permissions: [
+    const url = client.generateInvite({ 
+      scopes: [
+        'bot',
+        'applications.commands',
+        'connections'
+      ],
+      permissions: [
       'ADMINISTRATOR',
       'MANAGE_GUILD',
       'MANAGE_ROLES',
@@ -44,18 +53,17 @@ export class About {
       'MUTE_MEMBERS',
       'DEAFEN_MEMBERS',
       'MOVE_MEMBERS'
-    ]}).then(url => {
-
-      const embed = new MessageEmbed()
-        .setAuthor(clientUser.username, clientUser.avatarURL() || undefined)
-        .setDescription(`LeegionBot is a Discord Bot especially created for the LeeandLie Discord server, by <@${owner}>. Do you want LeegionBot to help manage your server? You can invite the bot [here](${url})!`)
-        .addField('Questions, suggestions or concerns?', `Please DM my owner <@${owner}>!`)
+    ]})
+    
+    const embed = new MessageEmbed()
+      .setAuthor(clientUser.username, clientUser.avatarURL() || undefined)
+      .setDescription(`LeegionBot is a Discord Bot especially created for the LeeandLie Discord server, by <@${owner}>. Do you want LeegionBot to help manage your server? You can invite the bot [here](${url})!`)
+      .addField('Questions, suggestions or concerns?', `Please DM my owner <@${owner}>!`)
   
-      channel.send(embed)
+    channel.send({ embeds: [embed] })
 
-    })
   }
-
+  
   public static get help() {
     return help
   }

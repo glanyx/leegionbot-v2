@@ -1,58 +1,58 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
-import { logger, QueueObject } from "../../utils"
+// import { Help, Config, IExecuteArgs } from "discord.js"
+// import { logger, QueueObject } from "../../utils"
 
-const help: Help = {
-  name: "queue",
-  category: "Music",
-  description: "Adds the URL for this song to the queue.",
-  usage: "queue [url]",
-  example: [
-    'queue https://www.youtube.com/watch?v=JqByA3ejOcg',
-  ]
-}
+// const help: Help = {
+//   name: "queue",
+//   category: "Music",
+//   description: "Adds the URL for this song to the queue.",
+//   usage: "queue [url]",
+//   example: [
+//     'queue https://www.youtube.com/watch?v=JqByA3ejOcg',
+//   ]
+// }
 
-const configs: Config = {
-  permissions: [
-    'SEND_MESSAGES'
-  ]
-}
+// const configs: Config = {
+//   permissions: [
+//     'SEND_MESSAGES'
+//   ]
+// }
 
-export class Queue {
+// export class Queue {
 
-  public static async run({
-    message,
-    args
-  }: IExecuteArgs) {
+//   public static async run({
+//     message,
+//     args
+//   }: IExecuteArgs) {
 
-    const { guild, channel } = message
-    if (!guild) return
+//     const { guild, channel } = message
+//     if (!guild) return
 
-    const instance = QueueObject.fetchQueueByGuildId(guild.id)
+//     const instance = QueueObject.fetchQueueByGuildId(guild.id)
 
-    if (instance) {
+//     if (instance) {
 
-      if (args) {
-        try{
-          await instance.addSong(args[0])
-        } catch (e) {
-          channel.send(e)
-          return
-        }
-      } else {
-        channel.send(`You must provide a URL!`)
-      }
+//       if (args) {
+//         try{
+//           await instance.addSong(args[0])
+//         } catch (e) {
+//           channel.send(e)
+//           return
+//         }
+//       } else {
+//         channel.send(`You must provide a URL!`)
+//       }
   
-    } else {
-      channel.send(`I'm not in a Voice Channel! Use \`${process.env.DISCORD_PREFIX}join\` so I can join your channel!`)
-    }
-  }
+//     } else {
+//       channel.send(`I'm not in a Voice Channel! Use \`${process.env.DISCORD_PREFIX}join\` so I can join your channel!`)
+//     }
+//   }
 
-  public static get help() {
-    return help
-  }
+//   public static get help() {
+//     return help
+//   }
 
-  public static get configs() {
-    return configs
-  }
+//   public static get configs() {
+//     return configs
+//   }
 
-}
+// }

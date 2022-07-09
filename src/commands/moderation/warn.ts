@@ -50,7 +50,7 @@ export class Warn {
 
       await member.fetch()
       
-      if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember !== guild.owner) return channel.send(`You don't have the required permissions to perform this action!`)
+      if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
       
       const embed = new MessageEmbed()
         .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
@@ -65,7 +65,7 @@ export class Warn {
       try {
         await member.send(`You were warned in the \`${guild.name}\` Discord server for the following reason:\n${reason}`)
         success = true
-      } catch (e) {
+      } catch (e: any) {
         logger.error(`${e.message} - User ID: ${member.user.id}`)
       }
       embed.addField('Received DM?', success ? 'Yes' : 'No')
@@ -84,10 +84,10 @@ export class Warn {
         return message.channel.send(text)
       })
       
-      modlogNotify(guild, embed, (channel as TextChannel))
+      modlogNotify(guild, { embed }, (channel as TextChannel))
 
     } catch (e) {
-      (await message.channel.send(`An error occured trying to warn the specified user. Please try again later.`)).delete({ timeout: 10 })
+      await message.channel.send(`An error occured trying to warn the specified user. Please try again later.`).then(msg => setTimeout(() => msg.delete(), 5000))
       logger.error(e)
     }
 

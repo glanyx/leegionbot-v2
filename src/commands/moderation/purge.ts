@@ -29,7 +29,7 @@ export class Purge {
     if (!guild) return
 
     if (!args[0]) {
-      channel.send('Please specify an amount of messages to delete.').then(message => message.delete({ timeout: 5000 }))
+      channel.send('Please specify an amount of messages to delete.').then(msg => setTimeout(() => msg.delete(), 5000))
       return
     }
 
@@ -37,7 +37,7 @@ export class Purge {
     const cycles = Math.floor(total / 100)
     const remainder = total % 100
 
-    if (channel.type === 'text') {
+    if (channel.type === 'GUILD_TEXT') {
 
       for (let i = 0; i < cycles; i++) {
         (channel as TextChannel).bulkDelete(100)
@@ -45,13 +45,13 @@ export class Purge {
 
       (channel as TextChannel).bulkDelete(remainder)
         .then(() => channel.send(`**${total - 1}** messages deleted!`)
-          .then(message => message.delete({ timeout: 5000 }))
+          .then(msg => setTimeout(() => msg.delete(), 5000))
           .catch(e => {
             logger.error(e)
           })
         )
         .catch(e => {
-          channel.send(`Something went wrong purging ${args[0]} messages!`).then(msg => msg.delete({ timeout: 5000 }))
+          channel.send(`Something went wrong purging ${args[0]} messages!`).then(msg => setTimeout(() => msg.delete(), 5000))
           logger.error(e)
         })
 

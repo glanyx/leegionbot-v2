@@ -35,12 +35,12 @@ export class Info {
 
       const embed = new MessageEmbed()
         .setTimestamp()
-        .addField('Bot Version', process.env.VERSION, true)
+        .addField('Bot Version', `${process.env.VERSION}`, true)
         .addField('CPU Usage (%)', `${(1 - idleDiff / totalDiff).toFixed(1)}%`, true)
         .addField('Memory Usage', `${(Math.round(process.memoryUsage().rss) / 1024 / 1024).toFixed(1)} MB`, true)
         .addField('Bot Uptime', formatDiff(client.uptime || 0))
   
-      channel.send(embed)
+      channel.send({ embeds: [embed] })
 
       clearTimeout(timeout)
     }, 1000)

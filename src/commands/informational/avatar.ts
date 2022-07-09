@@ -68,6 +68,6 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
     .setFooter(`${member.user.username} | ${member.user.id}`)
     .setTimestamp()
 
-  channel.send(embed)
+  channel.send({ embeds: [embed] })
 
 }

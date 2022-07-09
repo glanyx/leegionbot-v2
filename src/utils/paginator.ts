@@ -1,4 +1,4 @@
-import { User, DMChannel, TextChannel, NewsChannel, Message, MessageEmbed, MessageReaction } from "discord.js";
+import { User, DMChannel, TextChannel, NewsChannel, Message, MessageEmbed, MessageReaction, TextBasedChannel } from "discord.js";
 import { ReactionOptions } from './constants'
 import logger from "./logger";
 
@@ -30,7 +30,7 @@ interface IPaginator {
 interface IPaginatorArgs {
   title?: string
   description?: string
-  channel: DMChannel | TextChannel | NewsChannel
+  channel: TextBasedChannel
   author: User
   items: Array<IContentItem> | Array<Array<IContentItem>> | Array<string> | Array<Array<string>>
   displayCount?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
@@ -91,35 +91,35 @@ export class Paginator implements IPaginator {
     })
   }
 
-  private async create(channel: DMChannel | TextChannel | NewsChannel) {
-    return channel.send(this.createEmbed())
+  private async create(channel: TextBasedChannel) {
+    return channel.send({ embeds: [this.createEmbed()] })
   }
 
   private next() {
     if (this.currentPage < this.pageCount) {
       this.currentPage++
-      this.message?.edit(this.createEmbed())
+      this.message?.edit({ embeds: [this.createEmbed()] })
     }
   }
 
   private previous() {
     if (this.currentPage > 1) {
       this.currentPage--
-      this.message?.edit(this.createEmbed())
+      this.message?.edit({ embeds: [this.createEmbed()] })
     }
   }
 
   private last() {
     if (this.currentPage !== this.pageCount) {
       this.currentPage = this.pageCount
-      this.message?.edit(this.createEmbed())
+      this.message?.edit({ embeds: [this.createEmbed()] })
     }
   }
 
   private first() {
     if (this.currentPage !== 1) {
       this.currentPage = 1
-      this.message?.edit(this.createEmbed())
+      this.message?.edit({ embeds: [this.createEmbed()] })
     }
   }
 
@@ -140,11 +140,14 @@ export class Paginator implements IPaginator {
     }
   
     if (!this.useHeaders && !this.useOptions) {
-      const descriptionString = `${this.description ? `${this.description}\n` : ''}${this.items[this.currentPage - 1].map(item => typeof(item) === 'string' ? item : item.content).join('\n\n')}`
+      let descriptionString = this.description ? `${this.description}\n` : ''
+      this.items[this.currentPage - 1].forEach(item => {
+        descriptionString += `${typeof(item) === 'string' ? item : item.content}\n`
+      })
       embed.setDescription(descriptionString)
     } else if (this.useHeaders) {
       this.items[this.currentPage - 1].forEach(item => {
-        embed.addField(item.header, typeof(item) === 'string' ? item : item.content)
+        embed.addField(item.header || 'Unknown', typeof(item) === 'string' ? item : item.content)
       })
     } else if (this.useOptions) {
       this.items[this.currentPage - 1].forEach((item, index) => {
@@ -156,29 +159,51 @@ export class Paginator implements IPaginator {
   }
 
   private async addReactions() {
+    let reactionArray: Array<string> = []
     if (this.currentPage > 1) {
-      await this.message?.react('⏮️')
-      await this.message?.react('◀️')
+      reactionArray.push('⏮️')
+      reactionArray.push('◀️')
+      // await this.message?.react('⏮️')
+      // await this.message?.react('◀️')
     }
     if (this.currentPage < this.pageCount) {
-      await this.message?.react('▶️')
-      await this.message?.react('⏭️')
+      reactionArray.push('▶️')
+      reactionArray.push('⏭️')
+      // await this.message?.react('▶️')
+      // await this.message?.react('⏭️')
     }
     if (this.pageCount > 1) {
-      await this.message?.react('⏹️')
+      // await this.message?.react('⏹️')
+      reactionArray.push('⏹️')
     }
     if (this.useOptions) {
       await Promise.all(this.items[this.currentPage - 1].map(async (_, index) => {
-        await this.message?.react(ReactionOptions[index])
+        reactionArray.push(ReactionOptions[index])
+        // await this.message?.react(ReactionOptions[index])
       }))
     }
 
-    this.createCollector()
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(() => {
+        if (reactionArray.length === 0) {
+          clearInterval(interval)
+          this.createCollector()
+          resolve(null)
+        }
+
+        const emoji = reactionArray.shift()
+        if (emoji) {
+          this.message?.react(emoji)
+        }
+      }, 750)
+    })
+
+    // this.createCollector()
   }
 
   private async clearReactions() {
     try {
-      if (this.message?.channel.type !== 'dm') await this.message?.reactions.removeAll()
+      if (this.message?.channel.type !== 'DM') await this.message?.reactions.removeAll()
     } catch (e) {
       logger.error(e)
     }
@@ -186,9 +211,10 @@ export class Paginator implements IPaginator {
 
   private createCollector() {
 
-    const filter = (reaction : MessageReaction, user: User) => [...ReactionOptions, ...ReactionNavigation].includes(reaction.emoji.name) && user.id === this.user.id
+    const filter = (reaction : MessageReaction, user: User) => [...ReactionOptions, ...ReactionNavigation].includes(reaction.emoji.name || '') && user.id === this.user.id
 
-    const collector = this.message?.createReactionCollector(filter, {
+    const collector = this.message?.createReactionCollector({
+      filter,
       time: this.timeout,
       maxEmojis: 1,
     })
@@ -197,7 +223,7 @@ export class Paginator implements IPaginator {
 
       await this.clearReactions()
 
-      if (ReactionNavigation.includes(reaction.emoji.name)) {
+      if (ReactionNavigation.includes(reaction.emoji.name || '')) {
         switch (reaction.emoji.name) {
           case '⏮️':
             this.first()
@@ -216,7 +242,7 @@ export class Paginator implements IPaginator {
           default:
             break
         }
-      } else if (ReactionOptions.includes(reaction.emoji.name)) {
+      } else if (ReactionOptions.includes(reaction.emoji.name || '')) {
         const index = ReactionOptions.findIndex(option => option === reaction.emoji.name)
         this.selectedOption = this.items.reduce((acc, cur, index) => {
           if (index < this.currentPage - 1) {

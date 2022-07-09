@@ -1,5 +1,5 @@
-import { User, Help as CommandHelp, Command, IExecuteArgs } from "discord.js"
-import Commands from './'
+import { User, Help as CommandHelp, Command, IExecuteArgs, Util, Formatters } from "discord.js"
+import { Commands } from './'
 import { hasPerms } from "../utils";
 
 const help: CommandHelp = {
@@ -28,7 +28,7 @@ export class Help {
     if (!guild || !member) return
 
     const commands = client.commands;
-    const commandList = commands.keyArray();
+    const commandList = [...commands.keys()]
 
     // standalone command
     if (!content) {
@@ -39,7 +39,10 @@ export class Help {
 
       let output = `= Command List =\n\n[Use ${process.env.DISCORD_PREFIX}help <commandname> for details]\n`;
 
-      const owner = (await client.fetchApplication()).owner as User
+      const app = client.application
+      if (!app) return
+      await app.fetch()
+      const owner = app.owner as User
 
       const sorted = Commands
         .filter(cmd => hasPerms(cmd, member, owner))
@@ -62,10 +65,10 @@ export class Help {
           (longest - c.help.name.length)
         )} :: ${c.help.description}\n`;
       });
-      message.channel.send(output, {
-        code: "asciidoc",
-        split: { char: "\u200b" }
-      })
+
+      const chunks = Util.splitMessage(output, { char: '\u200b' })
+      chunks.forEach(content => message.channel.send(Formatters.codeBlock('asciidoc', content)))
+
     } else {
 
       let i = 0
@@ -96,10 +99,8 @@ export class Help {
 
       const cmd = commandArray[commandArray.length - 1]
 
-      message.channel.send(
-        `= ${commandArray.map(cmd => cmd.help.name).join(' | ')} =\n${cmd.help.description}\nUsage:: ${cmd.help.usage}${cmd.subcommands ? `\nSubcommands:: ${cmd.subcommands.map(s => s.help.name).join(', ')}` : ''}\nExample::\n${cmd.help.example?.join('\n')}`,
-        { code: "asciidoc" }
-      );
+      const content = `= ${commandArray.map(cmd => cmd.help.name).join(' | ')} =\n${cmd.help.description}\nUsage:: ${cmd.help.usage}${cmd.subcommands ? `\nSubcommands:: ${cmd.subcommands.map(s => s.help.name).join(', ')}` : ''}\nExample::\n${cmd.help.example?.join('\n')}`
+      message.channel.send(Formatters.codeBlock('asciidoc', content))
     }
   }
 

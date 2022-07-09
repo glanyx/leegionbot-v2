@@ -51,7 +51,7 @@ export class Countdown {
     const everyoneRole = guild.roles.everyone
 
     const createdChannel = await guild.channels.create(`${name} - ${getTimerValue(target.getTime())}`, {
-      type:'voice',
+      type: 'GUILD_VOICE',
       permissionOverwrites: [
         {
           id: everyoneRole.id,

@@ -31,14 +31,14 @@ export class MessageDelete {
     }
 
     if (message.attachments.size > 0) {
-      message.attachments.array().forEach((attachment, index) => {
+      [...message.attachments.values()].forEach((attachment, index) => {
         embed.addField(`Attachment ${index + 1}`, attachment.url)
       })
     }
 
     if (!message.content && message.attachments.size === 0) embed.setDescription('Unable to retrieve content')
 
-    channel.send(embed)
+    channel.send({ embeds: [embed] })
 
   }
 

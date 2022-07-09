@@ -26,13 +26,14 @@ export class Shutdown {
       .setTitle(`Terminate v${process.env.VERSION}?`)
       .setDescription('This will log out the bot and terminate the current process. Is this okay?')
 
-    const embedMessage = await channel.send(embed)
+    const embedMessage = await channel.send({ embeds: [embed] })
     await embedMessage.react('507285695484919809')
     await embedMessage.react('507287289282428962')
 
     
     const confirmFilter = (reaction: MessageReaction, user: User) => (reaction.emoji.id === '507285695484919809' || reaction.emoji.id === '507287289282428962') && user === author
-    const confirmCollector = embedMessage.createReactionCollector(confirmFilter, {
+    const confirmCollector = embedMessage.createReactionCollector({
+      filter: confirmFilter,
       time: 300000,
       max: 1
     })

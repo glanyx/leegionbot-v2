@@ -33,7 +33,7 @@ export class Suggestion {
 
     message.delete()
 
-    if (!content || content === '') return message.channel.send('Please add some text for your suggestion!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!content || content === '') return message.channel.send('Please add some text for your suggestion!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const settings = await GuildSetting.fetchByGuildId(guild.id)
     const channel = (settings && settings.suggestionChannelId ? await guild.channels.cache.get(settings.suggestionChannelId)?.fetch() || message.channel : message.channel) as TextChannel
@@ -44,10 +44,11 @@ export class Suggestion {
       text: content,
       userId: author.id
     }).then(suggestion => {
-      channel.send(updateSuggestion({
+      const embed = updateSuggestion({
         user: author,
-        suggestion
-      })).then(msg => suggestion.setMessageId(msg.id).update())
+        suggestion,
+      })
+      channel.send({ embeds: [embed] }).then(msg => suggestion.setMessageId(msg.id).update())
       message.channel.send(`Thanks for your suggestion, <@${author}>! You can find your suggestion in <#${channel}>`)
     })
 
@@ -101,22 +102,22 @@ class Edit {
     if (!guild || !member) return
 
     const idText = args.shift()
-    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const id = parseInt(idText)
-    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => msg.delete({ timeout: 5000 }))
+    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const text = args.join(' ')
-    if (!text || text === '') return channel.send('Please enter some text to edit this suggestion with!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!text || text === '') return channel.send('Please enter some text to edit this suggestion with!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     SuggestionModel.fetchById({
       id,
       guildId: guild.id
     }).then(async suggestion => {
-      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => msg.delete({ timeout: 5000 }))
+      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
       if (suggestion.userId !== author.id) {
-        if (!member.hasPermission('MANAGE_MESSAGES')) return channel.send('You don\'t have the required permissions to edit this suggestion!').then(msg => msg.delete({ timeout: 5000 }))
+        if (!member.permissions.has('MANAGE_MESSAGES')) return channel.send('You don\'t have the required permissions to edit this suggestion!').then(msg => setTimeout(() => msg.delete(), 5000))
       }
       
       suggestion
@@ -131,11 +132,12 @@ class Edit {
 
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
-      sgMessage.edit(updateSuggestion({
+      const embed = updateSuggestion({
         user: sgUser?.user,
         editor: author,
         suggestion
-      }))
+      })
+      sgMessage.edit({ embeds: [embed] })
       .then(() => {
 
         suggestion.update()
@@ -143,13 +145,16 @@ class Edit {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
+        sgChannel.send({
+          content: `<@${sgUser || suggestion.userId}>`,
+          embeds: [updatedEmbed]
+        })
         
-        const embed = new MessageEmbed()
+        const successEmbed = new MessageEmbed()
           .setColor('#00FF00')
           .setTitle('Success!')
           .setDescription('Suggestion edited successfully!')
-        channel.send(embed).then(msg => msg.delete({ timeout: 5000 }))
+        channel.send({ embeds: [successEmbed] }).then(msg => setTimeout(() => msg.delete(), 5000))
 
       }).catch(e => {
         logger.debug(`Unable to update Suggestion ID ${suggestion.id}\n${e}`)
@@ -205,10 +210,10 @@ class Approve {
     if (!guild || !member) return
 
     const idText = args.shift()
-    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const id = parseInt(idText)
-    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => msg.delete({ timeout: 5000 }))
+    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const reason = args.join(' ') || 'No reason provided'
 
@@ -216,9 +221,9 @@ class Approve {
       id,
       guildId: guild.id
     }).then(async suggestion => {
-      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => msg.delete({ timeout: 5000 }))
+      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
-      if (suggestion.status !== SuggestionStatus.SUBMITTED) return channel.send(`You can't approve a suggestion in ${suggestion.status} status!`).then(msg => msg.delete({ timeout: 5000 }))
+      if (suggestion.status !== SuggestionStatus.SUBMITTED) return channel.send(`You can't approve a suggestion in ${suggestion.status} status!`).then(msg => setTimeout(() => msg.delete(), 5000))
 
       suggestion
         .setReason(reason)
@@ -233,11 +238,12 @@ class Approve {
 
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
-      sgMessage.edit(updateSuggestion({
+      const embed = updateSuggestion({
         user: sgUser?.user,
         mod: author,
         suggestion
-      }))
+      })
+      sgMessage.edit({ embeds: [embed] })
       .then(() => {
 
         suggestion.update()
@@ -245,13 +251,16 @@ class Approve {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
+        sgChannel.send({
+          content: `<@${sgUser || suggestion.userId}>`,
+          embeds: [updatedEmbed],
+        })
         
-        const embed = new MessageEmbed()
+        const approveEmbed = new MessageEmbed()
           .setColor('#00FF00')
           .setTitle('Success!')
           .setDescription('Suggestion approved!')
-        channel.send(embed).then(msg => msg.delete({ timeout: 5000 }))
+        channel.send({ embeds: [approveEmbed] }).then(msg => setTimeout(() => msg.delete(), 5000))
 
       }).catch(e => {
         logger.debug(`Unable to update message for Suggestion ID ${suggestion.id}\n${e}`)
@@ -305,10 +314,10 @@ class Complete {
     if (!guild || !member) return
 
     const idText = args.shift()
-    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const id = parseInt(idText)
-    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => msg.delete({ timeout: 5000 }))
+    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const reason = args.join(' ') || 'No reason provided'
 
@@ -316,9 +325,9 @@ class Complete {
       id,
       guildId: guild.id
     }).then(async suggestion => {
-      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => msg.delete({ timeout: 5000 }))
+      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
-      if (SuggestionState.FINAL.includes(suggestion.status)) return channel.send(`You can't complete a suggestion in ${suggestion.status} status!`).then(msg => msg.delete({ timeout: 5000 }))
+      if (SuggestionState.FINAL.includes(suggestion.status)) return channel.send(`You can't complete a suggestion in ${suggestion.status} status!`).then(msg => setTimeout(() => msg.delete(), 5000))
 
       suggestion
         .setReason(reason)
@@ -333,11 +342,12 @@ class Complete {
 
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
-      sgMessage.edit(updateSuggestion({
+      const embed = updateSuggestion({
         user: sgUser?.user,
         mod: author,
         suggestion
-      }))
+      })
+      sgMessage.edit({ embeds: [embed] })
       .then(() => {
 
         suggestion.update()
@@ -345,13 +355,16 @@ class Complete {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
+        sgChannel.send({
+          content: `<@${sgUser || suggestion.userId}>`,
+          embeds: [updatedEmbed],
+        })
         
-        const embed = new MessageEmbed()
+        const completeEmbed = new MessageEmbed()
           .setColor('#00FF00')
           .setTitle('Success!')
           .setDescription('Suggestion completed!')
-        channel.send(embed).then(msg => msg.delete({ timeout: 5000 }))
+        channel.send({ embeds: [completeEmbed] }).then(msg => setTimeout(() => msg.delete(), 5000))
 
       }).catch(e => {
         logger.debug(`Unable to update message for Suggestion ID ${suggestion.id}\n${e}`)
@@ -406,10 +419,10 @@ class Decline {
     if (!guild || !member) return
 
     const idText = args.shift()
-    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => msg.delete({ timeout: 5000 }))
+    if (!idText) return channel.send('Please specify an ID to edit!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const id = parseInt(idText)
-    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => msg.delete({ timeout: 5000 }))
+    if (isNaN(id)) return channel.send('Please specify a valid ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
     const reason = args.join(' ') || 'No reason provided'
 
@@ -417,9 +430,9 @@ class Decline {
       id,
       guildId: guild.id
     }).then(async suggestion => {
-      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => msg.delete({ timeout: 5000 }))
+      if (!suggestion) return channel.send('Unable to find a suggestion by the specified ID!').then(msg => setTimeout(() => msg.delete(), 5000))
 
-      if (SuggestionState.FINAL.includes(suggestion.status)) return channel.send(`You can't decline a suggestion in ${suggestion.status} status!`).then(msg => msg.delete({ timeout: 5000 }))
+      if (SuggestionState.FINAL.includes(suggestion.status)) return channel.send(`You can't decline a suggestion in ${suggestion.status} status!`).then(msg => setTimeout(() => msg.delete(), 5000))
 
       suggestion
         .setReason(reason)
@@ -434,11 +447,12 @@ class Decline {
 
       const sgMessage = await sgChannel.messages.fetch(suggestion.messageId)
 
-      sgMessage.edit(updateSuggestion({
+      const embed = updateSuggestion({
         user: sgUser?.user,
         mod: author,
         suggestion
-      }))
+      })
+      sgMessage.edit({ embeds: [embed] })
       .then(() => {
 
         suggestion.update()
@@ -446,13 +460,16 @@ class Decline {
         const updatedEmbed = new MessageEmbed()
           .setTitle('Suggestion Updated!')
           .setDescription(`Your suggestion has been updated! You can check the status of your suggestion [here](${sgMessage.url})!`)
-        sgChannel.send(`<@${sgUser || suggestion.userId}>`, updatedEmbed)
+        sgChannel.send({
+          content: `<@${sgUser || suggestion.userId}>`,
+          embeds: [updatedEmbed],
+        })
         
-        const embed = new MessageEmbed()
+        const declineEmbed = new MessageEmbed()
           .setColor('#00FF00')
           .setTitle('Success!')
           .setDescription('Suggestion declined!')
-        channel.send(embed).then(msg => msg.delete({ timeout: 5000 }))
+        channel.send({ embeds: [declineEmbed] }).then(msg => setTimeout(() => msg.delete(), 5000))
 
       }).catch(e => {
         logger.debug(`Unable to update message for Suggestion ID ${suggestion.id}\n${e}`)

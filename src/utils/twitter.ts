@@ -97,12 +97,19 @@ export class TwitterClient extends EventEmitter {
           const rule = this.rules.get(item.tag)
           if (!rule) return
 
-          this.emit('tweet', { data, rule })
+          this.client.get(`tweets/${data.id}`).then(res => {
+            console.log(res)
+          }).catch(e => {
+            console.log(e)
+          })
+
+
+          // this.emit('tweet', { data, rule })
         })
       }
 
       this.listen()
-    } catch (e) {
+    } catch (e: any) {
       if (e.message.toLowerCase().startsWith('connectionexception')) {
         logger.warn(`Twitter Stream closed. Reason: ${e.message}\nRetrying in 10 seconds..`)
         const timeout = setTimeout(() => {

@@ -10,7 +10,7 @@ declare module 'discord.js' {
     configs?: Config
     subcommands?: Array<Command>
     alias?: Array<string>
-    run: (args: IExecuteArgs) => Promise<Message | void | undefined>
+    run: (args: IExecuteArgs) => Promise<Message | void | undefined | NodeJS.Timeout>
   }
 
   export interface Help {

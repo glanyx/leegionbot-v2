@@ -48,7 +48,7 @@ export class Unban {
       .addField('Actioned by', `<@${author}>`, true)
       .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
 
-    modlogNotify(guild, embed, (channel as TextChannel))
+    modlogNotify(guild, { embed }, (channel as TextChannel))
 
   }
 

@@ -73,7 +73,7 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
     if (role.name !== "@everyone") {
       return `<@&${role}>`
     } 
-  }) : '*None*'
+  }).join('\n') : '*None*'
       
   const defaultImage = 'https://discord.com/assets/6debd47ed13483642cf09e832ed0bc1b.png'
 
@@ -87,11 +87,11 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
     .addField('User', `${member.user.username}`, true)
     .addField('Nickname', member.nickname || '*None*', true)
     .addField('User ID', member.user.id, true)
-    .addField('Status', PresenceStatus[member.user.presence.status], true)
+    .addField('Status', member.presence ? PresenceStatus[member.presence.status] : 'Unknown', true)
     .addField('Creation Date', format(member.user.createdAt), true)
     .addField('Join Date', member.joinedAt ? format(member.joinedAt) : 'Unknown', true)
     .addField('Roles', roleString)
 
-  channel.send(embed)
+  channel.send({ embeds: [embed] })
 
 }

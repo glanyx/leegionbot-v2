@@ -1,6 +1,6 @@
 import { Help, Config, IExecuteArgs } from 'discord.js'
 import { ModLog } from '../../db/models'
-import { MuteManager } from '../../utils'
+import { ModActions } from '../../utils'
 
 const help: Help = {
   name: "unmute",
@@ -36,12 +36,12 @@ export class Unmute {
 
     await member.fetch()
 
-    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember !== guild.owner) return channel.send(`You don't have the required permissions to perform this action!`)
+    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
 
     const action = await ModLog.fetchActiveUserMute(guild.id, member.id)
     if (!action) return channel.send(`Unable to find an active mute for that user.`)
 
-    MuteManager.dispose(action.id, authorMember.user)
+    ModActions.unmute(member, action, authorMember.user)
 
   }
 

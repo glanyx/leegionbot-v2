@@ -32,17 +32,17 @@ export class MessageUpdate {
       .addField('After', content ? content.length > 1024 ? `${content.substr(0, 1022)}..` : content : '*None*')
       .setTimestamp()
 
-    if (messageOld.content) embed
+    if (messageOld.content) embed;
 
-    messageOld.attachments.array().forEach((attachment, index) => {
+    [...messageOld.attachments.values()].forEach((attachment, index) => {
       embed.addField(`Old Attachment ${index + 1}`, attachment.url)
-    })
+    });
 
-    message.attachments.array().forEach((attachment, index) => {
+    [...message.attachments.values()].forEach((attachment, index) => {
       embed.addField(`New Attachment ${index + 1}`, attachment.url)
-    })
+    });
 
-    channel.send(embed)
+    channel.send({ embeds: [embed] })
 
   }
 
