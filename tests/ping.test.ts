@@ -1,5 +1,5 @@
 import { Client, Collection } from 'discord.js'
-import { run as Ping } from '../src/commands/ping'
+import { Ping } from '../src/commands/informational/ping'
 
 const Message = require('../src/events/message')
 

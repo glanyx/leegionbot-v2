@@ -17,11 +17,13 @@ export class GoLive {
 
     const user = discordClient.user as ClientUser
     user.setPresence({
-      activity: {
-        name: stream.title,
-        type: 'STREAMING',
-        url: `https://www.twitch.tv/${stream.broadcaster_login}`
-      }
+      activities: [
+        {
+          name: stream.title,
+          type: 'STREAMING',
+          url: `https://www.twitch.tv/${stream.broadcaster_login}`
+        }
+      ],
     })
   }
 

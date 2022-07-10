@@ -17,7 +17,7 @@ export class GoOffline {
 
     const user = discordClient.user as ClientUser
     user.setPresence({
-      activity: undefined
+      activities: []
     })
   }
 
