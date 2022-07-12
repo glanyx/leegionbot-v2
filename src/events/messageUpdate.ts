@@ -24,10 +24,13 @@ export class MessageUpdate {
 
     const embed = new MessageEmbed()
       .setColor('#00dbff')
-      .setAuthor(`${author.username || 'Unknown'}#${author.discriminator || '0000'}`, author.avatarURL() || undefined)
+      .setAuthor({
+        name: `${author.username || 'Unknown'}#${author.discriminator || '0000'}`,
+        iconURL: author.displayAvatarURL()
+      })
       .setTitle(`Message Edited`)
       .setDescription(`[Link](${url})`)
-      .addField('Author', `<@${author}>`)
+      .addField('Author', `${author}`)
       .addField('Before', messageOld.content ? messageOld.content.length > 1024 ? `${messageOld.content.substr(0, 1022)}..` : messageOld.content : '*None*')
       .addField('After', content ? content.length > 1024 ? `${content.substr(0, 1022)}..` : content : '*None*')
       .setTimestamp()

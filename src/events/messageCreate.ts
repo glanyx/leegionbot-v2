@@ -1,5 +1,4 @@
 import { Command, User, Client, Message as DiscordMessage } from 'discord.js'
-import { GuildSetting } from '../db/models'
 import { logger, hasPerms, Blacklist } from '../utils'
 
 export class MessageCreate {

@@ -20,9 +20,12 @@ export class GuildMemberUpdate {
 
       const embed = new MessageEmbed()
         .setColor('#00dbff')
-        .setAuthor(`${user.username}#${user.discriminator}`, user.avatarURL() || undefined)
+        .setAuthor({
+          name: `${user.username}#${user.discriminator}`,
+          iconURL: user.displayAvatarURL()
+        })
         .setTitle(`Nickname Updated`)
-        .setDescription(`<@${user}>`)
+        .setDescription(`${user}`)
         .addField('Old Nickname', `${memberOld.nickname || '*None*'}`, true)
         .addField('New Nickname', `${member.nickname || '*None*'}`, true)
         .setTimestamp()

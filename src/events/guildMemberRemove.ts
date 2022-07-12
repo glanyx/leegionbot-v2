@@ -22,9 +22,12 @@ export class GuildMemberRemove {
 
         const embed = new MessageEmbed()
           .setTitle('Member Left')
-          .setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL() || undefined)
+          .setAuthor({
+            name: `${member.user.username}#${member.user.discriminator}`,
+            iconURL: member.user.displayAvatarURL()
+          })
           .setThumbnail(member.user.displayAvatarURL())
-          .setFooter(`User ID: ${member.user.id}`)
+          .setFooter({ text: `User ID: ${member.user.id}` })
           .setTimestamp()
           .setColor('#FF0000')
           .addField('Joined on', member.joinedAt ? format(member.joinedAt) : '*Unknown*')

@@ -20,10 +20,13 @@ export class MessageDelete {
 
     const embed = new MessageEmbed()
       .setColor('#ff0000')
-      .setAuthor(`${message.author.username || 'Unknown'}#${message.author.discriminator || '0000'}`, message.author.avatarURL() || undefined)
+      .setAuthor({
+        name: `${message.author.username || 'Unknown'}#${message.author.discriminator || '0000'}`,
+        iconURL: message.author.displayAvatarURL()
+      })
       .setTitle(`Message Deleted`)
-      .addField('Channel', `<#${message.channel.id}>` || 'Unable to retrieve', true)
-      .addField('Author', `<@${message.author.id}>` || 'Unable to retrieve', true)
+      .addField('Channel', `${message.channel}` || 'Unable to retrieve', true)
+      .addField('Author', `${message.author}` || 'Unable to retrieve', true)
       .setTimestamp()
 
     if (message.content) {

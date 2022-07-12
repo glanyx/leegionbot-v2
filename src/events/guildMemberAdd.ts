@@ -37,10 +37,13 @@ export class GuildMemberAdd {
 
         const embed = new MessageEmbed()
           .setTitle('Member Joined')
-          .setDescription(`<@${member.id}>`)
-          .setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL() || undefined)
+          .setDescription(`${member}`)
+          .setAuthor({
+            name: `${member.user.username}#${member.user.discriminator}`,
+            iconURL: member.user.displayAvatarURL()
+          })
           .setThumbnail(member.user.displayAvatarURL())
-          .setFooter(`User ID: ${member.user.id}`)
+          .setFooter({ text: `User ID: ${member.user.id}` })
           .setTimestamp()
           .setColor('#00FF00')
           .addField('Using Discord Since', format(member.user.createdAt))
