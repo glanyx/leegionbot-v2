@@ -68,13 +68,13 @@ TwitchEvents.forEach((event: any) => {
   }))
 })
 
-// TwitterEvents.forEach((event: any) => {
-//   const eventName = event.name.toCamelCase()
-//   twitterClient.on(eventName, event.execute.bind(null, {
-//     discordClient: client,
-//     twitterClient
-//   }))
-// })
+TwitterEvents.forEach((event: any) => {
+  const eventName = event.name.toCamelCase()
+  twitterClient.on(eventName, event.execute.bind(null, {
+    discordClient: client,
+    twitterClient
+  }))
+})
 
 client.login(process.env.DISCORD_TOKEN)
 
