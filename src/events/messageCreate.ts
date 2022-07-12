@@ -1,9 +1,9 @@
-import { Command, User, Client, Message as DiscordMessage } from 'discord.js'
+import { Command, User, Client, Message } from 'discord.js'
 import { logger, hasPerms, Blacklist } from '../utils'
 
 export class MessageCreate {
 
-  public static async execute(client: Client, message: DiscordMessage) {
+  public static async execute(client: Client, message: Message) {
 
     if (message.author.bot) return
 

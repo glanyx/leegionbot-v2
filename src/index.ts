@@ -7,7 +7,7 @@ import { Events } from './events'
 import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchClient, TwitterClient, SpamFilter } from './utils'
+import { logger, TwitchClient, TwitterClient, SpamFilter, TicketManager } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
 
@@ -68,14 +68,15 @@ TwitchEvents.forEach((event: any) => {
   }))
 })
 
-// TwitterEvents.forEach((event: any) => {
-//   const eventName = event.name.toCamelCase()
-//   twitterClient.on(eventName, event.execute.bind(null, {
-//     discordClient: client,
-//     twitterClient
-//   }))
-// })
+TwitterEvents.forEach((event: any) => {
+  const eventName = event.name.toCamelCase()
+  twitterClient.on(eventName, event.execute.bind(null, {
+    discordClient: client,
+    twitterClient
+  }))
+})
 
 client.login(process.env.DISCORD_TOKEN)
 
-const filter = new SpamFilter(client)
+new SpamFilter(client)
+new TicketManager(client)
