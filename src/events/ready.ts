@@ -37,10 +37,7 @@ export class Ready {
     logger.info('Fetching active mutes..')
     ModActions.loadAllMutes(client)
     ModActions.monitorMutes()
-
-    logger.info('Fetching active Ticket Conversations')
-    TicketConversation.loadAllOngoingFromDB(client)
-
+    
     const url = client.generateInvite({ 
       scopes: [
         'bot',

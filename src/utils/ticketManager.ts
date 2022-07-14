@@ -8,6 +8,9 @@ export class TicketManager {
 
   constructor(client: Client) {
     this.client = client
+
+    TicketConversation.loadAllOngoingFromDB(client)
+
     client.on('messageCreate', (message) => {
       if (message.author.bot) return
       if (message.channel.type !== 'DM') return
@@ -150,6 +153,7 @@ export class TicketConversation {
 
   public static loadAllOngoingFromDB = async (client: Client) => {
 
+    logger.info('Fetching active Ticket Conversations')
     const { items: tickets } = await TicketConversationModel.fetchAllOngoing()
 
     const guildIds = tickets.map(t => t.guildId).filter((v, i, s) => s.indexOf(v) === i)
