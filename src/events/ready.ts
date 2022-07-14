@@ -1,7 +1,7 @@
 import { Client } from 'discord.js'
 import { DBClient } from '../db'
 import { Countdown } from '../db/models'
-import { logger, Blacklist, CountdownTimer, ModActions } from '../utils'
+import { logger, Blacklist, CountdownTimer, ModActions, TicketConversation } from '../utils'
 
 export class Ready {
 
@@ -37,6 +37,9 @@ export class Ready {
     logger.info('Fetching active mutes..')
     ModActions.loadAllMutes(client)
     ModActions.monitorMutes()
+
+    logger.info('Fetching active Ticket Conversations')
+    TicketConversation.loadAllOngoingFromDB(client)
 
     const url = client.generateInvite({ 
       scopes: [

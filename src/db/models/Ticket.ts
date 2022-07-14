@@ -44,6 +44,13 @@ export class TicketConversation extends DBModel<ITicketConversation> {
     `, TicketConversation)
   }
 
+  public static async fetchAllOngoing() {
+    return super.query<TicketConversation>(`
+      SELECT * FROM ${convCollection}
+        WHERE status = '${ConversationStatus.ONGOING}'
+    `, TicketConversation)
+  }
+
   public async update() {
     return super.edit<TicketConversation>(`
       UPDATE ${convCollection} SET

@@ -148,7 +148,40 @@ export class TicketConversation {
     this.status = ConversationStatus.PENDING
   }
 
-  public static getChannelConversation(channel: GuildChannel) {
+  public static loadAllOngoingFromDB = async (client: Client) => {
+
+    const { items: tickets } = await TicketConversationModel.fetchAllOngoing()
+
+    const guildIds = tickets.map(t => t.guildId).filter((v, i, s) => s.indexOf(v) === i)
+
+    guildIds.forEach(async id => {
+      const guild = client.guilds.cache.get(id)
+      if (!guild) return
+      GuildConversations.set(id, {
+        guild,
+        conversations: new Map<number, TicketConversation>()
+      })
+
+      const gTickets = tickets.filter(t => t.guildId === guild.id)
+      await Promise.all(gTickets.map(t => guild.channels.fetch(t.channelId, { cache: true })))
+      await Promise.all(gTickets.map(t => client.users.fetch(t.userId, { cache: true })))
+      gTickets.forEach(t => {
+        const ch = guild.channels.cache.get(t.channelId)
+        const user = client.users.cache.get(t.userId)
+        if (!ch || !user) return
+        const conv = new TicketConversation()
+          .setGuild(guild)
+          .setChannel(ch as TextChannel)
+          .setUser(user)
+
+        conv.status = t.status
+        conv.model = t
+      })
+    })
+
+  }
+
+  public static getChannelConversation = (channel: GuildChannel) => {
 
     const { guild } = channel
 
@@ -158,7 +191,7 @@ export class TicketConversation {
 
   }
 
-  public async store() {
+  public store = async () => {
     if (!this.guild || !this.channel || !this.user) throw new Error('Unable to store model')
     const model = await TicketConversationModel.add({
       guildId: this.guild.id,
