@@ -16,12 +16,12 @@ export class Rolegate extends DBModel<IRolegate> {
 
   public collection = collection
 
-  public static async add(props: INewRolegate) {
+  public static async add(gate: INewRolegate) {
     return super.create<Rolegate>(`
-      INSERT INTO ${collection} ("guildId")
-      SELECT '${''}'
-      WHERE NOT EXISTS (
-        SELECT 1 FROM ${collection} WHERE "guildId" = '${''}'
+      INSERT INTO ${collection} ("guildId", "messageId", "roleId") VALUES (
+        '${gate.guildId}',
+        '${gate.messageId}',
+        '${gate.roleId}'
       )
     `, Rolegate)
   }
@@ -29,7 +29,7 @@ export class Rolegate extends DBModel<IRolegate> {
   public static async fetchById(id: number) {
     return super.fetchOne<Rolegate>(`
       SELECT * FROM ${collection}
-      WHERE id = id
+      WHERE id = ${id}
     `, Rolegate)
   }
 
