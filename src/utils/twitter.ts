@@ -103,8 +103,7 @@ export class TwitterClient extends EventEmitter {
             console.log(e)
           })
 
-
-          // this.emit('tweet', { data, rule })
+          this.emit('tweet', { data, rule })
         })
       }
 
