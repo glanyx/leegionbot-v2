@@ -4,6 +4,9 @@ import { Timer } from './timer'
 import axios from 'axios'
 import { logger } from '.'
 
+import { Client, TextChannel } from 'discord.js'
+import { GuildSetting } from '../db/models'
+
 const TIMEOUT = 60000
 
 interface AxiosResponse {
@@ -55,6 +58,7 @@ export class TwitchClient extends EventEmitter {
     this.channels = []
 
     this.getToken()
+    this.start()
   }
 
   private getToken() {
@@ -172,3 +176,51 @@ export class TwitchClient extends EventEmitter {
   }
 
 }
+
+export class TwitchManager {
+
+  public client: TwitchClient
+  private relations: Map<string, Array<TextChannel>>
+
+  constructor() {
+    this.client = new TwitchClient()
+    this.relations = new Map<string, Array<TextChannel>>()
+  }
+
+  public static getAnnounceChannel = (channelName: string) => {
+    return manager.relations.get(channelName) || []
+  }
+
+  public fetchTrackers = async (client: Client) => {
+
+    const { items: trackers } = await GuildSetting.fetchTwitchTrackers()
+
+    trackers.forEach(async gSetting => {
+      const guild = client.guilds.cache.get(gSetting.guildId)
+      if (!guild) return
+      const ch = await guild.channels.fetch(gSetting.twitchAnnounceChannelId, { cache: true })
+      if (!ch || ch.type !== 'GUILD_TEXT') return
+      gSetting.twitchFeeds.forEach(feed => {
+        this.track(feed, ch)
+      })
+    })
+  }
+
+  public track = (channelName: string, channelAnnounce: TextChannel) => {
+    const item = this.relations.get(channelName)
+    if (item) {
+      item.push(channelAnnounce)
+      return
+    }
+
+    this.client.track(channelName)
+    this.relations.set(channelName, [channelAnnounce])
+  }
+
+  public static getManager = () => {
+    return manager
+  }
+
+}
+
+const manager = new TwitchManager()

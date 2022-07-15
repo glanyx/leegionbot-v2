@@ -1,6 +1,6 @@
 import { Shutdown } from './admin'
 import { Config } from './configuration'
-import { Countdown, Suggestion } from './features'
+import { Countdown, Suggestion, Rolegate, RoleEmoji } from './features'
 import { About, Avatar, Info, Ping, User } from './informational'
 import { Ban, Blacklist, Kick, Modlog, Mute, Purge, Slowmode, Unban, Unmute, Warn } from './moderation'
 import { Close, Reply } from './tickets'
@@ -16,6 +16,8 @@ export const Commands: Array<Command> = [
 
   Countdown,
   Suggestion,
+  Rolegate,
+  RoleEmoji,
 
   About,
   Avatar,

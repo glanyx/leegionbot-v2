@@ -1,6 +1,6 @@
 import { Client, Message, User, Guild, TextChannel, MessageEmbed, MessageAttachment, DMChannel, GuildChannel } from 'discord.js'
 import { logger, StepMessage, ResponseType } from '.'
-import { TicketConversation as TicketConversationModel, TicketMessage as TicketMessageModel, GuildSetting } from '../db/models'
+import { TicketConversation as TicketConversationModel, GuildSetting } from '../db/models'
 
 export class TicketManager {
 
@@ -277,7 +277,7 @@ export class TicketConversation {
     if (!settings) throw new Error('NO_GUILD_SETTINGS')
 
     const ch = await this.guild.channels.create(`${this.user.username}-${this.user.discriminator}`, {
-      parent: settings.ticketChannelId
+      parent: settings.ticketCategoryId
     })
 
     this.channel = ch
@@ -286,11 +286,15 @@ export class TicketConversation {
 
   }
 
-  public createNewTicketMessage = () => {
+  public createNewTicketMessage = async () => {
 
-    if (!this.model || !this.channel || !this.user) return
+    if (!this.guild || !this.model || !this.channel || !this.user) return
 
-    const logChannel = this.channel.parent?.children.first()
+    const settings = await GuildSetting.fetchByGuildId(this.guild.id)
+    const logChannel = settings ? await this.guild.channels.fetch(settings.ticketCategoryId, { cache: true }) : this.channel.parent?.children.first()
+
+    if (settings) await this.guild.roles.fetch()
+    const mentionRoles = settings ? [...this.guild.roles.cache.values()].filter(r => settings.ticketMentionRoleIds.includes(r.id)) : []
 
     const newLogEmbed = new MessageEmbed()
       .setTitle('A new Ticket has been created!')
@@ -307,7 +311,7 @@ export class TicketConversation {
       .setTimestamp()
 
     if (logChannel && logChannel.type === 'GUILD_TEXT') logChannel.send({ embeds: [newLogEmbed] })
-    return this.channel.send({ embeds: [newTicketEmbed] })
+    return this.channel.send({ content: mentionRoles.length > 0 ? `${mentionRoles.join(' ')}` : undefined, embeds: [newTicketEmbed] })
 
   }
 

@@ -1,5 +1,5 @@
-import { Client, ClientUser } from 'discord.js'
-import { StreamEvent, TwitchClient } from '../../utils/twitch'
+import { Client, ClientUser, MessageEmbed } from 'discord.js'
+import { StreamEvent, TwitchClient, TwitchManager } from '../../utils/twitch'
 import { logger } from '../../utils'
 
 interface MultiClient {
@@ -25,6 +25,19 @@ export class GoLive {
         }
       ],
     })
+
+    const channels = TwitchManager.getAnnounceChannel(stream.broadcaster_login)
+    const embed = new MessageEmbed()
+      .setColor('#6441a5')
+      .setTitle(`${stream.display_name} just went live on Twitch!`)
+      .setDescription(`**Playing ${stream.game_name}**\n${stream.title}\n\n[Watch Now!](https://www.twitch.tv/${stream.broadcaster_login})`)
+      .setFooter({ text: `Via Twitch` })
+      .setTimestamp()
+
+    channels.forEach(ch => {
+      ch.send({ embeds: [embed] })
+    })
+
   }
 
 }
