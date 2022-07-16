@@ -26,15 +26,16 @@ export class Reply {
   public static async run({
     anonymous,
     message,
+    args,
   }: ITicketExecuteArgs) {
 
-    const { guild, author, channel, content, attachments } = message
+    const { guild, author, channel, attachments } = message
     if (!guild || channel.type !== 'GUILD_TEXT') return
 
     const conv = TicketConversation.getChannelConversation(channel)
     if (!conv) return channel.send('Unable to send response at this time. Please try again later.')
 
-    conv.forwardToUser(content, author, [...attachments.values()], anonymous)
+    conv.forwardToUser(args.join(' '), author, [...attachments.values()], anonymous)
 
   }
 

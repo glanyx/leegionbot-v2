@@ -50,7 +50,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   public static async fetchTwitchTrackers() {
     return super.query<GuildSetting>(`
       SELECT * FROM ${collection}
-      WHERE "twitchFeeds" IS NOT '{}'
+      WHERE cardinality("twitchFeeds") > 0
     `, GuildSetting)
   }
 

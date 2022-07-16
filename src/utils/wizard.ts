@@ -37,12 +37,13 @@ export class StepMessage extends MessageEmbed {
   private timeout: number = 3000000
 
   private client: Client
-  private responseType!: ResponseType
+  private responseType: ResponseType
   private actionRow: MessageActionRow
 
   constructor(client: Client, type: ResponseType, options?: StepOptions) {
     super()
     this.client = client
+    this.responseType = type
 
     const components = []
 
@@ -67,10 +68,13 @@ export class StepMessage extends MessageEmbed {
     switch (type) {
       case ResponseType.BOOLEAN:
         components.push(confirmButton, declineButton)
+        break
       case ResponseType.CHOICE:
         components.push(confirmButton, declineButton, redoButton)
+        break
       case ResponseType.LIST:
         components.push(selectionBox)
+        break
     }
 
     this.actionRow = new MessageActionRow().addComponents(components)
@@ -81,7 +85,7 @@ export class StepMessage extends MessageEmbed {
   }
 
   public async requestUser(channel: TextChannel, user?: User): Promise<string | StringResponse> {
-    const message = await channel.send({ embeds: [this], components: [this.actionRow] })
+    const message = await channel.send({ embeds: [this], components: this.actionRow.components.length > 0 ? [this.actionRow] : undefined })
     return new Promise((resolve, reject) => {
 
       // Set standard timeout
@@ -111,7 +115,7 @@ export class StepMessage extends MessageEmbed {
       // Plain text response
       if (this.responseType === ResponseType.TEXT) {
 
-        const filter = (m: Message) => user ? m.author === user : true
+        const filter = (m: Message) => user ? m.author.id === user.id : true
 
         const collector = channel.createMessageCollector({
           filter: filter,

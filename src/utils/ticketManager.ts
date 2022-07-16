@@ -44,8 +44,12 @@ export class TicketManager {
       const conversation = await this.getGuildResponse(client, author, (channel as TextChannel), ticketContent).catch(e => reject(e.message))
 
       if (conversation) {
+        conversation.setUser(author)
 
-        if (conversation.status === ConversationStatus.ONGOING) resolve(conversation)
+        if (conversation.status === ConversationStatus.ONGOING) {
+          resolve(conversation)
+          return
+        }
 
         await conversation.createTicketChannel()
 
@@ -84,13 +88,15 @@ export class TicketManager {
         if (sharedGuilds.size === 0) return channel.send('No servers available to contact at this time.')
     
         const guildOptions = [...sharedGuilds.values()].map(g => { return { label: g.name, value: g.id }})
-    
+
         const contactGuildId = first && ongoingTickets.length > 0 ? ongoingTickets[0].guildId : guildOptions.length === 1 ? guildOptions[0].value : await new StepMessage(client, ResponseType.LIST, {
           listOptions: guildOptions,
-        }).requestUser((channel as TextChannel), user).catch((e: Error) => {
-          reject(e.message)
         })
-    
+          .setDescription('Please select a server to contact.')
+          .requestUser((channel as TextChannel), user).catch((e: Error) => {
+            reject(e.message)
+          })
+
         const contactGuild = client.guilds.cache.get(`${contactGuildId}`)
     
         if (!contactGuild) return channel.send('Unable to contact server at this time. Please try again later.')
@@ -103,7 +109,7 @@ export class TicketManager {
         const confirmMessage = await new StepMessage(client, ResponseType.CHOICE)
           .setAuthor({ name: `${user.username}#${user.discriminator}`, iconURL: user.displayAvatarURL() })
           .setTitle('Preview of your message')
-          .setDescription(`You are about to send a message to **${contactGuild.name}** (ID: ${contactGuild.id}). Please confirm this is the server you want to contact.\n**Your Message**\n${content}`)
+          .setDescription(`You are about to send a message to **${contactGuild.name}** (ID: ${contactGuild.id}). Please confirm this is the server you want to contact.\n\n**Your Message**\n${content}`)
           .requestUser((channel as TextChannel), user).catch((e: Error) => {
             reject(e.message)
           })
@@ -180,6 +186,11 @@ export class TicketConversation {
 
         conv.status = t.status
         conv.model = t
+
+        const guildItem = GuildConversations.get(id)
+        if (!guildItem) return
+        guildItem.conversations.set(conv.model.id, conv)
+
       })
     })
 
@@ -243,7 +254,7 @@ export class TicketConversation {
       const parent = this.channel.parent
       this.channel.delete()
       if (parent) {
-        const logChannel = parent.children.first()
+        const logChannel = parent.children.sort((a, b) => a.createdTimestamp - b.createdTimestamp).first()
 
         const userCloseEmbed = new MessageEmbed()
           .setAuthor({
@@ -291,7 +302,7 @@ export class TicketConversation {
     if (!this.guild || !this.model || !this.channel || !this.user) return
 
     const settings = await GuildSetting.fetchByGuildId(this.guild.id)
-    const logChannel = settings ? await this.guild.channels.fetch(settings.ticketCategoryId, { cache: true }) : this.channel.parent?.children.first()
+    const logChannel = this.channel.parent?.children.sort((a, b) => a.createdTimestamp - b.createdTimestamp).first()
 
     if (settings) await this.guild.roles.fetch()
     const mentionRoles = settings ? [...this.guild.roles.cache.values()].filter(r => settings.ticketMentionRoleIds.includes(r.id)) : []
@@ -329,11 +340,22 @@ export class TicketConversation {
       })
      
     this.sendMessage(this.channel, embed, content, attachments)
+      .then(() => {
+        if (!this.user || !this.user.dmChannel) return
+        this.confirmMessage(this.user.dmChannel, content)
+      })
+      .catch(e => {
+        if (!this.user || !this.user.dmChannel) return
+        this.failureMessage(this.user.dmChannel, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
+        logger.debug(e.message)
+      })
   }
 
-  public forwardToUser = (content: string, user: User, attachments: Array<MessageAttachment> = [], anonymous: boolean = false) => {
+  public forwardToUser = async (content: string, user: User, attachments: Array<MessageAttachment> = [], anonymous: boolean = false) => {
 
-    if (!this.user || !this.user.dmChannel || !this.channel || !this.guild) throw new Error('INVALID_TICKET_CONVERSATION')
+    if (!this.user || !this.channel || !this.guild) throw new Error('INVALID_TICKET_CONVERSATION')
+    if (!this.user.dmChannel) await user.createDM()
+    if (!this.user.dmChannel) throw new Error('INVALID_TICKET_CONVERSATION')
 
     const embed = new MessageEmbed()
       .setAuthor({
@@ -345,6 +367,15 @@ export class TicketConversation {
       })
 
     this.sendMessage(this.user.dmChannel, embed, content, attachments)
+      .then(() => {
+        if (!this.channel) return
+        this.confirmMessage(this.channel, content)
+      })
+      .catch(e => {
+        if (!this.channel) return
+        this.failureMessage(this.channel, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
+        logger.debug(e.message)
+      })
 
   }
 
@@ -358,16 +389,7 @@ export class TicketConversation {
 
     attachments.forEach((att, index) => embed.addField(`Attachment ${index + 1}`, att.url))
 
-    channel.send({ embeds: [embed] })
-      .then(() => {
-        if (!this.channel) return
-        this.confirmMessage(this.channel, content)
-      })
-      .catch(e => {
-        if (!this.channel) return
-        this.failureMessage(this.channel, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
-        logger.debug(e.message)
-      })
+    return channel.send({ embeds: [embed] })
 
   }
 

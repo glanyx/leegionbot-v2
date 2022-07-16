@@ -26,6 +26,7 @@ export class Close {
   public static async run({
     anonymous,
     message,
+    args,
   }: ITicketExecuteArgs) {
 
     const { guild, author, channel, content } = message
@@ -34,7 +35,7 @@ export class Close {
     const conv = TicketConversation.getChannelConversation(channel)
     if (!conv) return channel.send('Unable to close at this time. Please try again later.')
 
-    conv.close(content, author, anonymous)
+    conv.close(args.join(' '), author, anonymous)
 
   }
 

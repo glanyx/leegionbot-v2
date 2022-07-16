@@ -7,7 +7,7 @@ import { Events } from './events'
 import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchClient, TwitchManager, TwitterClient, SpamFilter, TicketManager } from './utils'
+import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
 

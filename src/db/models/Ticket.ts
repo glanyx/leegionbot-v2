@@ -54,7 +54,7 @@ export class TicketConversation extends DBModel<ITicketConversation> {
   public async update() {
     return super.edit<TicketConversation>(`
       UPDATE ${convCollection} SET
-        status = '${this.data.status}',
+        status = '${this.data.status}'
       WHERE id = ${this.data.id}
     `, TicketConversation)
   }

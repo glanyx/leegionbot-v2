@@ -32,9 +32,8 @@ export class Rolegate {
 
     if (!guild || !channel || channel.type !== 'GUILD_TEXT') return
 
-    const roleMessage = new StepMessage(client, ResponseType.TEXT, {
-      
-    })
+    const roleMessage = new StepMessage(client, ResponseType.TEXT, {})
+      .setTitle(`Rolegate Setup`)
       .setDescription('Please enter the name of the role you would like to add.')
 
     const response = await roleMessage.requestUser(channel, author)
@@ -79,7 +78,7 @@ export class Rolegate {
       components: [components]
     })
 
-    channel.send('Rolegate created').then((msg) => setTimeout(() => msg.delete(), 3000))
+    channel.send('Rolegate created.').then((msg) => setTimeout(() => msg.delete(), 3000))
 
   }
   

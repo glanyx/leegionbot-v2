@@ -6,10 +6,10 @@ export class InteractionCreate {
   public static async execute(client: Client, interaction: Interaction) {
 
     if (interaction.isButton()) {
-        const name = interaction.customId
+      const name = interaction.customId.split('-')[0]
 
-        const handler = ButtonHandlers.find(item => item.name)
-        if (handler) handler.execute({ client, interaction })
+      const handler = ButtonHandlers.find(item => item.name.toLowerCase() === name.toLowerCase())
+      if (handler) handler.execute({ client, interaction })
     }
 
   }
