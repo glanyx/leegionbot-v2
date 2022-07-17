@@ -21,7 +21,7 @@ export class Tweet {
       .then(setting => {
         if (!setting) return
 
-        const channel = guild.channels.cache.get(setting.announcementChannelId) as TextChannel
+        const channel = guild.channels.cache.get(setting.twitterAnnounceChannelId) as TextChannel
 
         const embed = new MessageEmbed()
           .setColor('#1DA1F2')
