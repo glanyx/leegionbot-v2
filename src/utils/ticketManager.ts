@@ -342,11 +342,13 @@ export class TicketConversation {
     this.sendMessage(this.channel, embed, content, attachments)
       .then(() => {
         if (!this.user || !this.user.dmChannel) return
-        this.confirmMessage(this.user.dmChannel, content)
+        const confirmEmbed = new MessageEmbed().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
+        this.confirmMessage(this.user.dmChannel, confirmEmbed, content)
       })
       .catch(e => {
         if (!this.user || !this.user.dmChannel) return
-        this.failureMessage(this.user.dmChannel, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
+        const failureEmbed = new MessageEmbed().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
+        this.failureMessage(this.user.dmChannel, failureEmbed, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
         logger.debug(e.message)
       })
   }
@@ -369,11 +371,13 @@ export class TicketConversation {
     this.sendMessage(this.user.dmChannel, embed, content, attachments)
       .then(() => {
         if (!this.channel) return
-        this.confirmMessage(this.channel, content)
+        const confirmEmbed = new MessageEmbed().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
+        this.confirmMessage(this.channel, confirmEmbed, content)
       })
       .catch(e => {
         if (!this.channel) return
-        this.failureMessage(this.channel, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
+        const failureEmbed = new MessageEmbed().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
+        this.failureMessage(this.channel, failureEmbed, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
         logger.debug(e.message)
       })
 
@@ -393,19 +397,21 @@ export class TicketConversation {
 
   }
 
-  private confirmMessage = (channel: TextChannel | DMChannel, content: string) => {
-    const embed = new MessageEmbed()
+  private confirmMessage = (channel: TextChannel | DMChannel, embed: MessageEmbed, content: string) => {
+    embed
       .setColor('#00FF00')
       .setTitle('Message Sent!')
       .setDescription(content)
+      .setTimestamp()
     channel.send({ embeds: [embed] })
   }
 
-  private failureMessage = (channel: TextChannel | DMChannel, content: string) => {
-    const embed = new MessageEmbed()
+  private failureMessage = (channel: TextChannel | DMChannel, embed: MessageEmbed, content: string) => {
+    embed
       .setColor('#FF0000')
       .setTitle('Unable to send message! Please try again later.')
       .setDescription(content)
+      .setTimestamp()
     channel.send({ embeds: [embed] })
   }
 

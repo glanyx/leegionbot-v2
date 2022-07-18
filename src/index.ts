@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/node'
 import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
+import { ClientRoleManager } from './managers'
 
 const client = new Client({
   intents: [
@@ -27,6 +28,7 @@ const client = new Client({
   ]
 })
 client.commands = new Collection()
+client.roleManager = new ClientRoleManager()
 
 const twitchClient = new TwitchManager().client
 const twitterClient = new TwitterClient()

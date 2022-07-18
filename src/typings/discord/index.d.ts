@@ -1,8 +1,10 @@
 import { Message, PermissionResolvable } from 'discord.js';
+import { ClientRoleManager } from '../../managers'
 
 declare module 'discord.js' {
   export interface Client {
     commands: Collection<string, Command>
+    roleManager: ClientRoleManager
   }
 
   export interface Command {

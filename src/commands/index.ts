@@ -1,7 +1,7 @@
 import { Shutdown } from './admin'
 import { Config } from './configuration'
 import { Countdown, Suggestion, Rolegate, RoleEmoji } from './features'
-import { About, Avatar, Info, Ping, User } from './informational'
+import { About, Avatar, Info, Ping, User, Rank } from './informational'
 import { Ban, Blacklist, Kick, Modlog, Mute, Purge, Slowmode, Unban, Unmute, Warn } from './moderation'
 import { Close, Reply, AClose, AReply } from './tickets'
 import { Command } from 'discord.js'
@@ -24,6 +24,7 @@ export const Commands: Array<Command> = [
   Info,
   Ping,
   User,
+  Rank,
 
   Ban,
   Unban,
