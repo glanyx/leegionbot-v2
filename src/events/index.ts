@@ -3,6 +3,7 @@ import { GuildCreate } from './guildCreate'
 import { GuildMemberAdd } from './guildMemberAdd'
 import { GuildMemberRemove } from './guildMemberRemove'
 import { GuildMemberUpdate } from './guildMemberUpdate'
+import { InteractionCreate } from './interactionCreate'
 import { MessageCreate } from './messageCreate'
 import { MessageDelete } from './messageDelete'
 import { MessageUpdate } from'./messageUpdate'
@@ -17,6 +18,7 @@ export const Events = [
   GuildMemberAdd,
   GuildMemberRemove,
   GuildMemberUpdate,
+  InteractionCreate,
   MessageCreate,
   MessageDelete,
   MessageUpdate,

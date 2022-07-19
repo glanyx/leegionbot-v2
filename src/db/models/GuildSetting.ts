@@ -13,6 +13,11 @@ interface IGuildSetting extends INewGuildSetting {
   muteDuration: number
   suggestionChannelId: string
   twitterAnnounceChannelId: string
+  twitchAnnounceChannelId: string
+  twitchFeeds: Array<string>
+  patreonAnnounceChannelId: string
+  ticketCategoryId: string
+  ticketMentionRoleIds: Array<string>
 }
 
 interface INewGuildSetting {
@@ -42,6 +47,13 @@ export class GuildSetting extends DBModel<IGuildSetting> {
     `, GuildSetting)
   }
 
+  public static async fetchTwitchTrackers() {
+    return super.query<GuildSetting>(`
+      SELECT * FROM ${collection}
+      WHERE cardinality("twitchFeeds") > 0
+    `, GuildSetting)
+  }
+
   public async update() {
     return super.edit<GuildSetting>(`
       UPDATE ${collection} SET
@@ -51,7 +63,12 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "modLogChannelId" = ${this.data.modLogChannelId ? `'${this.data.modLogChannelId}'` : null},
         "suggestionChannelId" = ${this.data.suggestionChannelId ? `'${this.data.suggestionChannelId}'` : null},
         "twitterAnnounceChannelId" = ${this.data.twitterAnnounceChannelId ? `'${this.data.twitterAnnounceChannelId}'` : null},
+        "twitchAnnounceChannelId" = ${this.data.twitchAnnounceChannelId ? `'${this.data.twitchAnnounceChannelId}'` : null},
+        "patreonAnnounceChannelId" = ${this.data.patreonAnnounceChannelId ? `'${this.data.patreonAnnounceChannelId}'` : null},
+        "ticketCategoryId" = ${this.data.ticketCategoryId ? `'${this.data.ticketCategoryId}'` : null},
+        "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
+        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.join(',')}]::text[],
         blacklist = ARRAY[${this.data.blacklist.join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `, GuildSetting)
@@ -176,6 +193,49 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   public setTwitterAnnounceChannelId(id: string) {
     this.data.twitterAnnounceChannelId = id
     return this
+  }
+
+  public get twitchAnnounceChannelId() {
+    return this.data.twitchAnnounceChannelId
+  }
+
+  public setTwitchAnnounceChannelId(id: string) {
+    this.data.twitchAnnounceChannelId = id
+    return this
+  }
+
+  public get twitchFeeds() {
+    return this.data.twitchFeeds
+  }
+
+  public addTwitchFeed(channelname: string) {
+    this.data.twitchFeeds.push(channelname)
+  }
+
+  public get patreonAnnounceChannelId() {
+    return this.data.patreonAnnounceChannelId
+  }
+
+  public setPatreonAnnounceChannelId(id: string) {
+    this.data.patreonAnnounceChannelId = id
+    return this
+  }
+
+  public get ticketCategoryId() {
+    return this.data.ticketCategoryId
+  }
+
+  public setTicketCategoryId(id: string) {
+    this.data.ticketCategoryId = id
+    return this
+  }
+
+  public get ticketMentionRoleIds() {
+    return this.data.ticketMentionRoleIds
+  }
+
+  public addTicketMentionRoleIds(id: string) {
+    this.data.ticketMentionRoleIds.push(id)
   }
 
 }

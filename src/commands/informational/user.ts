@@ -71,7 +71,7 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
 
   const roleString = member.roles.cache.size > 1 ? member.roles.cache.map(role => {
     if (role.name !== "@everyone") {
-      return `<@&${role}>`
+      return `${role}`
     } 
   }).join('\n') : '*None*'
       
@@ -79,7 +79,7 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
 
   const embed = new MessageEmbed()
     .setAuthor(member.user.tag, member.user.avatarURL() || defaultImage)
-    .setDescription(`<@${member.user}>`)
+    .setDescription(`${member.user}`)
     .setThumbnail(member.user.avatarURL() || defaultImage)
     .setColor(member.roles.highest.color)
     .setTimestamp()

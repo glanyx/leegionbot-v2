@@ -1,7 +1,7 @@
 import { logger } from '.'
 import { Client, Message, MessageEmbed, MessageActionRow, MessageButton, User, TextChannel, MessageSelectMenu } from 'discord.js'
 
-enum ResponseType {
+export enum ResponseType {
   TEXT = 'text',
   BOOLEAN = 'boolean',
   CHOICE = 'choice',
@@ -20,24 +20,30 @@ interface StepOptions {
     declineLabel?: string
     redoLabel?: string
   }
-  listOptions?: Array<any>
+  listOptions?: Array<Option>
+}
+
+interface StringResponse {
+  message: Message
+  text: string
 }
 
 export class Wizard {
 
 }
 
-class StepMessage extends MessageEmbed {
+export class StepMessage extends MessageEmbed {
 
   private timeout: number = 3000000
 
   private client: Client
-  private responseType!: ResponseType
+  private responseType: ResponseType
   private actionRow: MessageActionRow
 
   constructor(client: Client, type: ResponseType, options?: StepOptions) {
     super()
     this.client = client
+    this.responseType = type
 
     const components = []
 
@@ -62,10 +68,13 @@ class StepMessage extends MessageEmbed {
     switch (type) {
       case ResponseType.BOOLEAN:
         components.push(confirmButton, declineButton)
+        break
       case ResponseType.CHOICE:
         components.push(confirmButton, declineButton, redoButton)
+        break
       case ResponseType.LIST:
         components.push(selectionBox)
+        break
     }
 
     this.actionRow = new MessageActionRow().addComponents(components)
@@ -75,13 +84,13 @@ class StepMessage extends MessageEmbed {
 
   }
 
-  public async requestUser(user: User, channel: TextChannel): Promise<any> {
-    const message = await channel.send({ embeds: [this], components: [this.actionRow] })
+  public async requestUser(channel: TextChannel, user?: User): Promise<string | StringResponse> {
+    const message = await channel.send({ embeds: [this], components: this.actionRow.components.length > 0 ? [this.actionRow] : undefined })
     return new Promise((resolve, reject) => {
 
       // Set standard timeout
       setTimeout(() => {
-        logger.debug(`Message Timeout | Channel ID ${channel.id} | User ID ${user.id}`)
+        logger.debug(`Message Timeout | Channel ID ${channel.id} | User ID ${user ? user.id : 'None'}`)
         reject(new Error('MESSAGE_TIMEOUT'))
       }, this.timeout)
 
@@ -93,12 +102,12 @@ class StepMessage extends MessageEmbed {
             const redo = interaction.customId.toLowerCase() === 'redo'
             this.setColor(confirmed ? 'GREEN' : redo ? 'BLUE' : 'RED')
             interaction.update({ embeds: [this], components: [] })
-            resolve({ message: message, value: interaction.customId.toLowerCase() as any })
+            resolve(interaction.customId.toLowerCase())
           }
         } else if (interaction.isSelectMenu()) {
           if (interaction.message.id === message.id && interaction.user === user && interaction.customId.toLowerCase() === 'select') {
             interaction.update({ embeds: [this], components: [] })
-            resolve({ message: message, choice: interaction.values[0] })
+            resolve(interaction.values[0])
           }
         }
       })
@@ -106,7 +115,7 @@ class StepMessage extends MessageEmbed {
       // Plain text response
       if (this.responseType === ResponseType.TEXT) {
 
-        const filter = (m: Message) => m.author === user
+        const filter = (m: Message) => user ? m.author.id === user.id : true
 
         const collector = channel.createMessageCollector({
           filter: filter,
@@ -121,7 +130,7 @@ class StepMessage extends MessageEmbed {
   
         collector.on('end', collected => {
           if (!collected || collected.size === 0) {
-            logger.debug(`0 Items Collected | Channel ID ${channel.id} | User ID ${user.id}`)
+            logger.debug(`0 Items Collected | Channel ID ${channel.id} | User ID ${user ? user.id : 'None'}`)
             reject(new Error('NO_USER_RESPONSE_FOUND'))
           }
         })

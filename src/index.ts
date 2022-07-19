@@ -7,9 +7,10 @@ import { Events } from './events'
 import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchClient, TwitterClient, SpamFilter } from './utils'
+import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager, LevelsManager } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
+import { ClientRoleManager } from './managers'
 
 const client = new Client({
   intents: [
@@ -27,8 +28,9 @@ const client = new Client({
   ]
 })
 client.commands = new Collection()
+client.roleManager = new ClientRoleManager()
 
-const twitchClient = new TwitchClient().track('leeandlie').start()
+const twitchClient = new TwitchManager().client
 const twitterClient = new TwitterClient()
 
 twitterClient.addRule('453582519087005696', {
@@ -78,4 +80,6 @@ TwitterEvents.forEach((event: any) => {
 
 client.login(process.env.DISCORD_TOKEN)
 
-const filter = new SpamFilter(client)
+new SpamFilter(client)
+new TicketManager(client)
+new LevelsManager(client)
