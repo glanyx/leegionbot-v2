@@ -31,13 +31,13 @@ export const updateSuggestion = (args: SuggestionArgs) => {
 
   if (user) {
     embed.setTitle(`Suggestion by ${user.username}#${user.discriminator}`)
-    embed.addField('Author', `<@${user}>`, true)
+    embed.addField('Author', `${user}`, true)
   } else {
     embed.setTitle(`Suggestion by ${suggestion.userId}`)
-    embed.addField('Author', `<@${suggestion.userId}>`, true)
+    embed.addField('Author', `${suggestion.userId}`, true)
   }
-  if (args.editor) embed.addField(`Edited by`, `<@${args.editor.id}>`, true)
-  if (args.mod) embed.addField(`${args.suggestion.status.capitalize()} by`, `<@${args.mod.id}>`, true)
+  if (args.editor) embed.addField(`Edited by`, `${args.editor}`, true)
+  if (args.mod) embed.addField(`${args.suggestion.status.capitalize()} by`, `${args.mod}`, true)
   if (args.suggestion.reason) embed.addField('Comment', args.suggestion.reason)
 
   switch (args.suggestion.status) {

@@ -67,7 +67,7 @@ export class ModActions {
         embed.addField('Error', 'Member was warned, however there was an error saving this data.')
       })
       .finally(() => {
-        if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed)
+        if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
       })
   }
 
@@ -110,7 +110,7 @@ export class ModActions {
           })
           .finally(() => {
             embed.addField('Received DM?', msg ? 'Yes' : 'No')
-            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed)
+            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
           })
       })
       .catch(() => {
@@ -158,7 +158,7 @@ export class ModActions {
           })
           .finally(() => {
             embed.addField('Received DM?', msg ? 'Yes' : 'No')
-            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed)
+            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
           })
       })
       .catch(() => {
@@ -273,7 +273,12 @@ export class ModActions {
         instance.mutes.set(member.id, { member, data: undefined, endDatetime })
       })
       .finally(() => {
-        if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed)
+        if (logChannel && logChannel.type === 'GUILD_TEXT') {
+          if (sourceChannel && sourceChannel.isText()) {
+            return ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
+          }
+          ModActions.notifyGuild(logChannel, embed)
+        }
       })
   }
 
@@ -318,8 +323,9 @@ export class ModActions {
     })
   }
 
-  private static notifyGuild = (channel: TextChannel, embed: MessageEmbed) => {
+  private static notifyGuild = (channel: TextChannel, embed: MessageEmbed, backup?: TextChannel) => {
     channel.send({ embeds: [embed] })
+    if (backup) backup.send({ embeds: [embed] }).then(m => setTimeout(() => m.delete(), 10000))
   }
 
   private static notifyUser = (user: User, content: string) => {

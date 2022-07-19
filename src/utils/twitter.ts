@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import Twitter from 'twitter-v2'
+import Twitter, { RequestParameters} from 'twitter-v2'
 import { logger } from '.'
 
 interface IRule {
@@ -97,7 +97,9 @@ export class TwitterClient extends EventEmitter {
           const rule = this.rules.get(item.tag)
           if (!rule) return
 
-          this.client.get(`tweets/${data.id}`).then(res => {
+          this.client.get(`tweets/${data.id}`, {
+            'tweet.fields': 'conversation_id'
+          }).then(res => {
             console.log(res)
           }).catch(e => {
             console.log(e)
