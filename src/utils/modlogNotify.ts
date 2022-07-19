@@ -1,7 +1,7 @@
 import { MessageEmbed, TextChannel, Guild } from "discord.js"
 import { GuildSetting } from '../db/models'
 
-export const modlogNotify = async (guild: Guild, content: { embed?: MessageEmbed, content?: string }, backup: TextChannel) => {
+export const modlogNotify = async (guild: Guild, content: { embeds?: Array<MessageEmbed>, content?: string }, backup: TextChannel) => {
   const settings = await GuildSetting.fetchByGuildId(guild.id)
   if (settings) {
     const { modLogChannelId } = settings
@@ -10,8 +10,6 @@ export const modlogNotify = async (guild: Guild, content: { embed?: MessageEmbed
       await logChannel.fetch()
 
       logChannel.send(content)
-      backup.send(content).then(msg => setTimeout(() => msg.delete(), 10000))
-      return
     }
   }
 
