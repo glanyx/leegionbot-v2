@@ -236,6 +236,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
 
   public addTicketMentionRoleIds(id: string) {
     this.data.ticketMentionRoleIds.push(id)
+    return this
   }
 
 }
