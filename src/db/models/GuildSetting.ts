@@ -55,7 +55,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   }
 
   public async update() {
-    return super.edit<GuildSetting>(`
+    const temp = `
       UPDATE ${collection} SET
         "mutedRoleId" = ${this.data.mutedRoleId ? `'${this.data.mutedRoleId}'` : null},
         "messageLogChannelId" = ${this.data.messageLogChannelId ? `'${this.data.messageLogChannelId}'` : null},
@@ -68,10 +68,12 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "ticketCategoryId" = ${this.data.ticketCategoryId ? `'${this.data.ticketCategoryId}'` : null},
         "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
-        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.join(',')}]::text[],
+        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
         blacklist = ARRAY[${this.data.blacklist.join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
-    `, GuildSetting)
+    `
+    console.log(temp)
+    return super.edit<GuildSetting>(temp, GuildSetting)
   }
 
   public get id() {
