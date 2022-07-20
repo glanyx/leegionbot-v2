@@ -29,30 +29,30 @@ export class LevelsManager {
 
   private processMessage = async (message: Message) => {
 
-    const { guild, member } = message
+    const { guild, member, author } = message
     if (!guild || !member) return
     
-    const item = this.memberMap.get(`${guild.id}-${member.id}`)
+    const item = this.memberMap.get(`${guild.id}-${author.id}`)
     if (!item) {
       const timer = setTimeout(() => {
-        this.memberMap.delete(`${guild.id}-${member.id}`)
+        this.memberMap.delete(`${guild.id}-${author.id}`)
       }, TIMEFRAME)
-      this.memberMap.set(`${guild.id}-${member.id}`, {
+      this.memberMap.set(`${guild.id}-${author.id}`, {
         timer,
         member,
         postCount: 0
       })
     }
 
-    const memberItem = this.memberMap.get(`${guild.id}-${member.id}`)
+    const memberItem = this.memberMap.get(`${guild.id}-${author.id}`)
     if (!memberItem) return
 
     const count = memberItem.postCount
     if (count < MAX_MESSAGES) {
       if (count === 0) {
-        Levels.addExp(guild.id, member.id, 10)
+        Levels.addExp(guild.id, author.id, 10)
       } else {
-        Levels.addExp(guild.id, member.id, 1)
+        Levels.addExp(guild.id, author.id, 1)
       }
       memberItem.postCount++
     }
