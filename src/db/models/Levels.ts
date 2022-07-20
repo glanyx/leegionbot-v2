@@ -32,7 +32,7 @@ export class Levels extends DBModel<ILevels> {
     return super.fetchOne<Levels>(`
       SELECT l.*, r.rank FROM ${collection} l LEFT JOIN (
         SELECT "guildId", "userId", ROW_NUMBER() OVER(ORDER BY exp DESC) AS rank FROM ${collection}
-      ) AS r ON l."userId" = r."userdId" AND l."guildId" = r."guildId"
+      ) AS r ON l."userId" = r."userId" AND l."guildId" = r."guildId"
       WHERE l."userId" = '${userId}'
       AND l."guildId" = '${guildId}'
     `, Levels)
