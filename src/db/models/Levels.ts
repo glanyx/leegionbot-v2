@@ -22,7 +22,7 @@ export class Levels extends DBModel<ILevels> {
       INSERT INTO ${collection} ("guildId", "userId", exp)
       SELECT '${levels.guildId}', '${levels.userId}', ${levels.exp}
       WHERE NOT EXISTS (
-        SELECT 1 FROM ${collection} WHERE "guildId" = '${levels.guildId}'
+        SELECT 1 FROM ${collection} WHERE "guildId" = '${levels.guildId}' AND "userId" = '${levels.guildId}'
       )
     `, Levels)
   }
