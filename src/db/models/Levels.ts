@@ -1,4 +1,5 @@
 import { DBModel } from '../db-model'
+import { logger } from '../../utils'
 
 interface ILevels extends INewLevels {
   id: number
@@ -29,14 +30,14 @@ export class Levels extends DBModel<ILevels> {
 
   public static fetchUserData(guildId: string, userId: string) {
     return super.fetchOne<Levels>(`
-      SELECT *, row_number() over(order by exp) AS rank FROM ${collection}
+      SELECT *, ROW_NUMBER() OVER(ORDER BY exp DESC) AS rank FROM ${collection}
       WHERE "guildId" = '${guildId}'
       AND "userId" = '${userId}'
     `, Levels)
   }
 
   public static async addExp(guildId: string, userId: string, exp: number) {
-    await Levels.add({ guildId, userId, exp: 0 })
+    await Levels.add({ guildId, userId, exp: 0 }).catch(e => logger.debug(e.message))
     return super.fetchOne<Levels>(`
       UPDATE ${collection}
       SET exp = exp + ${exp}
@@ -46,7 +47,7 @@ export class Levels extends DBModel<ILevels> {
   }
 
   public static async removeExp(guildId: string, userId: string, exp: number) {
-    await Levels.add({ guildId, userId, exp: 0 })
+    await Levels.add({ guildId, userId, exp: 0 }).catch(e => logger.debug(e.message))
     return super.fetchOne<Levels>(`
       UPDATE ${collection}
       SET exp = exp - ${exp}

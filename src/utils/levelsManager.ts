@@ -50,9 +50,9 @@ export class LevelsManager {
     const count = memberItem.postCount
     if (count < MAX_MESSAGES) {
       if (count === 0) {
-        Levels.addExp(guild.id, member.id, 10)
+        Levels.addExp(guild.id, member.id, 10).catch(e => logger.debug(e.message))
       } else {
-        Levels.addExp(guild.id, member.id, 1)
+        Levels.addExp(guild.id, member.id, 1).catch(e => logger.debug(e.message))
       }
       memberItem.postCount++
     }
