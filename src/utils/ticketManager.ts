@@ -21,7 +21,12 @@ export class TicketManager {
       this.processDMs(message)
     })
 
-    client.user?.setActivity('DM to contact staff!', { type: 'LISTENING' })
+    if (client.user) {
+      client.user.setActivity('DM to contact staff!', { type: 'LISTENING' })
+      logger.debug('Activity set')
+    } else {
+      logger.debug('No user?')
+    }
   }
 
   private processDMs = async (message: Message) => {
@@ -326,8 +331,18 @@ export class TicketConversation {
       .setTimestamp()
 
     const newTicketEmbed = new MessageEmbed()
-      .setTitle('A new Ticket has been created!')
-      .setDescription(`**Ticket ID**\n${this.model.id}`)
+      .setTitle(`A new Ticket has been created!`)
+      .setDescription(`
+        A new ticket has been opened!\n\n
+        Anything you type in this channel will not be sent to the user unless you use a reply command, thus you may discuss amongst each other or ping Staff directly in this channel if you feel their intervention is required.\n
+        If you feel you are able to handle this ticket, please type a quick message stating this, so others are aware not to answer it too. (Example: I've got this one!)\n\n
+        To reply to this ticket please use:\n
+        \`=areply <message>\`: Anonymously replies to a ticket. Must be used in an active ticket channel.\n\n
+        To close the ticket please use:\n
+        \`=aclose <reason>\`: Anonymously closes a ticket. Must be used in an active ticket channel. **This reason is for internal use only and will not be sent to the user. Please use it to summarise the ticket.**\n\n
+        Please do not use the non-anonymous commands for your own protection (\`=reply\` / \`=close\`).\n\n
+        **Ticket ID**\n${this.model.id}
+      `)
       .setFooter({ text: `${this.user.username}#${this.user.discriminator} (ID: ${this.user.id})` })
       .setTimestamp()
 

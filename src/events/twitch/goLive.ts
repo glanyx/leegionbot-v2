@@ -13,19 +13,6 @@ export class GoLive {
 
     logger.info(`${stream.display_name} just went live on Twitch!`)
 
-    const { discordClient } = clients
-
-    const user = discordClient.user as ClientUser
-    user.setPresence({
-      activities: [
-        {
-          name: stream.title,
-          type: 'STREAMING',
-          url: `https://www.twitch.tv/${stream.broadcaster_login}`
-        }
-      ],
-    })
-
     const channels = TwitchManager.getAnnounceChannel(stream.broadcaster_login)
     const embed = new MessageEmbed()
       .setColor('#6441a5')
