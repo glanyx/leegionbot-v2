@@ -1,6 +1,5 @@
-import { Help, Config, IExecuteArgs, MessageEmbed, MessageButton, MessageActionRow } from "discord.js"
+import { Help, Config, IExecuteArgs, MessageButton, MessageActionRow } from "discord.js"
 import { StepMessage, ResponseType } from '../../utils'
-import { Rolegate as RolegateModel } from '../../db/models'
 
 const configs: Config = {
   permissions: [
@@ -25,7 +24,6 @@ export class Rolegate {
   public static async run({
     client,
     message,
-    args
   }: IExecuteArgs) {
 
     const { guild, channel, author } = message
@@ -53,27 +51,14 @@ export class Rolegate {
     }
 
     const roleButton = new MessageButton()
-      .setCustomId('rolegate')
+      .setCustomId(`rolegate-${role.id}`)
       .setLabel('I agree')
       .setStyle('SUCCESS')
 
     const components = new MessageActionRow()
       .addComponents(roleButton)
 
-    const gateMessage = await channel.send({
-      content: 'Please press the button below to agree to the rules and gain access to the server.',
-      components: [components]
-    })
-
-    const gateStore = await RolegateModel.add({
-      guildId: guild.id,
-      messageId: gateMessage.id,
-      roleId: role.id,
-    })
-
-    roleButton.setCustomId(`rolegate-${gateStore.id}`)
-
-    gateMessage.edit({
+    await channel.send({
       content: 'Please press the button below to agree to the rules and gain access to the server.',
       components: [components]
     })
