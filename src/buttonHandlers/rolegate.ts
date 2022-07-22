@@ -53,7 +53,7 @@ export class Rolegate extends ButtonHandler {
       .catch(e => logger.debug(e.message))
     }
 
-    client.roleManager.add((member as GuildMember), role, IRoleAction.ADD, IActionType.MENU, () => count < 10 ? early : late)
+    client.roleManager.add((member as GuildMember), role, IRoleAction.ADD, IActionType.JOIN, () => count < 10 ? early : late)
 
   }
 
