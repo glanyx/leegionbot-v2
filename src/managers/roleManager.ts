@@ -111,7 +111,7 @@ export class ClientRoleManager {
     const actionSet = split > 0 ? items.splice(0, split) : []
     instance.actions = actionSet
     actionSet.forEach(item => {
-      (item.member.roles as any)[item.action](item.role).catch(() => logger.error(`Unable to ${item.action} Role ${item.role.name} (ID: ${item.role.id}) | User ${item.member.user.username}#${item.member.user.discriminator} (ID: ${item.member.user.id})`))
+      (item.member.roles as any)[item.action](item.role).catch(() => logger.debug(`Unable to ${item.action} Role ${item.role.name} (ID: ${item.role.id}) | User ${item.member.user.username}#${item.member.user.discriminator} (ID: ${item.member.user.id})`))
       this.logAction(item)
       if (item.callback) item.callback()
     })
@@ -132,7 +132,7 @@ export class ClientRoleManager {
         const toAction = instance.queue.sort(customSort).splice(0, 9)
         instance.actions = toAction
         toAction.forEach(item => {
-          (item.member.roles as any)[item.action](item.role).catch(() => logger.error(`Unable to ${item.action} Role ${item.role.name} (ID: ${item.role.id}) | User ${item.member.user.username}#${item.member.user.discriminator} (ID: ${item.member.user.id}) | Guild: ${item.member.guild.name} (ID: ${item.member.guild.id})`))
+          (item.member.roles as any)[item.action](item.role).catch(() => logger.debug(`Unable to ${item.action} Role ${item.role.name} (ID: ${item.role.id}) | User ${item.member.user.username}#${item.member.user.discriminator} (ID: ${item.member.user.id}) | Guild: ${item.member.guild.name} (ID: ${item.member.guild.id})`))
           this.logAction(item)
           if (item.callback) item.callback()
         })
