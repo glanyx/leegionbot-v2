@@ -55,7 +55,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   }
 
   public async update() {
-    return super.edit<GuildSetting>(`
+    const temp = `
       UPDATE ${collection} SET
         "mutedRoleId" = ${this.data.mutedRoleId ? `'${this.data.mutedRoleId}'` : null},
         "messageLogChannelId" = ${this.data.messageLogChannelId ? `'${this.data.messageLogChannelId}'` : null},
@@ -66,12 +66,14 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "twitchAnnounceChannelId" = ${this.data.twitchAnnounceChannelId ? `'${this.data.twitchAnnounceChannelId}'` : null},
         "patreonAnnounceChannelId" = ${this.data.patreonAnnounceChannelId ? `'${this.data.patreonAnnounceChannelId}'` : null},
         "ticketCategoryId" = ${this.data.ticketCategoryId ? `'${this.data.ticketCategoryId}'` : null},
-        "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.join(',')}]::text[],
+        "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
-        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.join(',')}]::text[],
-        blacklist = ARRAY[${this.data.blacklist.join(',')}]::text[]
+        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
+        blacklist = ARRAY[${this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
-    `, GuildSetting)
+    `
+    console.log(temp)
+    return super.edit<GuildSetting>(temp, GuildSetting)
   }
 
   public get id() {

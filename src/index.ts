@@ -7,7 +7,7 @@ import { Events } from './events'
 import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager } from './utils'
+import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager, LevelsManager } from './utils'
 import TwitchEvents from './events/twitch'
 import TwitterEvents from './events/twitter'
 import { ClientRoleManager } from './managers'
@@ -82,3 +82,4 @@ client.login(process.env.DISCORD_TOKEN)
 
 new SpamFilter(client)
 new TicketManager(client)
+new LevelsManager(client)

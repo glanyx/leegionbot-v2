@@ -1,6 +1,10 @@
-import { Client, Message, User, Guild, TextChannel, MessageEmbed, MessageAttachment, DMChannel, GuildChannel } from 'discord.js'
+import { Client, Message, User, Guild, TextChannel, MessageEmbed, MessageAttachment, DMChannel, GuildChannel, GuildMember } from 'discord.js'
 import { logger, StepMessage, ResponseType } from '.'
 import { TicketConversation as TicketConversationModel, GuildSetting } from '../db/models'
+
+const isMember = (item: GuildMember | undefined): item is GuildMember => {
+  return !!item
+}
 
 export class TicketManager {
 
@@ -82,8 +86,12 @@ export class TicketManager {
 
         conversation = undefined
 
-        const guildmemberArray = await Promise.all([...client.guilds.cache.values()].map(async guild => await guild.members.fetch({ user: user.id, cache: true })))
-        const sharedGuilds = new Map<string, Guild>(guildmemberArray.map(mbr => [mbr.guild.id, mbr.guild]))
+        const guildmemberArray = await Promise.all([...client.guilds.cache.values()].map(async guild => await guild.members.fetch({ user: user.id, cache: true }).catch(e => {
+          logger.debug(e.message)
+          return undefined
+        })))
+        const filtered = guildmemberArray.filter(isMember)
+        const sharedGuilds = new Map<string, Guild>(filtered.map(mbr => [mbr.guild.id, mbr.guild]))
     
         if (sharedGuilds.size === 0) return channel.send('No servers available to contact at this time.')
     

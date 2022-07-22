@@ -56,6 +56,12 @@ export interface TweetEvent {
   data: ITweetData
 }
 
+interface IFetchResponse {
+  conversation_id: string
+  id: string
+  text: string
+}
+
 export class TwitterClient extends EventEmitter {
 
   private client!: Twitter
@@ -97,16 +103,14 @@ export class TwitterClient extends EventEmitter {
           const rule = this.rules.get(item.tag)
           if (!rule) return
 
-          this.client.get(`tweets/${data.id}`, {
+          this.client.get<IFetchResponse>(`tweets/${data.id}`, {
             'tweet.fields': 'conversation_id'
           }).then(res => {
-            console.log(res)
+            if (res.conversation_id === data.id) this.emit('tweet', { data, rule })
           }).catch(e => {
             console.log(e)
           })
 
-
-          // this.emit('tweet', { data, rule })
         })
       }
 

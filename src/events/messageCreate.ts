@@ -22,7 +22,7 @@ export class MessageCreate {
       if (message.guild) {
         if (Blacklist.compare(guild.id, message.content.startsWith(prefix) ? message.content.slice(prefix.length) : message.content)) {
           await message.delete()
-          channel.send(`Please mind the language, <@${member.id}>!`).then(m => setTimeout(() => m.delete(), 5000))
+          channel.send(`${member} was taken by the Monarch. Please mind the language, ${member}!`).then(m => setTimeout(() => m.delete(), 5000))
           return
         }
       }
