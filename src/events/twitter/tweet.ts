@@ -27,7 +27,7 @@ export class Tweet {
           .setColor('#1DA1F2')
           .setTitle(`New Tweet by @${rule.from}`)
           .setDescription(`${data.text}\n\n[View on Twitter](https://twitter.com/${rule.from}/status/${data.id})`)
-          .setFooter('Via Twitter')
+          .setFooter({ text: 'Via Twitter' })
           .setTimestamp()
           .setURL(`https://twitter.com/${rule.from}`)
 

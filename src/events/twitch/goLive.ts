@@ -13,16 +13,19 @@ export class GoLive {
 
     logger.info(`${stream.display_name} just went live on Twitch!`)
 
-    const channels = TwitchManager.getAnnounceChannel(stream.broadcaster_login)
-    const embed = new MessageEmbed()
-      .setColor('#6441a5')
-      .setTitle(`${stream.display_name} just went live on Twitch!`)
-      .setDescription(`**Playing ${stream.game_name}**\n${stream.title}\n\n[Watch Now!](https://www.twitch.tv/${stream.broadcaster_login})`)
-      .setFooter({ text: `Via Twitch` })
-      .setTimestamp()
+    const data = TwitchManager.getAnnounceData(stream.broadcaster_login)
 
-    channels.forEach(ch => {
-      ch.send({ embeds: [embed] })
+    data.forEach(item => {
+
+      const embed = new MessageEmbed()
+        .setColor('#6441a5')
+        .setTitle(`<@&${item.mentionId}>\n${stream.display_name} just went live on Twitch!`)
+        .setDescription(`**Playing ${stream.game_name}**\n${stream.title}\n\n[Watch Now!](https://www.twitch.tv/${stream.broadcaster_login})`)
+        .setFooter({ text: `Via Twitch` })
+        .setTimestamp()
+
+      item.channel.send({ embeds: [embed] })
+      
     })
 
   }

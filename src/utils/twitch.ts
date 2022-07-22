@@ -177,17 +177,22 @@ export class TwitchClient extends EventEmitter {
 
 }
 
+interface IAnnounceData {
+  channel: TextChannel
+  mentionId: string
+}
+
 export class TwitchManager {
 
   public client: TwitchClient
-  private relations: Map<string, Array<TextChannel>>
+  private relations: Map<string, Array<IAnnounceData>>
 
   constructor() {
     this.client = new TwitchClient()
-    this.relations = new Map<string, Array<TextChannel>>()
+    this.relations = new Map<string, Array<IAnnounceData>>()
   }
 
-  public static getAnnounceChannel = (channelName: string) => {
+  public static getAnnounceData = (channelName: string) => {
     return manager.relations.get(channelName) || []
   }
 
@@ -201,20 +206,20 @@ export class TwitchManager {
       const ch = await guild.channels.fetch(gSetting.twitchAnnounceChannelId, { cache: true })
       if (!ch || ch.type !== 'GUILD_TEXT') return
       gSetting.twitchFeeds.forEach(feed => {
-        this.track(feed, ch)
+        this.track(feed, ch, gSetting.twitchMentionId)
       })
     })
   }
 
-  public track = (channelName: string, channelAnnounce: TextChannel) => {
+  public track = (channelName: string, channelAnnounce: TextChannel, mentionId: string) => {
     const item = this.relations.get(channelName)
     if (item) {
-      item.push(channelAnnounce)
+      item.push({ channel: channelAnnounce, mentionId })
       return
     }
 
     this.client.track(channelName)
-    this.relations.set(channelName, [channelAnnounce])
+    this.relations.set(channelName, [{ channel: channelAnnounce, mentionId }])
   }
 
   public static getManager = () => {

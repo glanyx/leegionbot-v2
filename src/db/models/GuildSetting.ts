@@ -14,6 +14,7 @@ interface IGuildSetting extends INewGuildSetting {
   suggestionChannelId: string
   twitterAnnounceChannelId: string
   twitchAnnounceChannelId: string
+  twitchMentionId: string
   twitchFeeds: Array<string>
   patreonAnnounceChannelId: string
   ticketCategoryId: string
@@ -64,6 +65,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "suggestionChannelId" = ${this.data.suggestionChannelId ? `'${this.data.suggestionChannelId}'` : null},
         "twitterAnnounceChannelId" = ${this.data.twitterAnnounceChannelId ? `'${this.data.twitterAnnounceChannelId}'` : null},
         "twitchAnnounceChannelId" = ${this.data.twitchAnnounceChannelId ? `'${this.data.twitchAnnounceChannelId}'` : null},
+        "twitchMentionId" = ${this.data.twitchMentionId ? `'${this.data.twitchMentionId}'` : null},
         "patreonAnnounceChannelId" = ${this.data.patreonAnnounceChannelId ? `'${this.data.patreonAnnounceChannelId}'` : null},
         "ticketCategoryId" = ${this.data.ticketCategoryId ? `'${this.data.ticketCategoryId}'` : null},
         "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
@@ -203,6 +205,15 @@ export class GuildSetting extends DBModel<IGuildSetting> {
 
   public setTwitchAnnounceChannelId(id: string) {
     this.data.twitchAnnounceChannelId = id
+    return this
+  }
+
+  public get twitchMentionId() {
+    return this.data.twitchMentionId
+  }
+
+  public setTwitchMentionId(id: string) {
+    this.data.twitchMentionId = id
     return this
   }
 
