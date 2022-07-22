@@ -30,17 +30,15 @@ export class Rolemenu extends ButtonHandler {
     const count = client.roleManager.getQueueCount(guild.id)
     const message = count > 290 ? `A lot of members are currently requesting roles. I will edit your role in roughly ${formatDiff((Math.ceil(count / 10) * 10) * 1000)}.${count > 900 ? `If this takes more than 15 minutes, this interaction might fail but I should still edit your role after the estimated time!` : `I'll ping you when I have edited yours! Sit tight!`}` : `Editing your role. This may take a moment, please wait!`
 
-    if (count >= 10) {
-      await interaction.editReply(message).catch(e => {
-        logger.debug(e.message)
-      })
-    }
+    await interaction.editReply(message).catch(e => {
+      logger.debug(e.message)
+    })
 
     logger.debug([...(member as GuildMember).roles.cache.values()].map(r => r.name).join(' - '))
     const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name.toLowerCase()))
 
     const early = () => {
-      interaction.editReply(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
+      interaction.followUp(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
       .catch(e => {
         logger.debug(e.message)
       })
