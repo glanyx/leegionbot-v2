@@ -18,25 +18,25 @@ export class Rolemenu extends ButtonHandler {
 
     const id = args.shift()
 
-    if (!id || !guild || !member) return interaction.reply('Unable to edit role at this time.')
+    if (!id || !guild || !member) return interaction.followUp('Unable to edit role at this time.')
 
     const role = guild.roles.cache.get(id) || await guild.roles.fetch(id)
 
-    if (!role) return interaction.reply('Unable to edit role at this time.')
+    if (!role) return interaction.followUp('Unable to edit role at this time.')
 
     const count = client.roleManager.getQueueCount(guild.id)
     const message = count > 290 ? `A lot of members are currently requesting roles. I will edit your role in roughly ${formatDiff((Math.ceil(count / 10) * 10) * 1000)}.${count > 900 ? `If this takes more than 15 minutes, this interaction might fail but I should still edit your role after the estimated time!` : `I'll ping you when I have edited yours! Sit tight!`}` : `Editing your role. This may take a moment, please wait!`
 
-    if (count > 10) {
-      await interaction.reply({
+    if (count >= 10) {
+      await interaction.followUp({
         ephemeral: true,
         content: message,
       })
     }
 
-    const add = !(member as GuildMember).roles.cache.has(role.id)
+    const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name))
 
-    const early = interaction.reply({
+    const early = interaction.followUp({
       ephemeral: true,
       content: `Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`
     })
@@ -47,7 +47,7 @@ export class Rolemenu extends ButtonHandler {
     })
     .catch(e => logger.debug(e.message))
 
-    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, () => count < 10 ? early : late)
+    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, count < 10 ? () => early : () => late)
 
   }
 
