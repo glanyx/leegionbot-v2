@@ -1,6 +1,6 @@
 import { Client } from 'discord.js'
 import { DBClient } from '../db'
-import { Countdown, GuildSetting } from '../db/models'
+import { Countdown } from '../db/models'
 import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
 
 export class Ready {
@@ -67,7 +67,9 @@ export class Ready {
       'DEAFEN_MEMBERS',
       'MOVE_MEMBERS',
     ]})
-    
+
+    client.user?.setActivity('DM to contact staff!', { type: 'LISTENING' })
+
     logger.info(`Invite me at: ${url}`)
 
     logger.info(`Now listening for events..`);
