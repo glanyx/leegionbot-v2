@@ -38,7 +38,10 @@ export class Rolemenu extends ButtonHandler {
     const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name.toLowerCase()))
 
     const early = () => {
-      interaction.followUp(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
+      interaction.followUp({
+        ephemeral: true,
+        content: `Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`
+      })
       .catch(e => {
         logger.debug(e.message)
       })

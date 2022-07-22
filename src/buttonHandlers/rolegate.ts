@@ -39,7 +39,10 @@ export class Rolegate extends ButtonHandler {
     })
 
     const early = () => {
-      interaction.followUp(`Role ${role} was assigned to you!`).catch(e => {
+      interaction.followUp({
+        ephemeral: true,
+        content: `Role ${role} was assigned to you!`
+      }).catch(e => {
         logger.debug(e.message)
       })
     }
