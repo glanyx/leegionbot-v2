@@ -15,7 +15,7 @@ export class InteractionCreate {
       if (handler) {
         const { guild, user } = interaction
         logger.info(`Executing Button ${name} | Guild ID ${guild?.id} | User ID ${user.id}`)
-        await interaction.deferReply()
+        await interaction.deferReply({ ephemeral: true })
         handler.execute({ client, interaction, args: content })
       }
     }
