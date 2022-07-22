@@ -18,7 +18,7 @@ export class Rolegate extends ButtonHandler {
 
     const id = args.shift()
 
-    if (!id || !guild || !member) return interaction.reply('Unable to assign role at this time.')
+    if (!id || !guild || !member) return interaction.followUp('Unable to assign role at this time.')
 
     const role = guild.roles.cache.get(id) || await guild.roles.fetch(id)
 
@@ -27,14 +27,14 @@ export class Rolegate extends ButtonHandler {
     const count = client.roleManager.getQueueCount(guild.id)
     const message = count > 290 ? `A lot of members are currently requesting roles. I will assign your role in roughly ${formatDiff((Math.ceil(count / 10) * 10) * 1000)}.${count > 900 ? `If this takes more than 15 minutes, this interaction might fail but you should still get your role after the estimated time!` : `I'll ping you when you have yours! Sit tight!`}` : `Assigning your role. This may take a moment, please wait!`
 
-    if (count > 10) {
-      await interaction.reply({
+    if (count >= 10) {
+      await interaction.followUp({
         ephemeral: true,
         content: message,
       })
     }
 
-    const early = interaction.reply({
+    const early = interaction.followUp({
       ephemeral: true,
       content: `Role ${role} was assigned to you!`
     })

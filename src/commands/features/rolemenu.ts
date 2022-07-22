@@ -63,7 +63,7 @@ export class Rolemenu {
     }
 
     const buttons = filteredRoles.map(r => new MessageButton()
-      .setCustomId(`rolegate-${r.id}`)
+      .setCustomId(`rolemenu-${r.id}`)
       .setLabel(r.name)
       .setStyle('PRIMARY')
     )

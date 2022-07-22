@@ -47,7 +47,7 @@ export class Rolemenu extends ButtonHandler {
     })
     .catch(e => logger.debug(e.message))
 
-    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, count < 10 ? () => early : () => late)
+    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, () => count < 10 ? early : late)
 
   }
 
