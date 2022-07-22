@@ -19,14 +19,12 @@ export class Rolemenu extends ButtonHandler {
 
     if (!id || !guild || !member) return interaction.editReply('Unable to edit role at this time.').catch(e => {
       logger.debug(e.message)
-      logger.debug('Catch 1')
     })
 
     const role = guild.roles.cache.get(id) || await guild.roles.fetch(id)
 
     if (!role) return interaction.editReply('Unable to edit role at this time.').catch(e => {
       logger.debug(e.message)
-      logger.debug('Catch 2')
     })
 
     const count = client.roleManager.getQueueCount(guild.id)
@@ -35,20 +33,16 @@ export class Rolemenu extends ButtonHandler {
     if (count >= 10) {
       await interaction.editReply(message).catch(e => {
         logger.debug(e.message)
-        logger.debug('Catch 3')
       })
     }
 
-    await (member as GuildMember).fetch()
-
     logger.debug([...(member as GuildMember).roles.cache.values()].map(r => r.name).join(' - '))
-    const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name))
+    const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name.toLowerCase()))
 
     const early = () => {
       interaction.editReply(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
       .catch(e => {
         logger.debug(e.message)
-        logger.debug('Catch 4')
       })
     }
 
@@ -59,7 +53,6 @@ export class Rolemenu extends ButtonHandler {
       })
       .catch(e => {
         logger.debug(e.message)
-        logger.debug('Catch 5')
       })
     }
 
