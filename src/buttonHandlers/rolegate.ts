@@ -1,6 +1,5 @@
 import { GuildMember } from 'discord.js'
 import { ButtonHandler, HandlerProps } from './handler'
-import { Rolegate as RolegateModel } from '../db/models'
 import { IActionType, IRoleAction } from '../managers'
 import { logger, formatDiff } from '../utils'
 

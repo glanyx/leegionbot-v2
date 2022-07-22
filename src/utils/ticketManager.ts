@@ -20,6 +20,8 @@ export class TicketManager {
       if (message.channel.type !== 'DM') return
       this.processDMs(message)
     })
+
+    client.user?.setActivity('DM to contact staff!', { type: 'LISTENING' })
   }
 
   private processDMs = async (message: Message) => {
