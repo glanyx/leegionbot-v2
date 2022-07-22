@@ -41,24 +41,29 @@ export class Rolemenu extends ButtonHandler {
 
     await (member as GuildMember).fetch()
 
+    logger.debug([...(member as GuildMember).roles.cache.values()].map(r => r.name).join(' - '))
     const add = !((member as GuildMember).roles.cache.some(r => r.name.toLowerCase() === role.name))
 
-    const early = interaction.editReply(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
-    .catch(e => {
-      logger.debug(e.message)
-      logger.debug('Catch 4')
-    })
+    const early = () => {
+      interaction.editReply(`Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`)
+      .catch(e => {
+        logger.debug(e.message)
+        logger.debug('Catch 4')
+      })
+    }
 
-    const late = interaction.followUp({
-      ephemeral: true,
-      content: `Hey ${member}! Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`
-    })
-    .catch(e => {
-      logger.debug(e.message)
-      logger.debug('Catch 5')
-    })
+    const late = () => {
+      interaction.followUp({
+        ephemeral: true,
+        content: `Hey ${member}! Role ${role} was ${add ? 'assigned to' : 'removed from'} you!`
+      })
+      .catch(e => {
+        logger.debug(e.message)
+        logger.debug('Catch 5')
+      })
+    }
 
-    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, () => count < 10 ? early : late)
+    client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, count < 10 ? early : late)
 
   }
 

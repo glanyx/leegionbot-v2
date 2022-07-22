@@ -33,13 +33,17 @@ export class Rolegate extends ButtonHandler {
       await interaction.editReply(message)
     }
 
-    const early = interaction.editReply(`Role ${role} was assigned to you!`)
+    const early = () => {
+      interaction.editReply(`Role ${role} was assigned to you!`)
+    }
 
-    const late = interaction.followUp({
-      ephemeral: true,
-      content: `Hey ${member}! Role ${role} was assigned to you!`
-    })
-    .catch(e => logger.debug(e.message))
+    const late = () => {
+      interaction.followUp({
+        ephemeral: true,
+        content: `Hey ${member}! Role ${role} was assigned to you!`
+      })
+      .catch(e => logger.debug(e.message))
+    }
 
     client.roleManager.add((member as GuildMember), role, IRoleAction.ADD, IActionType.MENU, () => count < 10 ? early : late)
 
