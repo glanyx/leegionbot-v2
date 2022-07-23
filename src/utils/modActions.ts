@@ -297,7 +297,10 @@ export class ModActions {
       logger.error(`Unable to remove mutedrole (ID: ${mutedRole.id}) from User ID ${member.id}`)
     })
 
-    if (item) item?.unmute().update().catch(e => logger.warn(`Unable to save unmute to DB\n${e.message}`))
+    if (item) {
+      this.dispose(item)
+      item.unmute().update().catch(e => logger.warn(`Unable to save unmute to DB\n${e.message}`))
+    }
 
     const msg = await member.send(`Your mute in **${guild.name}** has ended or has been rescinded by a moderator!`).catch(() => {
       logger.warn(`Couldn't DM user ${member.id} regarding unmute in Guild ${guild.id}`)
@@ -314,6 +317,7 @@ export class ModActions {
       .setColor('#00ff00')
 
     if (logChannel?.isText()) logChannel.send({ embeds: [embed] })
+
   }
 
   public static dispose = (item: ModLog) => {
