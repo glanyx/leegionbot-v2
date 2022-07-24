@@ -45,7 +45,7 @@ export class ModActions {
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
     const embed = new MessageEmbed()
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been warned.`)
       .addField('User', `<@${member.id}>`, true)
       .addField('Actioned by', `${user}`, true)
@@ -86,7 +86,7 @@ export class ModActions {
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
     const embed = new MessageEmbed()
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been kicked.`)
       .addField('User', `<@${member.id}>`, true)
       .addField('Actioned by', `${user}`, true)
@@ -134,7 +134,7 @@ export class ModActions {
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
     const embed = new MessageEmbed()
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been banned.`)
       .addField('User', `<@${member.id}>`, true)
       .addField('Actioned by', `${user}`, true)
@@ -242,7 +242,7 @@ export class ModActions {
     if (memberInstance && memberInstance.data) ModActions.dispose(memberInstance.data)
 
     const embed = new MessageEmbed()
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been muted.`)
       .addField('User', `<@${member.id}>`, true)
       .addField('Actioned by', `${user}`, true)
@@ -307,10 +307,10 @@ export class ModActions {
     })
 
     const embed = new MessageEmbed()
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setTitle(`ID ${item?.id || '*Unknown*'} | Unmute`)
       .setDescription(`This user has been unmuted.`)
-      .addField('User', `<@${member}>`, true)
+      .addField('User', `${member}`, true)
       .addField('Actioned by', user ? `${user}` : 'Auto unmute', true)
       .addField('Received DM?', `${msg ? 'Yes' : 'No'}`)
       .setTimestamp()

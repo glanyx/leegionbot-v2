@@ -66,33 +66,61 @@ export const levels = [
   // Level 22 - Growth 2850
   22490,
   // Level 23 - Growth 3210
+  25700,
   // Level 24 - Growth 3600
+  29300,
   // Level 25 - Growth 4020
+  33320,
   // Level 26 - Growth 4470
+  37790,
   // Level 27 - Growth 4950
+  42740,
   // Level 28 - Growth 5460
+  48200,
   // Level 29 - Growth 6000
+  54200,
   // Level 30 - Growth 6570
+  60770,
   // Level 31 - Growth 7000 (450 + 50n)
+  67770,
   // Level 32 - Growth 7450
+  75220,
   // Level 33 - Growth 7950
+  83170,
   // Level 34 - Growth 8500
+  91670,
   // Level 35 - Growth 9100
+  100770,
   // Level 36 - Growth 9750
+  110520,
   // Level 37 - Growth 10450
+  120970,
   // Level 38 - Growth 11200
+  132170,
   // Level 39 - Growth 12000
+  133370,
   // Level 40 - Growth 12850
+  146220,
   // Level 41 - Growth 13750
+  159970,
   // Level 42 - Growth 15700
+  175670,
   // Level 43 - Growth 16700
+  192370,
   // Level 44 - Growth 17750
+  210120,
   // Level 45 - Growth 18850
+  228970,
   // Level 46 - Growth 20000
+  248970,
   // Level 47 - Growth 21200
+  270170,
   // Level 48 - Growth 22450
+  292620,
   // Level 49 - Growth 23750
+  316370,
   // Level 50 - Growth 25100
+  341470,
   // Level 75 - Growth 70000 (9600)
   // Level 100 - Growth 300000
 ]
