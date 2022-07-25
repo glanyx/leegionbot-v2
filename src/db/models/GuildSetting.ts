@@ -59,7 +59,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   public static async fetchVoteTrackers() {
     return super.query<GuildSetting>(`
       SELECT * FROM ${collection}
-      WHERE cardinality("voteChannels") > 0
+      WHERE cardinality("voteChannelIds") > 0
     `, GuildSetting)
   }
 

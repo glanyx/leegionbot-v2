@@ -125,7 +125,10 @@ export class TicketManager {
 
         first = false
 
-        if (confirmMessage === 'decline') reject('TICKET_CANCELLED')
+        if (confirmMessage === 'decline') {
+          reject('TICKET_CANCELLED')
+          return
+        }
 
         final = confirmMessage === 'confirm'
       }

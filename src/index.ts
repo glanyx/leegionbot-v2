@@ -8,8 +8,6 @@ import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
 import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager, LevelsManager } from './utils'
-import TwitchEvents from './events/twitch'
-import TwitterEvents from './events/twitter'
 import { ClientRoleManager } from './managers'
 
 const client = new Client({
@@ -30,7 +28,7 @@ const client = new Client({
 client.commands = new Collection()
 client.roleManager = new ClientRoleManager()
 
-const twitchClient = new TwitchManager().client
+new TwitchManager(client)
 const twitterClient = new TwitterClient()
 
 twitterClient.addRule('453582519087005696', {
@@ -60,22 +58,6 @@ Commands.forEach(command => {
   const commandName = command.help.name.toLowerCase()
   logger.info(`Attempting to load command ${commandName}`)
   client.commands.set(commandName, command)
-})
-
-TwitchEvents.forEach((event: any) => {
-  const eventName = event.name.toCamelCase()
-  twitchClient.on(eventName, event.execute.bind(null, {
-    discordClient: client,
-    twitchClient
-  }))
-})
-
-TwitterEvents.forEach((event: any) => {
-  const eventName = event.name.toCamelCase()
-  twitterClient.on(eventName, event.execute.bind(null, {
-    discordClient: client,
-    twitterClient
-  }))
 })
 
 client.login(process.env.DISCORD_TOKEN)

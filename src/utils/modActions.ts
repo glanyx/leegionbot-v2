@@ -298,7 +298,7 @@ export class ModActions {
     })
 
     if (item) {
-      this.dispose(item)
+      ModActions.dispose(item)
       item.unmute().update().catch(e => logger.warn(`Unable to save unmute to DB\n${e.message}`))
     }
 

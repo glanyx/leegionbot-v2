@@ -19,7 +19,7 @@ export class GoLive {
 
       const embed = new MessageEmbed()
         .setColor('#6441a5')
-        .setTitle(`<@&${item.mentionId}>\n${stream.display_name} just went live on Twitch!`)
+        .setTitle(`${item.mentionId ? `<@&${item.mentionId}>\n` : ''}${stream.display_name} just went live on Twitch!`)
         .setDescription(`**Playing ${stream.game_name}**\n${stream.title}\n\n[Watch Now!](https://www.twitch.tv/${stream.broadcaster_login})`)
         .setFooter({ text: `Via Twitch` })
         .setTimestamp()
