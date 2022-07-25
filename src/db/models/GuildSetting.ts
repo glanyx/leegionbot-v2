@@ -19,6 +19,7 @@ interface IGuildSetting extends INewGuildSetting {
   patreonAnnounceChannelId: string
   ticketCategoryId: string
   ticketMentionRoleIds: Array<string>
+  voteChannels: Array<string>
 }
 
 interface INewGuildSetting {
@@ -55,6 +56,13 @@ export class GuildSetting extends DBModel<IGuildSetting> {
     `, GuildSetting)
   }
 
+  public static async fetchVoteTrackers() {
+    return super.query<GuildSetting>(`
+      SELECT * FROM ${collection}
+      WHERE cardinality("voteChannels") > 0
+    `, GuildSetting)
+  }
+
   public async update() {
     const temp = `
       UPDATE ${collection} SET
@@ -71,7 +79,8 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
         "twitchFeeds" = ARRAY[${this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
-        blacklist = ARRAY[${this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[]
+        blacklist = ARRAY[${this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[],
+        "voteChannels" = ARRAY[${this.data.voteChannels.map(c => `'${c}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `
     console.log(temp)
@@ -249,6 +258,15 @@ export class GuildSetting extends DBModel<IGuildSetting> {
 
   public addTicketMentionRoleIds(id: string) {
     this.data.ticketMentionRoleIds.push(id)
+    return this
+  }
+
+  public get voteChannels() {
+    return this.data.voteChannels
+  }
+
+  public addVoteChannel(id: string) {
+    this.data.voteChannels.push(id)
     return this
   }
 

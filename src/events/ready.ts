@@ -2,6 +2,7 @@ import { Client } from 'discord.js'
 import { DBClient } from '../db'
 import { Countdown } from '../db/models'
 import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
+import { VoteManager } from '../managers'
 
 export class Ready {
 
@@ -39,6 +40,7 @@ export class Ready {
     ModActions.monitorMutes()
 
     TwitchManager.getManager().fetchTrackers(client)
+    new VoteManager(client)
     
     const url = client.generateInvite({ 
       scopes: [
