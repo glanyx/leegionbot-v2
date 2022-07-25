@@ -189,7 +189,6 @@ export class TwitchManager {
 
   constructor() {
     this.client = new TwitchClient()
-    this.client.start()
     this.relations = new Map<string, Array<IAnnounceData>>()
   }
 
