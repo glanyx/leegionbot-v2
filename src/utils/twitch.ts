@@ -7,6 +7,8 @@ import { logger } from '.'
 import { Client, TextChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
 
+import TwitchEvents from '../events/twitch'
+
 const TIMEOUT = 60000
 
 interface AxiosResponse {
@@ -135,7 +137,7 @@ export class TwitchClient extends EventEmitter {
             }
             return
           }
-          const liveAt = new Date(stream.started_at)
+          const liveAt = new Date()
           if (!channel.live) {
             channel.live = true
             this.emit('goLive', {
@@ -182,14 +184,30 @@ interface IAnnounceData {
   mentionId: string
 }
 
+let manager: TwitchManager
+
 export class TwitchManager {
 
   public client: TwitchClient
   private relations: Map<string, Array<IAnnounceData>>
 
-  constructor() {
+  constructor(client: Client) {
     this.client = new TwitchClient()
     this.relations = new Map<string, Array<IAnnounceData>>()
+    this.monitor(client)
+    manager = this
+  }
+
+  private monitor = (client: Client) => {
+    
+    TwitchEvents.forEach((event: any) => {
+      const eventName = event.name.toCamelCase()
+      this.client.on(eventName, event.execute.bind(null, {
+        discordClient: client,
+        twitchClient: this.client,
+      }))
+    })
+
   }
 
   public static getAnnounceData = (channelName: string) => {
@@ -227,5 +245,3 @@ export class TwitchManager {
   }
 
 }
-
-const manager = new TwitchManager()
