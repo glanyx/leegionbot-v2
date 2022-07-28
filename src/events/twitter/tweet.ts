@@ -18,10 +18,10 @@ export class Tweet {
     if (!guild) return
 
     GuildSetting.fetchByGuildId(guild.id)
-      .then(setting => {
+      .then(async setting => {
         if (!setting) return
 
-        const channel = guild.channels.cache.get(setting.twitterAnnounceChannelId) as TextChannel
+        const channel = guild.channels.cache.get(setting.twitterAnnounceChannelId) || await guild.channels.fetch(setting.twitterAnnounceChannelId)
 
         const embed = new MessageEmbed()
           .setColor('#1DA1F2')
@@ -29,9 +29,9 @@ export class Tweet {
           .setDescription(`${data.text}\n\n[View on Twitter](https://twitter.com/${rule.from}/status/${data.id})`)
           .setFooter({ text: 'Via Twitter' })
           .setTimestamp()
-          .setURL(`https://twitter.com/${rule.from}`)
+          .setURL(`https://twitter.com/${rule.from}`);
 
-        channel.send({ embeds: [embed] })
+        (channel as TextChannel).send({ embeds: [embed] })
 
       })
 
