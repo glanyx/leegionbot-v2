@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import Twitter, { RequestParameters} from 'twitter-v2'
+import Twitter, { RequestParameters } from 'twitter-v2'
 import { logger } from '.'
 
 interface IRule {
