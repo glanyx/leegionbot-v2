@@ -4,6 +4,7 @@ import { ClientRoleManager } from '../../managers'
 declare module 'discord.js' {
   export interface Client {
     commands: Collection<string, Command>
+    slashCommands: Collection<string, SlashCommand>
     roleManager: ClientRoleManager
   }
 
@@ -13,6 +14,10 @@ declare module 'discord.js' {
     subcommands?: Array<Command>
     alias?: Array<string>
     run: (args: IExecuteArgs) => Promise<Message | void | undefined | NodeJS.Timeout>
+  }
+
+  export interface SlashCommand {
+    
   }
 
   export interface Help {

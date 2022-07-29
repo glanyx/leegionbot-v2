@@ -49,7 +49,9 @@ export class Suggestion {
         suggestion,
       })
       channel.send({ embeds: [embed] }).then(msg => suggestion.setMessageId(msg.id).update())
-      message.channel.send(`Thanks for your suggestion, ${author}! You can find your suggestion in ${channel}`)
+      message.channel.send(`Thanks for your suggestion, ${author}! You can find your suggestion in ${channel}`).then(msg => {
+        if (message.channel.id === channel.id) setTimeout(() => msg.delete(), 5000)
+      })
     })
 
   }
