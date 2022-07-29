@@ -1,6 +1,11 @@
+import { ActionRowBuilder, ModalBuilder, SelectMenuBuilder, TextInputBuilder } from '@discordjs/builders'
 import { Client, Message, User, Guild, TextChannel, MessageEmbed, MessageAttachment, DMChannel, GuildChannel, GuildMember } from 'discord.js'
 import { logger, StepMessage, ResponseType } from '.'
 import { TicketConversation as TicketConversationModel, GuildSetting } from '../db/models'
+
+interface TicketModalResponse {
+
+}
 
 const isMember = (item: GuildMember | undefined): item is GuildMember => {
   return !!item
@@ -21,6 +26,47 @@ export class TicketManager {
       this.processDMs(message)
     })
     
+  }
+
+  private sendModal = async (client: Client, user: User) => {
+
+    const { items: ongoingTickets } = await TicketConversationModel.fetchOngoingForUserId(user.id)
+
+    const guildmemberArray = await Promise.all([...client.guilds.cache.values()].map(async guild => await guild.members.fetch({ user: user.id, cache: true }).catch(e => {
+      logger.debug(e.message)
+      return undefined
+    })))
+    const filtered = guildmemberArray.filter(isMember)
+    const sharedGuilds = new Map<string, Guild>(filtered.map(mbr => [mbr.guild.id, mbr.guild]))
+
+    if (sharedGuilds.size === 0) return
+
+    const guildOptions = [...sharedGuilds.values()].map(g => { return {
+      label: g.name,
+      value: g.id,
+      description: `ID: ${g.id}`,
+      default: ongoingTickets.map(i => i.guildId).includes(g.id),
+    }})
+
+    const modal = new ModalBuilder()
+      .setCustomId('ticketModal')
+      .setTitle('Create Ticket')
+
+    const guildMenu = new SelectMenuBuilder()
+      .setCustomId('modalGuildId')
+      .setOptions(guildOptions)
+      .setPlaceholder('Select a server to contact')
+
+    const ticketMessageContent = new TextInputBuilder()
+      .setCustomId('textInput')
+
+    const guildRow = new ActionRowBuilder().addComponents(guildMenu)
+    const textRow = new ActionRowBuilder().addComponents(ticketMessageContent)
+
+    modal.addComponents((guildRow as any), textRow)
+
+    
+
   }
 
   private processDMs = async (message: Message) => {

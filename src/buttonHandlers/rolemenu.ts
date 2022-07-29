@@ -1,9 +1,13 @@
-import { GuildMember } from 'discord.js'
-import { ButtonHandler, HandlerProps } from './handler'
+import { ButtonHelp, GuildMember, HandlerProps } from 'discord.js'
 import { IActionType, IRoleAction } from '../managers'
 import { logger, formatDiff } from '../utils'
 
-export class Rolemenu extends ButtonHandler {
+const help: ButtonHelp = {
+  name: 'rolemenu',
+  category: 'roles',
+}
+
+export class Rolemenu {
 
   public static async execute({
     client,
@@ -59,6 +63,10 @@ export class Rolemenu extends ButtonHandler {
 
     client.roleManager.add((member as GuildMember), role, add ? IRoleAction.ADD : IRoleAction.REMOVE, IActionType.MENU, count < 10 ? early : late)
 
+  }
+
+  public static get help() {
+    return help
   }
 
 }

@@ -16,8 +16,34 @@ declare module 'discord.js' {
     run: (args: IExecuteArgs) => Promise<Message | void | undefined | NodeJS.Timeout>
   }
 
+  export interface HandlerProps {
+    client: Client
+    interaction: Interaction
+    args: Array<string>
+  }
+
+  export interface SlashCommandProps {
+    client: Client
+    interaction: Interaction
+  }
+  
+  export interface ButtonCommand {
+    execute: (props: HandlerProps) => void
+    help: ButtonHelp
+  }
   export interface SlashCommand {
-    
+    execute: <T>(props: SlashCommandProps) => void
+    help: SlashCommandHelp
+  }
+
+  export interface ButtonHelp {
+    name: string
+    category: string
+  }
+
+  export interface SlashCommandHelp {
+    name: string
+    category: string
   }
 
   export interface Help {
