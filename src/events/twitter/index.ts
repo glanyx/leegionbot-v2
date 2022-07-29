@@ -1,5 +1,5 @@
 import { Tweet } from './tweet'
 
-export default [
+export const TwitterEvents = [
   Tweet,
 ]

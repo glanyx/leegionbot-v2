@@ -4,8 +4,10 @@ import { Timer } from './timer'
 import axios from 'axios'
 import { logger } from '.'
 
-import { Client, TextChannel } from 'discord.js'
+import { Client, TextChannel, NewsChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
+
+import TwitchEvents from '../events/twitch'
 
 const TIMEOUT = 60000
 
@@ -135,8 +137,9 @@ export class TwitchClient extends EventEmitter {
             }
             return
           }
-          const liveAt = new Date(stream.started_at)
+          const liveAt = new Date()
           if (!channel.live) {
+            console.log('hello?')
             channel.live = true
             this.emit('goLive', {
               ...stream,
@@ -178,18 +181,34 @@ export class TwitchClient extends EventEmitter {
 }
 
 interface IAnnounceData {
-  channel: TextChannel
+  channel: TextChannel | NewsChannel
   mentionId: string
 }
+
+let manager: TwitchManager
 
 export class TwitchManager {
 
   public client: TwitchClient
   private relations: Map<string, Array<IAnnounceData>>
 
-  constructor() {
+  constructor(client: Client) {
     this.client = new TwitchClient()
     this.relations = new Map<string, Array<IAnnounceData>>()
+    this.monitor(client)
+    manager = this
+  }
+
+  private monitor = (client: Client) => {
+    
+    TwitchEvents.forEach((event: any) => {
+      const eventName = event.name.toCamelCase()
+      this.client.on(eventName, event.execute.bind(null, {
+        discordClient: client,
+        twitchClient: this.client,
+      }))
+    })
+
   }
 
   public static getAnnounceData = (channelName: string) => {
@@ -204,14 +223,14 @@ export class TwitchManager {
       const guild = client.guilds.cache.get(gSetting.guildId)
       if (!guild) return
       const ch = await guild.channels.fetch(gSetting.twitchAnnounceChannelId, { cache: true })
-      if (!ch || ch.type !== 'GUILD_TEXT') return
+      if (!ch || (ch.type !== 'GUILD_TEXT' && ch.type !== 'GUILD_NEWS')) return
       gSetting.twitchFeeds.forEach(feed => {
         this.track(feed, ch, gSetting.twitchMentionId)
       })
     })
   }
 
-  public track = (channelName: string, channelAnnounce: TextChannel, mentionId: string) => {
+  public track = (channelName: string, channelAnnounce: TextChannel | NewsChannel, mentionId: string) => {
     const item = this.relations.get(channelName)
     if (item) {
       item.push({ channel: channelAnnounce, mentionId })
@@ -227,5 +246,3 @@ export class TwitchManager {
   }
 
 }
-
-const manager = new TwitchManager()
