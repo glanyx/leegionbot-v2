@@ -13,12 +13,6 @@ export class GoOffline {
 
     logger.info(`${stream.display_name} just went offline on Twitch.`)
 
-    const { discordClient } = clients
-
-    const user = discordClient.user as ClientUser
-    user.setPresence({
-      activities: []
-    })
   }
 
 }

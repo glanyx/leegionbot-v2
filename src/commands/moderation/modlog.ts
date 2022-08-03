@@ -78,7 +78,7 @@ const sendPaginator = async (member: GuildMember, channel: TextChannel, author: 
   new Paginator({
     channel: channel,
     author: author,
-    items: await Promise.all(logs.map(async item => `**Action:** ${item.action}\n**Actioned by:** <@${(await guild.members.cache.get(item.userId)?.fetch())}>\n**When:** ${item.time}\n**Reason:** ${item.reason}\n\n`)),
+    items: await Promise.all(logs.map(async item => `**Action:** ${item.action}\n**Actioned by:** ${(await guild.members.cache.get(item.userId)?.fetch())}\n**When:** ${item.time}\n**Reason:** ${item.reason}\n\n`)),
     timeout: 60000
   })
 

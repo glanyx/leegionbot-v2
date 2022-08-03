@@ -212,7 +212,7 @@ export class TwitchManager {
   }
 
   public static getAnnounceData = (channelName: string) => {
-    return manager.relations.get(channelName) || []
+    return manager.relations.get(channelName.toLowerCase()) || []
   }
 
   public fetchTrackers = async (client: Client) => {
@@ -231,14 +231,15 @@ export class TwitchManager {
   }
 
   public track = (channelName: string, channelAnnounce: TextChannel | NewsChannel, mentionId: string) => {
-    const item = this.relations.get(channelName)
+    const name = channelName.toLowerCase()
+    const item = this.relations.get(name)
     if (item) {
       item.push({ channel: channelAnnounce, mentionId })
       return
     }
 
-    this.client.track(channelName)
-    this.relations.set(channelName, [{ channel: channelAnnounce, mentionId }])
+    this.client.track(name)
+    this.relations.set(name, [{ channel: channelAnnounce, mentionId }])
   }
 
   public static getManager = () => {

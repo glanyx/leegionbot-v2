@@ -369,6 +369,7 @@ export class ModActions {
     guild.channels.cache.forEach(async channel => {
       newRole && (channel as GuildChannel).permissionOverwrites.create(newRole, {
         SEND_MESSAGES: false,
+        SEND_MESSAGES_IN_THREADS: false,
         ATTACH_FILES: false,
         ADD_REACTIONS: false,
         SPEAK: false
