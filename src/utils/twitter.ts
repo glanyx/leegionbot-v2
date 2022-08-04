@@ -39,6 +39,7 @@ interface IAddRuleResponse {
 interface ITweetData {
   id: string
   text: string
+  imageUrls: Array<string>
 }
 
 interface ITweetMatches {
@@ -61,7 +62,19 @@ interface IFetchResponse {
     conversation_id: string
     id: string
     text: string
+    attachments: {
+      media_keys: Array<string>
+    }
   }
+  includes: {
+    media: Array<IMediaResponse>
+  }
+}
+
+interface IMediaResponse {
+  media_key: string
+  type: string
+  url: string
 }
 
 export class TwitterClient extends EventEmitter {
@@ -106,9 +119,22 @@ export class TwitterClient extends EventEmitter {
           if (!rule) return
 
           this.client.get<IFetchResponse>(`tweets/${data.id}`, {
-            'tweet.fields': 'conversation_id'
-          }).then(({ data: resData }) => {
-            if (resData.conversation_id === data.id) this.emit('tweet', { data, rule })
+            'expansions': 'attachments.media_keys',
+            'tweet.fields': 'conversation_id',
+            'media.fields': 'media_key,preview_image_url,url',
+          }).then(({ data: resData, includes }) => {
+
+            const words = resData.text.split(' ')
+            while (words[words.length - 1].match(/^(https:\/\/t.co\/)([a-z]|[A-Z]|[0-9]){10}$/g)) {
+              words.pop()
+            }
+
+            if (resData.conversation_id === data.id) this.emit('tweet', { data: {
+              ...data,
+              text: words.join(' '),
+              imageUrls: includes.media.map(m => m.url),
+            }, rule })
+
           }).catch(e => {
             console.log(e)
           })

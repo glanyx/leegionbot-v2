@@ -17,6 +17,8 @@ export class Tweet {
     const guild = discordClient.guilds.cache.get(rule.guildId)
     if (!guild) return
 
+    const firstImage = data.imageUrls.shift()
+
     GuildSetting.fetchByGuildId(guild.id)
       .then(async setting => {
         if (!setting) return
@@ -26,10 +28,12 @@ export class Tweet {
         const embed = new MessageEmbed()
           .setColor('#1DA1F2')
           .setTitle(`New Tweet by @${rule.from}`)
-          .setDescription(`${data.text}\n\n[View on Twitter](https://twitter.com/${rule.from}/status/${data.id})`)
+          .setDescription(`${data.text}${data.imageUrls.length > 0 ? `\n\n${data.imageUrls.map((url, i) => `[Image ${i + 1}](${url})`).join('\n')}` : ''}\n\n[View on Twitter](https://twitter.com/${rule.from}/status/${data.id})`)
           .setFooter({ text: 'Via Twitter' })
           .setTimestamp()
-          .setURL(`https://twitter.com/${rule.from}`);
+          .setURL(`https://twitter.com/${rule.from}`)
+
+        if (firstImage) embed.setImage(firstImage);
 
         (channel as TextChannel).send({ embeds: [embed] })
 
