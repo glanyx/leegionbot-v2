@@ -14,6 +14,12 @@ RUN apk add --no-cache \
   pangomm-dev \
   libjpeg-turbo-dev \
   freetype-dev \
+  fontconfig \
+  ;
+
+RUN sudo \
+  fc-cache -f && \
+  fc-match Arial \
   ;
 
 RUN mkdir -p /usr/src/bot
