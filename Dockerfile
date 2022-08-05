@@ -2,17 +2,18 @@ FROM node:16.16.0-alpine
 
 RUN apk add --no-cache \
   sudo \
-  curl \
-  build-base \
+  python3 \
   g++ \
-  libpng \
-  libpng-dev \
+  build-base \
+  cairo-dev \
   jpeg-dev \
   pango-dev \
-  cairo-dev \
-  giflib-dev \
-  python3 \
   musl-dev \
+  giflib-dev \
+  pixman-dev \
+  pangomm-dev \
+  libjpeg-turbo-dev \
+  freetype-dev \
   ;
 
 RUN mkdir -p /usr/src/bot
