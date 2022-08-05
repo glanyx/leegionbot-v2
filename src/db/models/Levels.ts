@@ -33,7 +33,7 @@ export class Levels extends DBModel<ILevels> {
   public static fetchUserData(guildId: string, userId: string) {
     return super.fetchOne<Levels>(`
       SELECT l.*, r.rank FROM ${collection} l LEFT JOIN (
-        SELECT "guildId", "userId", ROW_NUMBER() OVER(ORDER BY exp DESC) AS rank FROM ${collection}
+        SELECT "guildId", "userId", ROW_NUMBER() OVER(ORDER BY exp DESC) AS rank FROM ${collection} WHERE "guildId" = '${guildId}'
       ) AS r ON l."userId" = r."userId" AND l."guildId" = r."guildId"
       WHERE l."userId" = '${userId}'
       AND l."guildId" = '${guildId}'

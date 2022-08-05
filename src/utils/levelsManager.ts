@@ -49,9 +49,9 @@ export class LevelsManager {
 
     const count = memberItem.postCount
     if (count < MAX_MESSAGES) {
-      const min = 5 * count ** -1
-      const max = 15 * count ** -1
-
+      const min = 5 * (count + 1) ** -1
+      const max = 15 * (count + 1) ** -1
+      
       const rand = Math.ceil(Math.random() * (max - min) + min)
       Levels.addExp(guild.id, member.id, rand).catch(e => logger.debug(e.message))
       memberItem.postCount++
