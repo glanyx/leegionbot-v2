@@ -187,9 +187,13 @@ export class ModActions {
       const settings = guildSettings.get(mute.guildId)
       if (!settings || !guild) return
       const { mutedRoleId } = settings
-      const member = guild.members.cache.get(mute.targetId) || await guild.members.fetch(mute.targetId)
+      const member = guild.members.cache.get(mute.targetId) || await guild.members.fetch(mute.targetId).catch(e => logger.debug(e.message))
       const role = guild.roles.cache.get(mutedRoleId) || await guild.roles.fetch(mutedRoleId)
-      if (!member || !role) return
+      if (!member || !role) {
+        const now = new Date()
+        if (mute.muteTime && now > mute.muteTime) mute.unmute().update()
+        return
+      }
       if (!mute.muteTime) return
 
       if (!GuildMap.has(guild.id)) {
