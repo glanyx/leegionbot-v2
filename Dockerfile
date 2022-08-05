@@ -1,4 +1,4 @@
-FROM node:10.16.0-alpine
+FROM node:18-alpine3.15
 
 RUN apk add --no-cache \
   sudo \
