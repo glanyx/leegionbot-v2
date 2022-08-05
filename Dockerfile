@@ -1,5 +1,8 @@
 FROM node:latest
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
