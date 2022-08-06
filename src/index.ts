@@ -12,6 +12,8 @@ import * as Sentry from '@sentry/node'
 import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager, LevelsManager } from './utils'
 import { ClientRoleManager } from './managers'
 
+import { registerFont } from 'canvas'
+
 const client = new Client({
   intents: [
     'GUILDS',
@@ -42,6 +44,9 @@ twitterClient.addRule('453582519087005696', {
 // })
 
 process.title = 'leegionbot'
+
+registerFont('./src//assets/Roboto-Regular.ttf', { family: 'Roboto' })
+registerFont('./src//assets/Roboto-Bold.ttf', { family: 'Roboto Bold' })
 
 if (process.env.SENTRY_DSN) {
   logger.info('Establishing connection to Sentry..')

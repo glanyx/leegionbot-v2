@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, MessageEmbed } from "discord.js"
+import { Help, Config, IExecuteArgs } from "discord.js"
 import { Levels } from '../../db/models'
 import { levels } from '../../utils'
 
@@ -105,14 +105,14 @@ export class Rank {
     ctx.loadingBar(150, 100, 330, 30, 30, remainder / expLim)
   
     // Ranking text
-    ctx.font = 'bold 20pt Arial'
+    ctx.font = 'bold 20pt Roboto Bold'
     ctx.textAlign = 'end'
     ctx.fillStyle = '#fff'
     ctx.fillText(`Rank #${userLevel ? userLevel.rank : 'Unknown'} - Level ${level}`, 470, 50)
   
     // Name and xp text
     ctx.textAlign = 'start'
-    ctx.font = 'bold 14pt Arial'
+    ctx.font = 'bold 14pt Roboto Bold'
     ctx.fillText(`${author.username}#${author.discriminator}`, 155, 92)
     ctx.textAlign = 'end'
     ctx.fillText(`${remainder}/${expLim}`, 470, 92)
