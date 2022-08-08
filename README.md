@@ -1,6 +1,6 @@
 # LeegionBot
 
-<a href="https://discord.gg/leeandlie"><img src="https://img.shields.io/discord/608721322096328736.svg?style=flat&label=Join%20Community&color=7289DA" alt="Join Community Badge"/></a>
+<a href="https://discord.gg/leeandlie"><img src="https://img.shields.io/discord/453582519087005696.svg?style=flat&label=Join%20Community&color=7289DA" alt="Join Community Badge"/></a>
 <a href="https://twitter.com/leeandlie" ><img src="https://img.shields.io/twitter/follow/leeandlie.svg?style=social" /> </a>
 
 
@@ -19,8 +19,8 @@ Commands can be found by typing !help.
 Users can contact the moderation team by DMing the bot directly.
 
 ## Special Mentions
-[log4js](https://www.npmjs.com/package/log4js) - Logging system used for tracking errors and debugging.
-[Sentry](https://sentry.io/welcome/) - Alerting system for errors.
-[PostgreSQL](https://www.postgresql.org/) - Database used.
-[AWS](https://aws.amazon.com/) - Services used for hosting.
-[discord.js](https://discord.js.org/#/) - Main library used for connecting to Discord's API
+- [log4js](https://www.npmjs.com/package/log4js) - Logging system used for tracking errors and debugging.
+- [Sentry](https://sentry.io/welcome/) - Alerting system for errors.
+- [PostgreSQL](https://www.postgresql.org/) - Database used.
+- [AWS](https://aws.amazon.com/) - Services used for hosting.
+- [discord.js](https://discord.js.org/#/) - Main library used for connecting to Discord's API
