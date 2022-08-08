@@ -13,7 +13,7 @@ LeegionBot is a bespoke Discord Bot, written in TypeScript, with the sole purpos
 
 LeegionBot is hosted on an ECS Fargate service, with database hosted through AWS RDS.
 
-# Usage
+## Usage
 Commands can be found by typing !help.
 
 Users can contact the moderation team by DMing the bot directly.
