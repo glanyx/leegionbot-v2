@@ -144,7 +144,10 @@ export class ModActions {
 
     const msg = await ModActions.notifyUser(member.user, `You were banned from the \`${guild.name}\` Discord server for the following reason:\n${reason}`).catch(_ => { return undefined })
 
-    member.ban({ reason: reason.length > 512 ? `${reason.substring(0, 510)}..` : reason })
+    member.ban({
+      reason: reason.length > 512 ? `${reason.substring(0, 510)}..` : reason,
+      days: 7
+    })
       .then(() => {
         ModActions.saveToDb(guild.id, user.id, member.id, ModeratorAction.BAN, reason)
           .then((action) => {
