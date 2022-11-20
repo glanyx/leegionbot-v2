@@ -1,4 +1,4 @@
-import { Client, GuildMember, MessageEmbed, TextChannel } from 'discord.js'
+import { Client, GuildMember, EmbedBuilder, TextChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
 
 export class GuildMemberUpdate {
@@ -18,7 +18,7 @@ export class GuildMemberUpdate {
       const channel = guild.channels.cache.get(memberLogChannelId) as TextChannel
       if (!channel) return
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setColor('#00dbff')
         .setAuthor({
           name: `${user.username}#${user.discriminator}`,
@@ -26,8 +26,15 @@ export class GuildMemberUpdate {
         })
         .setTitle(`Nickname Updated`)
         .setDescription(`${user}`)
-        .addField('Old Nickname', `${memberOld.nickname || '*None*'}`, true)
-        .addField('New Nickname', `${member.nickname || '*None*'}`, true)
+        .addFields({
+          name: 'Old Nickname',
+          value: `${memberOld.nickname || '*None*'}`,
+          inline: true
+        }, {
+          name: 'New Nickname',
+          value: `${member.nickname || '*None*'}`,
+          inline: true,
+        })
         .setTimestamp()
   
       channel.send({ embeds: [embed] })

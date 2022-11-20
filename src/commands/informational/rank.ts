@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from "discord.js"
 import { Levels } from '../../db/models'
 import { levels } from '../../utils'
 
@@ -33,7 +33,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'SEND_MESSAGES'
+    PermissionFlagsBits.SendMessages
   ]
 }
 
@@ -87,7 +87,7 @@ export class Rank {
 
 
     // Avatar
-    const avatarImage = await loadImage(author.displayAvatarURL({ format: 'png' }))
+    const avatarImage = await loadImage(author.displayAvatarURL({ extension: 'png' }))
     const aCanvas = createCanvas(100, 100)
     const aCtx = aCanvas.getContext('2d')
 
@@ -100,26 +100,26 @@ export class Rank {
     ctx.clip()
     ctx.drawImage(aCanvas, 0, 0, 100, 100, 25, 25, AVATAR.radius * 2, AVATAR.radius * 2)
     ctx.restore()
-    
+
     // XP bar
     ctx.loadingBar(150, 100, 330, 30, 30, remainder / expLim)
-  
+
     // Ranking text
     ctx.font = 'bold 20pt Roboto Bold'
     ctx.textAlign = 'end'
     ctx.fillStyle = '#fff'
     ctx.fillText(`Rank #${userLevel ? userLevel.rank : 'Unknown'} - Level ${level}`, 470, 50)
-  
+
     // Name and xp text
     ctx.textAlign = 'start'
     ctx.font = 'bold 14pt Roboto Bold'
     ctx.fillText(`${author.username}#${author.discriminator}`, 155, 92)
     ctx.textAlign = 'end'
     ctx.fillText(`${remainder}/${expLim}`, 470, 92)
-  
-    const buffer = canvas.toBuffer()
-  
-    channel.send({
+
+    const buffer = canvas.toBuffer();
+
+    (channel as any).send({
       files: [{
         attachment: buffer,
         name: `rank-${author.id}.png`

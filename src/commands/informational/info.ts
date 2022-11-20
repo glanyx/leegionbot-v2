@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, MessageEmbed } from "discord.js"
+import { Help, Config, IExecuteArgs, EmbedBuilder, PermissionFlagsBits } from "discord.js"
 import { formatDiff } from '../../utils'
 import os from 'os'
 
@@ -12,7 +12,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'SEND_MESSAGES'
+    PermissionFlagsBits.SendMessages
   ]
 }
 
@@ -33,14 +33,26 @@ export class Info {
       const totalDiff = endMeasure.total - startMeasure.total
       const idleDiff = endMeasure.idle - startMeasure.idle
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setTimestamp()
-        .addField('Bot Version', `${process.env.VERSION}`, true)
-        .addField('CPU Usage (%)', `${(1 - idleDiff / totalDiff).toFixed(1)}%`, true)
-        .addField('Memory Usage', `${(Math.round(process.memoryUsage().rss) / 1024 / 1024).toFixed(1)} MB`, true)
-        .addField('Bot Uptime', formatDiff(client.uptime || 0))
-  
-      channel.send({ embeds: [embed] })
+        .addFields({
+          name: 'Bot Version',
+          value: `${process.env.VERSION}`,
+          inline: true,
+        }, {
+          name: 'CPU Usage (%)',
+          value: `${(1 - idleDiff / totalDiff).toFixed(1)}%`,
+          inline: true,
+        }, {
+          name: 'Memory Usage',
+          value: `${(Math.round(process.memoryUsage().rss) / 1024 / 1024).toFixed(1)} MB`,
+          inline: true,
+        }, {
+          name: 'Bot Uptime',
+          value: formatDiff(client.uptime || 0),
+        });
+
+      (channel as any).send({ embeds: [embed] })
 
       clearTimeout(timeout)
     }, 1000)

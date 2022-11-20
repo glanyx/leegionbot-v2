@@ -1,4 +1,4 @@
-import { Help, Config as CommandConfig, IExecuteArgs } from "discord.js"
+import { Help, Config as CommandConfig, IExecuteArgs, PermissionFlagsBits } from "discord.js"
 import { GuildSetting } from '../../../db/models'
 import { logger } from '../../../utils'
 
@@ -12,12 +12,12 @@ const logHelp: Help = {
 
 const logConfigs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
 export class Logs {
-  
+
   public static async run({
     message
   }: IExecuteArgs) {
@@ -25,7 +25,7 @@ export class Logs {
     const { guild, channel } = message
     if (!guild) return
 
-    channel.send('Please use subcommands to configure your server.')
+    (channel as any).send('Please use subcommands to configure your server.')
 
   }
 
@@ -56,7 +56,7 @@ const messageLogHelp: Help = {
 
 const messageLogConfigs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -66,7 +66,7 @@ const messageLogAlias = [
 ]
 
 class MessageLogs {
-  
+
   public static async run({
     message,
     args
@@ -82,7 +82,7 @@ class MessageLogs {
     } else {
       const channelId = args[0]
       channel = guild.channels.cache.get(channelId)
-      if (!channel) return message.channel.send('Unable to find a channel by that ID!')
+      if (!channel) return (message.channel as any).send('Unable to find a channel by that ID!')
       await channel.fetch()
     }
 
@@ -90,9 +90,9 @@ class MessageLogs {
     const setting = await GuildSetting.fetchByGuildId(guild.id)
     if (!setting) return
     logger.debug(`Updating message logs in Guild ID ${guild.id} to Channel ID ${channel.id}`)
-    await setting.setMessageLogChannel(channel.id).update()
+    await setting.setMessageLogChannel(channel.id).update();
 
-    message.channel.send(`Successfully set the message logs channel to <#${channel.id}>`)
+    (message.channel as any).send(`Successfully set the message logs channel to <#${channel.id}>`)
 
   }
 
@@ -123,7 +123,7 @@ const memberLogHelp: Help = {
 
 const memberLogConfigs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -133,7 +133,7 @@ const memberLogAlias = [
 ]
 
 class MemberLogs {
-  
+
   public static async run({
     message,
     args
@@ -149,7 +149,7 @@ class MemberLogs {
     } else {
       const channelId = args[0]
       channel = guild.channels.cache.get(channelId)
-      if (!channel) return message.channel.send('Unable to find a channel by that ID!')
+      if (!channel) return (message.channel as any).send('Unable to find a channel by that ID!')
       await channel.fetch()
     }
 
@@ -157,9 +157,9 @@ class MemberLogs {
     const setting = await GuildSetting.fetchByGuildId(guild.id)
     if (!setting) return
     logger.debug(`Updating member logs in Guild ID ${guild.id} to Channel ID ${channel.id}`)
-    await setting.setMemberLogChannel(channel.id).update()
+    await setting.setMemberLogChannel(channel.id).update();
 
-    message.channel.send(`Successfully set the member logs channel to <#${channel.id}>`)
+    (message.channel as any).send(`Successfully set the member logs channel to <#${channel.id}>`)
 
   }
 
@@ -190,7 +190,7 @@ const modLogHelp: Help = {
 
 const modLogConfigs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -199,7 +199,7 @@ const modLogAlias = [
 ]
 
 class ModLogs {
-  
+
   public static async run({
     message,
     args
@@ -215,7 +215,7 @@ class ModLogs {
     } else {
       const channelId = args[0]
       channel = guild.channels.cache.get(channelId)
-      if (!channel) return message.channel.send('Unable to find a channel by that ID!')
+      if (!channel) return (message.channel as any).send('Unable to find a channel by that ID!')
       await channel.fetch()
     }
 
@@ -223,9 +223,9 @@ class ModLogs {
     const setting = await GuildSetting.fetchByGuildId(guild.id)
     if (!setting) return
     logger.debug(`Updating mod logs in Guild ID ${guild.id} to Channel ID ${channel.id}`)
-    await setting.setModLogChannel(channel.id).update()
+    await setting.setModLogChannel(channel.id).update();
 
-    message.channel.send(`Successfully set the mod logs channel to <#${channel.id}>`)
+    (message.channel as any).send(`Successfully set the mod logs channel to <#${channel.id}>`)
 
   }
 

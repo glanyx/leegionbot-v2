@@ -1,4 +1,4 @@
-import { MessageEmbed, User } from 'discord.js'
+import { EmbedBuilder, User } from 'discord.js'
 import { Suggestion } from '../db/models'
 
 export enum SuggestionStatus {
@@ -24,21 +24,34 @@ export const updateSuggestion = (args: SuggestionArgs) => {
 
   const { user, suggestion } = args
 
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
+    .setTitle(`Suggestion by ${ user ? `${user.username}#${user.discriminator}` : `${suggestion.userId}` }`)
     .setDescription(suggestion.updatedText || suggestion.text)
-    .setFooter(`Suggestion ID: ${suggestion.id}`)
-    .addField('Status', `${suggestion.status.capitalize()}`, true)
+    .setFooter({ text: `Suggestion ID: ${suggestion.id}` })
+    .addFields({
+      name: 'Status',
+      value: `${suggestion.status.capitalize()}`,
+      inline: true
+    }, {
+      name: 'Author',
+      value: user ? `${user}` : `${suggestion.userId}`,
+      inline: true
+    })
 
-  if (user) {
-    embed.setTitle(`Suggestion by ${user.username}#${user.discriminator}`)
-    embed.addField('Author', `${user}`, true)
-  } else {
-    embed.setTitle(`Suggestion by ${suggestion.userId}`)
-    embed.addField('Author', `${suggestion.userId}`, true)
-  }
-  if (args.editor) embed.addField(`Edited by`, `${args.editor}`, true)
-  if (args.mod) embed.addField(`${args.suggestion.status.capitalize()} by`, `${args.mod}`, true)
-  if (args.suggestion.reason) embed.addField('Comment', args.suggestion.reason)
+  if (args.editor) embed.addFields({
+    name: `Edited by`,
+    value: `${args.editor}`,
+    inline: true
+  })
+  if (args.mod) embed.addFields({
+    name: `${args.suggestion.status.capitalize()} by`,
+    value: `${args.mod}`,
+    inline: true
+  })
+  if (args.suggestion.reason) embed.addFields({
+    name: 'Comment',
+    value: args.suggestion.reason
+  })
 
   switch (args.suggestion.status) {
     case SuggestionStatus.SUBMITTED:

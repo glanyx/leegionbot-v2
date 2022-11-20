@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, MessageEmbed, GuildMember, TextChannel } from "discord.js"
+import { Help, Config, IExecuteArgs, EmbedBuilder, GuildMember, TextChannel } from "discord.js"
 import { format, logger } from '../../utils'
 
 enum PresenceStatus {
@@ -47,7 +47,7 @@ export class User {
             logger.debug(`Unable to find member for arguments ${arg} in Guild ID ${guild.id}`)
           })
         }
-        if (!foundMember) return channel.send(`Unable to find member for arguments ${arg}`)
+        if (!foundMember) return (channel as any).send(`Unable to find member for arguments ${arg}`)
         sendEmbed(foundMember, (channel as TextChannel))
       })
     } else {
@@ -59,7 +59,7 @@ export class User {
   public static get help() {
     return help
   }
-  
+
   public static get configs() {
     return configs
   }
@@ -72,25 +72,50 @@ const sendEmbed = (member: GuildMember, channel: TextChannel) => {
   const roleString = member.roles.cache.size > 1 ? member.roles.cache.map(role => {
     if (role.name !== "@everyone") {
       return `${role}`
-    } 
+    }
   }).join('\n') : '*None*'
-      
+
   const defaultImage = 'https://discord.com/assets/6debd47ed13483642cf09e832ed0bc1b.png'
 
-  const embed = new MessageEmbed()
-    .setAuthor(member.user.tag, member.user.avatarURL() || defaultImage)
+  const embed = new EmbedBuilder()
+    .setAuthor({
+      name: member.user.tag,
+      iconURL: member.user.avatarURL() || defaultImage
+    })
     .setDescription(`${member.user}`)
     .setThumbnail(member.user.avatarURL() || defaultImage)
     .setColor(member.roles.highest.color)
     .setTimestamp()
-    .setFooter(`${member.user.username} | ID: ${member.user.id}`)
-    .addField('User', `${member.user.username}`, true)
-    .addField('Nickname', member.nickname || '*None*', true)
-    .addField('User ID', member.user.id, true)
-    .addField('Status', member.presence ? PresenceStatus[member.presence.status] : 'Unknown', true)
-    .addField('Creation Date', format(member.user.createdAt), true)
-    .addField('Join Date', member.joinedAt ? format(member.joinedAt) : 'Unknown', true)
-    .addField('Roles', roleString)
+    .setFooter({ text: `${member.user.username} | ID: ${member.user.id}` })
+    .addFields({
+      name: 'User',
+      value: `${member.user.username}`,
+      inline: true,
+    }, {
+      name: 'Nickname',
+      value: member.nickname || '*None*',
+      inline: true,
+    }, {
+      name: 'User ID',
+      value: member.user.id,
+      inline: true,
+    }, {
+      name: 'Status',
+      value: member.presence ? PresenceStatus[member.presence.status] : 'Unknown',
+      inline: true,
+    }, {
+      name: 'Creation Date',
+      value: format(member.user.createdAt),
+      inline: true,
+    }, {
+      name: 'Join Date',
+      value: member.joinedAt ? format(member.joinedAt) : 'Unknown',
+      inline: true,
+    }, {
+      name: 'Roles',
+      value: roleString,
+      inline: true,
+    })
 
   channel.send({ embeds: [embed] })
 

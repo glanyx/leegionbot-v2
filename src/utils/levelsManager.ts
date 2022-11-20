@@ -1,4 +1,4 @@
-import { Client, Message, GuildMember } from 'discord.js'
+import { Client, Message, GuildMember, ChannelType } from 'discord.js'
 import { logger } from '.'
 import { Levels } from '../db/models'
 
@@ -22,7 +22,7 @@ export class LevelsManager {
 
     client.on('messageCreate', (message) => {
       if (message.author.bot) return
-      if (message.channel.type !== 'GUILD_TEXT') return
+      if (message.channel.type !== ChannelType.GuildText) return
       this.processMessage(message)
     })
   }

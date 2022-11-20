@@ -1,4 +1,4 @@
-import { Client, MessageEmbed, Guild, GuildMember, GuildChannel, TextChannel, User, Role } from 'discord.js'
+import { Client, EmbedBuilder, Guild, GuildMember, GuildChannel, TextChannel, User, Role, ChannelType, Colors } from 'discord.js'
 import { ModLog, ModeratorAction, GuildSetting } from '../db/models'
 import { logger, formatDiff } from '.'
 
@@ -44,17 +44,29 @@ export class ModActions {
     const { modLogChannelId } = settings
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been warned.`)
-      .addField('User', `<@${member.id}>`, true)
-      .addField('Actioned by', `${user}`, true)
-      .addField('Reason', reason)
+      .addFields({
+        name: 'User',
+        value: `${member}`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: `${user}`,
+        inline: true,
+      }, {
+        name: 'Reason',
+        value: reason,
+      })
       .setTimestamp()
       .setColor('#FFA500')
 
     const msg = await ModActions.notifyUser(member.user, `You were warned in the \`${guild.name}\` Discord server for the following reason:\n${reason}`).catch(_ => { return undefined })
-    embed.addField('Received DM?', msg ? 'Yes' : 'No')
+    embed.addFields({
+      name: 'Received DM?',
+      value: msg ? 'Yes' : 'No'
+    })
 
     ModActions.saveToDb(guild.id, user.id, member.id, ModeratorAction.WARN, reason)
       .then((action) => {
@@ -64,10 +76,13 @@ export class ModActions {
         logger.error(`Error saving warn to DB\n${err.message}`)
         
         embed.setTitle(`ID *Unknown* | Warn`)
-        embed.addField('Error', 'Member was warned, however there was an error saving this data.')
+        embed.addFields({
+          name: 'Error',
+          value: 'Member was warned, however there was an error saving this data.'
+        })
       })
       .finally(() => {
-        if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
+        if (logChannel && logChannel.type === ChannelType.GuildText) ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
       })
   }
 
@@ -78,19 +93,28 @@ export class ModActions {
     if (!settings) return
 
     if (!member.kickable) {
-      if (sourceChannel.isText()) sourceChannel.send('Unable to kick user.')
+      if (sourceChannel.type === ChannelType.GuildText) (sourceChannel as TextChannel).send('Unable to kick user.')
       return
     }
 
     const { modLogChannelId } = settings
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been kicked.`)
-      .addField('User', `<@${member.id}>`, true)
-      .addField('Actioned by', `${user}`, true)
-      .addField('Reason', reason)
+      .addFields({
+        name: 'User',
+        value: `${member}`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: `${user}`,
+        inline: true,
+      }, {
+        name: 'Reason',
+        value: reason,
+      })
       .setTimestamp()
       .setColor('#F7CAC9')
 
@@ -106,16 +130,22 @@ export class ModActions {
             logger.error(`Error saving kick to DB\n${err.message}`)
             
             embed.setTitle(`ID *Unknown* | Kick`)
-            embed.addField('Error', 'Member was kicked, however there was an error saving this data.')
+            embed.addFields({
+              name: 'Error',
+              value: 'Member was kicked, however there was an error saving this data.'
+            })
           })
           .finally(() => {
-            embed.addField('Received DM?', msg ? 'Yes' : 'No')
-            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
+            embed.addFields({
+              name: 'Received DM?',
+              value: msg ? 'Yes' : 'No'
+            })
+            if (logChannel && logChannel.type === ChannelType.GuildText) ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
           })
       })
       .catch(() => {
         if (msg) msg.delete()
-        if (sourceChannel.isText()) sourceChannel.send(`Unable to kick user <@${member}>.${msg ? ' **User may have seen notification of their kick.**' : ''} Please try again later.`)
+        if (sourceChannel.isTextBased()) (sourceChannel as TextChannel).send(`Unable to kick user <@${member}>.${msg ? ' **User may have seen notification of their kick.**' : ''} Please try again later.`)
       })
   }
 
@@ -126,19 +156,28 @@ export class ModActions {
     if (!settings) return
 
     if (!member.bannable) {
-      if (sourceChannel.isText()) sourceChannel.send('Unable to ban user.')
+      if (sourceChannel.isTextBased()) (sourceChannel as TextChannel).send('Unable to ban user.')
       return
     }
 
     const { modLogChannelId } = settings
     const logChannel = guild.channels.cache.get(modLogChannelId) || await guild.channels.fetch(modLogChannelId)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been banned.`)
-      .addField('User', `<@${member.id}>`, true)
-      .addField('Actioned by', `${user}`, true)
-      .addField('Reason', reason)
+      .addFields({
+        name: 'User',
+        value: `${member}`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: `${user}`,
+        inline: true,
+      }, {
+        name: 'Reason',
+        value: reason,
+      })
       .setTimestamp()
       .setColor('#FF0000')
 
@@ -146,7 +185,7 @@ export class ModActions {
 
     member.ban({
       reason: reason.length > 512 ? `${reason.substring(0, 510)}..` : reason,
-      days: 7
+      deleteMessageSeconds: 604800
     })
       .then(() => {
         ModActions.saveToDb(guild.id, user.id, member.id, ModeratorAction.BAN, reason)
@@ -157,16 +196,22 @@ export class ModActions {
             logger.error(`Error saving ban to DB\n${err.message}`)
 
             embed.setTitle(`ID *Unknown* | Ban`)
-            embed.addField('Error', 'Member was banned, however there was an error saving this data.')
+            embed.addFields({
+              name: 'Error',
+              value: 'Member was banned, however there was an error saving this data.'
+            })
           })
           .finally(() => {
-            embed.addField('Received DM?', msg ? 'Yes' : 'No')
-            if (logChannel && logChannel.type === 'GUILD_TEXT') ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
+            embed.addFields({
+              name: 'Received DM?',
+              value: msg ? 'Yes' : 'No'
+            })
+            if (logChannel && logChannel.type === ChannelType.GuildText) ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
           })
       })
       .catch(() => {
         if (msg) msg.delete()
-        if (sourceChannel.isText()) sourceChannel.send(`Unable to ban user <@${member}>.${msg ? ' **User may have seen notification of their ban.**' : ''} Please try again later.`)
+        if (sourceChannel.isTextBased()) (sourceChannel as TextChannel).send(`Unable to ban user <@${member}>.${msg ? ' **User may have seen notification of their ban.**' : ''} Please try again later.`)
       })
   }
 
@@ -241,31 +286,50 @@ export class ModActions {
 
     const memberInstance = instance.mutes.get(member.id)
     if (memberInstance && memberInstance.endDatetime > endDatetime) {
-      if (sourceChannel && sourceChannel.isText()) sourceChannel.send(`There is already a mute active for this user that lasts longer than the specified duration!`).then(msg => setTimeout(() => msg.delete(), 5000))
+      if (sourceChannel && sourceChannel.isTextBased()) (sourceChannel as TextChannel).send(`There is already a mute active for this user that lasts longer than the specified duration!`).then(msg => setTimeout(() => msg.delete(), 5000))
       return
     }
 
     if (!memberInstance) member.roles.add(instance.mutedRole).catch((e) => logger.warn(e))
     if (memberInstance && memberInstance.data) ModActions.dispose(memberInstance.data)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setDescription(`This user has been muted.`)
-      .addField('User', `<@${member.id}>`, true)
-      .addField('Actioned by', `${user}`, true)
-      .addField('Reason', reason)
+      .addFields({
+        name: 'User',
+        value: `${member}`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: `${user}`,
+        inline: true,
+      }, {
+        name: 'Reason',
+        value: reason,
+      })
       .setTimestamp()
       .setColor('#FFA500')
 
-    const memberEmbed = new MessageEmbed()
+    const memberEmbed = new EmbedBuilder()
       .setTitle('Muted!')
       .setColor('#FFA500')
       .setDescription(`You were muted in the \`${guild.name}\` Discord server!`)
-      .addField('Reason', reason, true)
-      .addField('Duration', formatDiff(duration), true)
+      .addFields({
+        name: 'Reason',
+        value: reason,
+        inline: true
+      }, {
+        name: 'Duration',
+        value: formatDiff(duration),
+        inline: true
+      })
 
     const msg = await ModActions.notifyUserEmbed(member.user, memberEmbed).catch(_ => { return undefined })
-    embed.addField('Received DM?', msg ? 'Yes' : 'No')
+    embed.addFields({
+      name: 'Received DM?',
+      value: msg ? 'Yes' : 'No'
+    })
 
     ModActions.saveToDb(guild.id, user.id, member.id, ModeratorAction.MUTE, reason, endDatetime)
       .then((action) => {
@@ -276,12 +340,15 @@ export class ModActions {
         logger.error(`Error saving mute to DB\n${err}`)
         
         embed.setTitle(`ID *Unknown* | Mute`)
-        embed.addField('Error', 'Member was muted, however there was an error saving this data.')
+        embed.addFields({
+          name: 'Error',
+          value: 'Member was muted, however there was an error saving this data.'
+        })
         instance.mutes.set(member.id, { member, data: undefined, endDatetime })
       })
       .finally(() => {
-        if (logChannel && logChannel.type === 'GUILD_TEXT') {
-          if (sourceChannel && sourceChannel.isText()) {
+        if (logChannel && logChannel.type === ChannelType.GuildText) {
+          if (sourceChannel && sourceChannel.isTextBased()) {
             return ModActions.notifyGuild(logChannel, embed, (sourceChannel as TextChannel))
           }
           ModActions.notifyGuild(logChannel, embed)
@@ -313,17 +380,26 @@ export class ModActions {
       logger.warn(`Couldn't DM user ${member.id} regarding unmute in Guild ${guild.id}`)
     })
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({ name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, iconURL: member.user.displayAvatarURL() })
       .setTitle(`ID ${item?.id || '*Unknown*'} | Unmute`)
       .setDescription(`This user has been unmuted.`)
-      .addField('User', `${member}`, true)
-      .addField('Actioned by', user ? `${user}` : 'Auto unmute', true)
-      .addField('Received DM?', `${msg ? 'Yes' : 'No'}`)
+      .addFields({
+        name: 'User',
+        value: `${member}`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: user ? `${user}` : 'Auto unmute',
+        inline: true,
+      }, {
+        name: 'Received DM?',
+        value: msg ? 'Yes' : 'No',
+      })
       .setTimestamp()
       .setColor('#00ff00')
 
-    if (logChannel?.isText()) logChannel.send({ embeds: [embed] })
+    if (logChannel?.isTextBased()) (logChannel as TextChannel).send({ embeds: [embed] })
 
   }
 
@@ -334,7 +410,7 @@ export class ModActions {
     })
   }
 
-  private static notifyGuild = (channel: TextChannel, embed: MessageEmbed, backup?: TextChannel) => {
+  private static notifyGuild = (channel: TextChannel, embed: EmbedBuilder, backup?: TextChannel) => {
     channel.send({ embeds: [embed] })
     if (backup) backup.send({ embeds: [embed] }).then(m => setTimeout(() => m.delete(), 10000))
   }
@@ -343,7 +419,7 @@ export class ModActions {
     return user.send(content)
   }
 
-  private static notifyUserEmbed = (user: User, embed: MessageEmbed) => {
+  private static notifyUserEmbed = (user: User, embed: EmbedBuilder) => {
     return user.send({ embeds: [embed] })
   }
 
@@ -366,7 +442,7 @@ export class ModActions {
     // Create a new role
     const newRole = await guild.roles.create({
       name: 'Muted',
-      color: 'RED',
+      color: Colors.Red,
       permissions: [],
       reason: 'Automated Role Creation'
     })
@@ -375,11 +451,11 @@ export class ModActions {
 
     guild.channels.cache.forEach(async channel => {
       newRole && (channel as GuildChannel).permissionOverwrites.create(newRole, {
-        SEND_MESSAGES: false,
-        SEND_MESSAGES_IN_THREADS: false,
-        ATTACH_FILES: false,
-        ADD_REACTIONS: false,
-        SPEAK: false
+        SendMessages: false,
+        SendMessagesInThreads: false,
+        AttachFiles: false,
+        AddReactions: false,
+        Speak: false
       })
     })
 

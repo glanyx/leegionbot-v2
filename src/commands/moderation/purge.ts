@@ -1,9 +1,9 @@
-import { Help, Config, IExecuteArgs, TextChannel } from "discord.js"
+import { Help, Config, IExecuteArgs, TextChannel, PermissionFlagsBits, ChannelType, Message } from "discord.js"
 import { logger } from "../../utils"
 
 const configs: Config = {
   permissions: [
-    'MANAGE_NICKNAMES'
+    PermissionFlagsBits.ManageNicknames
   ]
 }
 
@@ -29,7 +29,7 @@ export class Purge {
     if (!guild) return
 
     if (!args[0]) {
-      channel.send('Please specify an amount of messages to delete.').then(msg => setTimeout(() => msg.delete(), 5000))
+      (channel as any).send('Please specify an amount of messages to delete.').then((msg: Message) => setTimeout(() => msg.delete(), 5000))
       return
     }
 
@@ -37,21 +37,21 @@ export class Purge {
     const cycles = Math.floor(total / 100)
     const remainder = total % 100
 
-    if (channel.type === 'GUILD_TEXT') {
+    if (channel.type === ChannelType.GuildText) {
 
       for (let i = 0; i < cycles; i++) {
-        (channel as TextChannel).bulkDelete(100)
+        (channel as any).bulkDelete(100)
       }
 
-      (channel as TextChannel).bulkDelete(remainder)
-        .then(() => channel.send(`**${total - 1}** messages deleted!`)
-          .then(msg => setTimeout(() => msg.delete(), 5000))
-          .catch(e => {
+      (channel as any).bulkDelete(remainder)
+        .then(() => (channel as any).send(`**${total - 1}** messages deleted!`)
+          .then((msg: Message) => setTimeout(() => msg.delete(), 5000))
+          .catch((e: Error) => {
             logger.error(e)
           })
         )
-        .catch(e => {
-          channel.send(`Something went wrong purging ${args[0]} messages!`).then(msg => setTimeout(() => msg.delete(), 5000))
+        .catch((e: Error) => {
+          (channel as any).send(`Something went wrong purging ${args[0]} messages!`).then((msg: Message) => setTimeout(() => msg.delete(), 5000))
           logger.error(e)
         })
 

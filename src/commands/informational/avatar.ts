@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, MessageEmbed, GuildMember, TextChannel } from "discord.js"
+import { Help, Config, IExecuteArgs, EmbedBuilder, GuildMember, TextChannel } from "discord.js"
 import { logger } from '../../utils'
 
 const help: Help = {
@@ -39,7 +39,7 @@ export class Avatar {
             logger.debug(`Unable to find member for arguments ${arg} in Guild ID ${guild.id}`)
           })
         }
-        if (!foundMember) return channel.send(`Unable to find member for arguments ${arg}`)
+        if (!foundMember) return (channel as any).send(`Unable to find member for arguments ${arg}`)
         sendEmbed(foundMember, (channel as TextChannel))
       })
     } else {
@@ -51,7 +51,7 @@ export class Avatar {
   public static get help() {
     return help
   }
-  
+
   public static get configs() {
     return configs
   }
@@ -59,15 +59,17 @@ export class Avatar {
 }
 
 const sendEmbed = (member: GuildMember, channel: TextChannel) => {
-      
+
   const defaultImage = 'https://discord.com/assets/6debd47ed13483642cf09e832ed0bc1b.png'
 
-  const embed = new MessageEmbed()
-    .setAuthor(`${member.user.username}#${member.user.discriminator}`)
-    .setImage(member.user.avatarURL({ size: 256, format: 'png' }) || defaultImage)
-    .setFooter(`${member.user.username} | ${member.user.id}`)
-    .setTimestamp()
+  const embed = new EmbedBuilder()
+    .setAuthor({
+      name: `${member.user.username}#${member.user.discriminator}`
+    })
+    .setImage(member.user.avatarURL({ size: 256, extension: 'png' }) || defaultImage)
+    .setFooter({ text: `${member.user.username} | ${member.user.id}` })
+    .setTimestamp();
 
-  channel.send({ embeds: [embed] })
+  (channel as any).send({ embeds: [embed] })
 
 }

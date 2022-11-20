@@ -1,4 +1,4 @@
-import { Client, GuildMember, Role, Message, MessageEmbed, User, TextChannel, GuildChannel } from 'discord.js'
+import { Client, GuildMember, Role, Message, EmbedBuilder, User, TextChannel, GuildChannel, Colors } from 'discord.js'
 import { GuildSetting, ModLog, ModeratorAction } from '../db/models'
 import { formatDiff } from '../utils'
 import logger from './logger'
@@ -80,13 +80,25 @@ export class MuteManager {
     if (!ch) return
     await ch.fetch()
 
-    const embed = new MessageEmbed()
-      .setAuthor(`${mute.member.user.username}#${mute.member.user.discriminator} [ID: ${mute.member.user.id}]`, mute.member.user.avatarURL() || undefined)
+    const embed = new EmbedBuilder()
+      .setAuthor({
+        name: `${mute.member.user.username}#${mute.member.user.discriminator} [ID: ${mute.member.user.id}]`,
+        iconURL: mute.member.user.avatarURL() || undefined
+      })
       .setTitle(`ID ${id} | Unmute`)
       .setDescription(`This user has been unmuted.`)
-      .addField('User', `<@${mute.member}>`, true)
-      .addField('Actioned by', user ? `<@${user}>` : 'Auto unmute', true)
-      .addField('Received DM?', `${success ? 'Yes' : 'No'}`)
+      .addFields({
+        name: 'User',
+        value: `${mute.member}`,
+        inline: true
+      }, {
+        name: 'Actioned by',
+        value: user ? `${user}` : 'Auto unmute',
+        inline: true,
+      }, {
+        name: 'Received DM?',
+        value: success ? 'Yes' : 'No',
+      })
       .setTimestamp()
       .setColor('#00ff00')
 
@@ -155,7 +167,7 @@ export class MuteManager {
 //         const ch = guild.channels.cache.get(logChannelId) as TextChannel
 //         if (!ch) return
 //         await ch.fetch()
-        
+
 //         const embed = new MessageEmbed()
 //           .setColor('#ff0000')
 //           .setAuthor(`${message.author.username || 'Unknown'}#${message.author.discriminator || '0000'}`, message.author.avatarURL() || undefined)
@@ -217,7 +229,7 @@ export class MuteManager {
 //       await ch.fetch()
 
 //       ch.send({ embeds: [embed] })
-    
+
 //     } else {
 //       const timeout = setTimeout(() => {
 //         messages.delete(message.id)
@@ -243,12 +255,12 @@ export const handleUserMute = async (member: GuildMember, reason: string, durati
   if (!settings) return
   const { mutedRoleId: roleId, alertOnAction } = settings
   let role = guild.roles.cache.get(roleId)
-  
+
   if (!role) {
     // Create a new role
     const newRole = await guild.roles.create({
       name: 'Muted',
-      color: 'RED',
+      color: Colors.Red,
       permissions: [],
       reason: 'Automated Role Creation'
     })
@@ -257,10 +269,10 @@ export const handleUserMute = async (member: GuildMember, reason: string, durati
       await channel.fetch()
 
       newRole && (channel as GuildChannel).permissionOverwrites.create(newRole, {
-        SEND_MESSAGES: false,
-        ATTACH_FILES: false,
-        ADD_REACTIONS: false,
-        SPEAK: false
+        SendMessages: false,
+        AttachFiles: false,
+        AddReactions: false,
+        Speak: false
       })
     })
 
@@ -281,12 +293,19 @@ export const handleUserMute = async (member: GuildMember, reason: string, durati
   if (!role) return
   member.roles.add(role)
 
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle('Muted!')
     .setColor('#FFA500')
     .setDescription(`You were muted in the \`${guild.name}\` Discord server!`)
-    .addField('Reason', reason, true)
-    .addField('Duration', formatDiff(duration), true)
+    .addFields({
+      name: 'Reason',
+      value: reason,
+      inline: true,
+    }, {
+      name: 'Duration',
+      value: formatDiff(duration),
+      inline: true,
+    })
 
   let success = false
   if (alertOnAction) {

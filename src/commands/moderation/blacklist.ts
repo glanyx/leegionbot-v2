@@ -1,5 +1,5 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
-import { Blacklist as BlacklistHelper, Paginator } from "../../utils"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from "discord.js"
+import { Blacklist as BlacklistHelper, OldPaginator } from "../../utils"
 
 const help: Help = {
   name: "blacklist",
@@ -13,7 +13,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'MANAGE_MESSAGES'
+    PermissionFlagsBits.ManageMessages
   ]
 }
 
@@ -25,8 +25,8 @@ export class Blacklist {
     message
   }: IExecuteArgs) {
 
-    const { channel } = message
-    channel.send("Please use subcommands to use this command!")
+    const { channel } = message;
+    (channel as any).send("Please use subcommands to use this command!")
 
   }
 
@@ -50,7 +50,7 @@ export class Blacklist {
 
 const aConfigs: Config = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -78,7 +78,7 @@ class Add {
     const { guild, channel } = message
     if (!guild) return
 
-    if (!args[0]) return channel.send('Please provided one or more words to blacklist!')
+    if (!args[0]) return (channel as any).send('Please provided one or more words to blacklist!')
 
     let text: string = ''
     if (args.length > 1) {
@@ -92,8 +92,8 @@ class Add {
       text = args[0]
     }
 
-    BlacklistHelper.add(guild.id, text)
-    channel.send(`Added \`${text}\` to the blacklist!`)
+    BlacklistHelper.add(guild.id, text);
+    (channel as any).send(`Added \`${text}\` to the blacklist!`)
 
   }
 
@@ -124,7 +124,7 @@ const dHelp: Help = {
 
 const dConfigs: Config = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -140,11 +140,11 @@ class Delete {
     const { guild, channel } = message
     if (!guild) return
 
-    if (!args[0]) return channel.send('Please provide a word to delete!')
+    if (!args[0]) return (channel as any).send('Please provide a word to delete!')
 
-    BlacklistHelper.remove(guild.id, args[0])
+    BlacklistHelper.remove(guild.id, args[0]);
 
-    channel.send('Deleted!')
+    (channel as any).send('Deleted!')
 
   }
 
@@ -174,7 +174,7 @@ const lHelp: Help = {
 
 const lConfigs: Config = {
   permissions: [
-    'MANAGE_MESSAGES'
+    PermissionFlagsBits.ManageMessages
   ]
 }
 
@@ -191,9 +191,9 @@ class List {
 
     const items = BlacklistHelper.list(guild.id)
 
-    if (!items || items.length === 0) return channel.send('No words are currently blacklisted!')
+    if (!items || items.length === 0) return (channel as any).send('No words are currently blacklisted!')
 
-    new Paginator({
+    new OldPaginator({
       title: 'List of Blacklisted words',
       channel,
       author,

@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, MessageReaction, User, MessageEmbed } from "discord.js"
+import { Help, Config, IExecuteArgs, MessageReaction, User, EmbedBuilder } from "discord.js"
 import { logger } from '../../utils'
 
 const help: Help = {
@@ -22,11 +22,11 @@ export class Shutdown {
 
     const { channel, author } = message
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Terminate v${process.env.VERSION}?`)
       .setDescription('This will log out the bot and terminate the current process. Is this okay?')
 
-    const embedMessage = await channel.send({ embeds: [embed] })
+    const embedMessage = await (channel as any).send({ embeds: [embed] })
     await embedMessage.react('507285695484919809')
     await embedMessage.react('507287289282428962')
 
@@ -38,15 +38,15 @@ export class Shutdown {
       max: 1
     })
 
-    confirmCollector.on('collect', async (reaction, userA) => {
+    confirmCollector.on('collect', async (reaction: MessageReaction, userA: User) => {
       confirmCollector.stop()
 
       if (reaction.emoji.id === '507287289282428962') {
-        embedMessage.reactions.removeAll()
-        channel.send('Cancelling shutdown process..')
+        embedMessage.reactions.removeAll();
+        (channel as any).send('Cancelling shutdown process..')
       } else if (reaction.emoji.id === '507285695484919809') {
 
-        await channel.send('Terminating node process.').then(() => {
+        await (channel as any).send('Terminating node process.').then(() => {
 
           logger.info('Destroying client and terminating node process.')
     

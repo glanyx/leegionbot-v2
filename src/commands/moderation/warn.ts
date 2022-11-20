@@ -1,10 +1,10 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
-import { ModActions, Paginator } from "../../utils"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from "discord.js"
+import { ModActions, OldPaginator } from "../../utils"
 import { ModLog, ModeratorAction } from '../../db/models'
 
 const configs: Config = {
   permissions: [
-    'MUTE_MEMBERS'
+    PermissionFlagsBits.MuteMembers
   ]
 }
 
@@ -39,12 +39,12 @@ export class Warn {
     const reason = args.splice(1).join(' ') || 'No reason provided'
 
     const member = guild.members.cache.get(target.id)
-    if (!member) return message.channel.send(`Unable to find member for arguments: ${args[0]}`)
+    if (!member) return (message.channel as any).send(`Unable to find member for arguments: ${args[0]}`)
 
     await member.fetch()
 
-    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
-    
+    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return (channel as any).send(`You don't have the required permissions to perform this action!`)
+
     ModActions.warn(member, (channel as any), reason, author)
 
   }
@@ -76,13 +76,13 @@ const listHelp: Help = {
 
 const listConfigs: Config = {
   permissions: [
-    'MUTE_MEMBERS'
+    PermissionFlagsBits.MuteMembers
   ]
 }
 
 class WarnList {
 
-  public static async run ({
+  public static async run({
     message,
     args
   }: IExecuteArgs) {
@@ -91,18 +91,18 @@ class WarnList {
     if (!guild) return
 
     if (!args[0]) {
-      channel.send('Please specify a user to search logs for!')
+      (channel as any).send('Please specify a user to search logs for!')
       return
     }
 
     const target = message.mentions.members && message.mentions.members.first() && message.mentions.members.first() || { id: args[0] }
 
     const member = guild.members.cache.get(target.id)
-    if (!member) return message.channel.send(`Unable to find member for arguments: ${args[0]}`)
+    if (!member) return (message.channel as any).send(`Unable to find member for arguments: ${args[0]}`)
 
     const { items: warnings } = await ModLog.fetchByUserId(guild.id, target.id, ModeratorAction.WARN)
 
-    new Paginator({
+    new OldPaginator({
       channel: message.channel,
       author: message.author,
       items: await Promise.all(warnings.map(async warn => `**Warning**\n**Actioned by:** <@${(await guild.members.cache.get(warn.userId)?.fetch())}>\n**When:** ${warn.time}\n**Reason:** ${warn.reason}\n\n`))

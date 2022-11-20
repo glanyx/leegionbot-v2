@@ -1,4 +1,4 @@
-import { Client, DMChannel, GuildChannel } from 'discord.js'
+import { ChannelType, Client, DMChannel, GuildChannel, TextChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
 import { logger } from '../utils'
 
@@ -6,9 +6,9 @@ export class ChannelCreate {
 
   public static async execute(_: Client, channel: DMChannel | GuildChannel) {
 
-    if (channel.type !== 'DM') {
+    if (channel.type === ChannelType.GuildText) {
 
-      const { guild } = (channel as GuildChannel)
+      const { guild } = channel
       logger.debug(`New Channel on Guild ID ${guild.id}`)
 
       const settings = await GuildSetting.fetchByGuildId(guild.id)
@@ -17,11 +17,11 @@ export class ChannelCreate {
       const { mutedRoleId } = settings
       if (!mutedRoleId) return
 
-      (channel as GuildChannel).permissionOverwrites.create(mutedRoleId, {
-        SEND_MESSAGES: false,
-        ATTACH_FILES: false,
-        ADD_REACTIONS: false,
-        SPEAK: false
+      channel.permissionOverwrites.create(mutedRoleId, {
+        SendMessages: false,
+        AttachFiles: false,
+        AddReactions: false,
+        Speak: false
       })
     }
 

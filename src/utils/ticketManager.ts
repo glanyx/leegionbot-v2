@@ -1,4 +1,4 @@
-import { Client, Message, User, Guild, TextChannel, MessageEmbed, MessageAttachment, DMChannel, GuildChannel, GuildMember } from 'discord.js'
+import { Client, Message, User, Guild, TextChannel, EmbedBuilder, Attachment, DMChannel, GuildChannel, GuildMember, ChannelType, Embed } from 'discord.js'
 import { logger, StepMessage, ResponseType } from '.'
 import { TicketConversation as TicketConversationModel, GuildSetting } from '../db/models'
 
@@ -17,7 +17,7 @@ export class TicketManager {
 
     client.on('messageCreate', (message) => {
       if (message.author.bot) return
-      if (message.channel.type !== 'DM') return
+      if (message.channel.type !== ChannelType.DM) return
       this.processDMs(message)
     })
     
@@ -44,7 +44,7 @@ export class TicketManager {
       const { client } = this
       const { author, channel, content: ticketContent } = message
 
-      if (!channel.isText()) return
+      if (!channel.isTextBased()) return
 
       const conversation = await this.getGuildResponse(client, author, (channel as TextChannel), ticketContent).catch(e => reject(e.message))
 
@@ -266,9 +266,9 @@ export class TicketConversation {
       const parent = this.channel.parent
       this.channel.delete()
       if (parent) {
-        const logChannel = parent.children.sort((a, b) => a.createdTimestamp - b.createdTimestamp).first()
+        const logChannel = [...parent.children.cache.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp)[0]
 
-        const userCloseEmbed = new MessageEmbed()
+        const userCloseEmbed = new EmbedBuilder()
           .setAuthor({
             name: anonymous ? this.guild.name : `${user.username}#${user.discriminator}`,
             iconURL: anonymous ? this.guild.iconURL() || undefined : user.displayAvatarURL()
@@ -277,15 +277,24 @@ export class TicketConversation {
           .setDescription(`Thank you for contacting ${this.guild.name}`)
           .setFooter({ text: `Your Conversation with Server: ${this.guild.name}` })
           .setTimestamp()
-        const logCloseEmbed = new MessageEmbed()
+        const logCloseEmbed = new EmbedBuilder()
           .setTitle('Ticket Closed')
           .setDescription(reason)
-          .addField('Ticket ID', `${this.model.id}`, true)
-          .addField('Author', `${this.user}`, true)
-          .addField('Closed By', `${user}`)
+          .addFields({
+            name: 'Ticket ID',
+            value: `${this.model.id}`,
+            inline: true
+          }, {
+            name: 'Author',
+            value: `${this.user}`,
+            inline: true
+          }, {
+            name: 'Closed by',
+            value: `${user}`
+          })
 
         this.user.send({ embeds: [userCloseEmbed] })
-        if (logChannel && logChannel.type === 'GUILD_TEXT') logChannel.send({ embeds: [logCloseEmbed] })
+        if (logChannel && logChannel.type === ChannelType.GuildText) (logChannel as any).send({ embeds: [logCloseEmbed] })
         
       }
     }
@@ -299,8 +308,9 @@ export class TicketConversation {
     const settings = await GuildSetting.fetchByGuildId(this.guild.id)
     if (!settings) throw new Error('NO_GUILD_SETTINGS')
 
-    const ch = await this.guild.channels.create(`${this.user.username}-${this.user.discriminator}`, {
-      parent: settings.ticketCategoryId
+    const ch = await this.guild.channels.create({
+      name: `${this.user.username}-${this.user.discriminator}`,
+      parent: settings.ticketCategoryId,
     })
 
     this.channel = ch
@@ -314,20 +324,26 @@ export class TicketConversation {
     if (!this.guild || !this.model || !this.channel || !this.user) return
 
     const settings = await GuildSetting.fetchByGuildId(this.guild.id)
-    const logChannel = this.channel.parent?.children.sort((a, b) => a.createdTimestamp - b.createdTimestamp).first()
+    if (!this.channel.parent) return
+    const logChannel = [...this.channel.parent.children.cache.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp)[0]
 
     if (settings) await this.guild.roles.fetch()
     const mentionRoles = settings ? [...this.guild.roles.cache.values()].filter(r => settings.ticketMentionRoleIds.includes(r.id)) : []
 
-    const newLogEmbed = new MessageEmbed()
+    const newLogEmbed = new EmbedBuilder()
       .setTitle('A new Ticket has been created!')
       .setDescription(`${this.channel}`)
-      .addField('Ticket ID', `${this.model.id}`)
-      .addField('Author', `${this.user}`)
+      .addFields({
+        name: 'Ticket ID',
+        value: `${this.model.id}`
+      }, {
+        name: 'Author',
+        value: `${this.user}`
+      })
       .setFooter({ text: `User ID: ${this.user.id} `})
       .setTimestamp()
 
-    const newTicketEmbed = new MessageEmbed()
+    const newTicketEmbed = new EmbedBuilder()
       .setTitle(`A new Ticket has been created!`)
       .setDescription(`
         A new ticket has been opened!\n\n
@@ -343,16 +359,16 @@ export class TicketConversation {
       .setFooter({ text: `${this.user.username}#${this.user.discriminator} (ID: ${this.user.id})` })
       .setTimestamp()
 
-    if (logChannel && logChannel.type === 'GUILD_TEXT') logChannel.send({ embeds: [newLogEmbed] })
+    if (logChannel && logChannel.type === ChannelType.GuildText) logChannel.send({ embeds: [newLogEmbed] })
     return this.channel.send({ content: mentionRoles.length > 0 ? `${mentionRoles.join(' ')}` : undefined, embeds: [newTicketEmbed] })
 
   }
 
-  public forwardToGuild = (content: string, attachments: Array<MessageAttachment> = []) => {
+  public forwardToGuild = (content: string, attachments: Array<Attachment> = []) => {
 
     if (!this.user || !this.channel || !this.guild) throw new Error('INVALID_TICKET_CONVERSATION')
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({
         name: `${this.user.username}#${this.user.discriminator}`,
         iconURL: this.user.displayAvatarURL()
@@ -364,24 +380,24 @@ export class TicketConversation {
     this.sendMessage(this.channel, embed, content, attachments)
       .then(() => {
         if (!this.user || !this.user.dmChannel) return
-        const confirmEmbed = new MessageEmbed().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
+        const confirmEmbed = new EmbedBuilder().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
         this.confirmMessage(this.user.dmChannel, confirmEmbed, content)
       })
-      .catch(e => {
+      .catch((e: Error) => {
         if (!this.user || !this.user.dmChannel) return
-        const failureEmbed = new MessageEmbed().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
+        const failureEmbed = new EmbedBuilder().setAuthor({ name: `${this.user.username}#${this.user.discriminator}` })
         this.failureMessage(this.user.dmChannel, failureEmbed, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
         logger.debug(e.message)
       })
   }
 
-  public forwardToUser = async (content: string, user: User, attachments: Array<MessageAttachment> = [], anonymous: boolean = false) => {
+  public forwardToUser = async (content: string, user: User, attachments: Array<Attachment> = [], anonymous: boolean = false) => {
 
     if (!this.user || !this.channel || !this.guild) throw new Error('INVALID_TICKET_CONVERSATION')
     if (!this.user.dmChannel) await user.createDM()
     if (!this.user.dmChannel) throw new Error('INVALID_TICKET_CONVERSATION')
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setAuthor({
         name: anonymous ? `${this.guild.name}` : `${user.username}#${user.discriminator}`,
         iconURL: anonymous ? this.guild.iconURL() || undefined : user.displayAvatarURL()
@@ -393,19 +409,19 @@ export class TicketConversation {
     this.sendMessage(this.user.dmChannel, embed, content, attachments)
       .then(() => {
         if (!this.channel) return
-        const confirmEmbed = new MessageEmbed().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
+        const confirmEmbed = new EmbedBuilder().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
         this.confirmMessage(this.channel, confirmEmbed, content)
       })
-      .catch(e => {
+      .catch((e: Error) => {
         if (!this.channel) return
-        const failureEmbed = new MessageEmbed().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
+        const failureEmbed = new EmbedBuilder().setAuthor({ name: `${user.username}#${user.discriminator}${anonymous ? ' (Anonymous)' : ''}` })
         this.failureMessage(this.channel, failureEmbed, `${content}${attachments.length > 0 ? `\n**Attachments: ${attachments.length}` : ''}`)
         logger.debug(e.message)
       })
 
   }
 
-  private sendMessage = (channel: TextChannel | DMChannel, embed: MessageEmbed, content: string, attachments: Array<MessageAttachment>) => {
+  private sendMessage = (channel: TextChannel | DMChannel, embed: EmbedBuilder, content: string, attachments: Array<Attachment>) => {
 
     embed
       .setTitle('New Message Received')
@@ -413,28 +429,28 @@ export class TicketConversation {
       .setDescription(content)
       .setTimestamp()
 
-    attachments.forEach((att, index) => embed.addField(`Attachment ${index + 1}`, att.url))
+    attachments.forEach((att, index) => embed.addFields({ name: `Attachment ${index + 1}`, value: att.url }))
 
-    return channel.send({ embeds: [embed] })
+    return (channel as any).send({ embeds: [embed] })
 
   }
 
-  private confirmMessage = (channel: TextChannel | DMChannel, embed: MessageEmbed, content: string) => {
+  private confirmMessage = (channel: TextChannel | DMChannel, embed: EmbedBuilder, content: string) => {
     embed
       .setColor('#00FF00')
       .setTitle('Message Sent!')
       .setDescription(content)
-      .setTimestamp()
-    channel.send({ embeds: [embed] })
+      .setTimestamp();
+    (channel as any).send({ embeds: [embed] })
   }
 
-  private failureMessage = (channel: TextChannel | DMChannel, embed: MessageEmbed, content: string) => {
+  private failureMessage = (channel: TextChannel | DMChannel, embed: EmbedBuilder, content: string) => {
     embed
       .setColor('#FF0000')
       .setTitle('Unable to send message! Please try again later.')
       .setDescription(content)
-      .setTimestamp()
-    channel.send({ embeds: [embed] })
+      .setTimestamp();
+    (channel as any).send({ embeds: [embed] })
   }
 
 }

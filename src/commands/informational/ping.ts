@@ -1,4 +1,4 @@
-import { Help, IExecuteArgs, MessageEmbed } from "discord.js"
+import { Help, IExecuteArgs, EmbedBuilder, Message } from "discord.js"
 
 const help: Help = {
   name: "ping",
@@ -18,18 +18,25 @@ export class Ping {
     const { guild, channel } = message
     if (!guild) return
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor('#FFA500')
       .setTitle('🏓 Pong!')
 
-    await channel.send({ embeds: [embed] }).then(msg => {
+    await (channel as any).send({ embeds: [embed] }).then((msg: Message) => {
       embed
         .setColor('#00ff00')
         .setTitle(`🏓 Pong!`)
-        .addField('Bot Latency', `${msg.createdTimestamp - message.createdTimestamp}ms`, true)
-        .addField('API Latency', `${client.ws.ping}ms`, true)
-      
-        msg.edit({ embeds: [embed] })
+        .addFields({
+          name: 'Bot Latency',
+          value: `${msg.createdTimestamp - message.createdTimestamp}ms`,
+          inline: true,
+        }, {
+          name: 'API Latency',
+          value: `${client.ws.ping}ms`,
+          inline: true,
+        })
+
+      msg.edit({ embeds: [embed] })
     })
 
   }

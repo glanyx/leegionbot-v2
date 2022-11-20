@@ -1,9 +1,9 @@
-import { Help, Config, IExecuteArgs, MessageButton, MessageActionRow, Role, Message } from "discord.js"
+import { Help, Config, IExecuteArgs, ButtonBuilder, ActionRowBuilder, PermissionFlagsBits, ChannelType, ButtonStyle, Message, Role } from "discord.js"
 import { StepMessage, ResponseType } from '../../utils'
 
 const configs: Config = {
   permissions: [
-    'MANAGE_CHANNELS'
+    PermissionFlagsBits.ManageChannels
   ]
 }
 
@@ -19,7 +19,7 @@ const help: Help = {
 
 const alias = ['menu', 'rm']
 
-const isRole = (item: Role | undefined) : item is Role => {
+const isRole = (item: Role | undefined): item is Role => {
   return !!item
 }
 
@@ -33,7 +33,7 @@ export class Rolemenu {
 
     const { guild, channel, author } = message
 
-    if (!guild || !channel || channel.type !== 'GUILD_TEXT') return
+    if (!guild || !channel || channel.type !== ChannelType.GuildText) return
 
     const roleMessage = new StepMessage(client, ResponseType.TEXT, {})
       .setTitle(`Rolemenu Setup`)
@@ -56,28 +56,29 @@ export class Rolemenu {
       return
     }
 
-    if (filteredRoles.length > 25) {message.delete()
+    if (filteredRoles.length > 25) {
+      message.delete()
       response.message.delete()
       channel.send('Maximum roles in a rolemenu is 25! Please add 25 roles or fewer.').then(msg => setTimeout(() => msg.delete(), 5000))
       return
     }
 
-    const buttons = filteredRoles.map(r => new MessageButton()
+    const buttons = filteredRoles.map(r => new ButtonBuilder()
       .setCustomId(`rolemenu-${r.id}`)
       .setLabel(r.name)
-      .setStyle('PRIMARY')
+      .setStyle(ButtonStyle.Primary)
     )
 
-    const components: Array<MessageActionRow> = []
+    const components: Array<ActionRowBuilder<ButtonBuilder>> = []
 
     while (buttons.length > 5) {
       const chunk = buttons.splice(0, 5)
-      const row = new MessageActionRow()
+      const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(chunk)
       components.push(row)
     }
 
-    const finalRow = new MessageActionRow()
+    const finalRow = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(buttons)
     components.push(finalRow)
 
@@ -89,7 +90,7 @@ export class Rolemenu {
     channel.send('Rolemenu created.').then((msg) => setTimeout(() => msg.delete(), 3000))
 
   }
-  
+
   public static get help() {
     return help
   }

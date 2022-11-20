@@ -1,9 +1,9 @@
-import { Help, Config, IExecuteArgs, MessageButton, MessageActionRow } from "discord.js"
+import { Help, Config, IExecuteArgs, ButtonBuilder, ActionRowBuilder, PermissionFlagsBits, ChannelType, ButtonStyle, Message } from "discord.js"
 import { StepMessage, ResponseType } from '../../utils'
 
 const configs: Config = {
   permissions: [
-    'MANAGE_CHANNELS'
+    PermissionFlagsBits.ManageChannels
   ]
 }
 
@@ -28,7 +28,7 @@ export class Rolegate {
 
     const { guild, channel, author } = message
 
-    if (!guild || !channel || channel.type !== 'GUILD_TEXT') return
+    if (!guild || !channel || channel.type !== ChannelType.GuildText) return
 
     const roleMessage = new StepMessage(client, ResponseType.TEXT, {})
       .setTitle(`Rolegate Setup`)
@@ -45,17 +45,17 @@ export class Rolegate {
 
     if (!role) {
       message.delete()
-      response.message.delete()
-      channel.send('Unable to find a role by that name. Please re-execute the command to try again.').then(msg => setTimeout(() => msg.delete(), 5000))
+      response.message.delete();
+      (channel as any).send('Unable to find a role by that name. Please re-execute the command to try again.').then((msg: Message) => setTimeout(() => msg.delete(), 5000))
       return
     }
 
-    const roleButton = new MessageButton()
+    const roleButton = new ButtonBuilder()
       .setCustomId(`rolegate-${role.id}`)
       .setLabel('I agree')
-      .setStyle('SUCCESS')
+      .setStyle(ButtonStyle.Success)
 
-    const components = new MessageActionRow()
+    const components = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(roleButton)
 
     await channel.send({
@@ -66,7 +66,7 @@ export class Rolegate {
     channel.send('Rolegate created.').then((msg) => setTimeout(() => msg.delete(), 3000))
 
   }
-  
+
   public static get help() {
     return help
   }

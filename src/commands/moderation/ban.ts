@@ -1,9 +1,9 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from "discord.js"
 import { ModActions } from "../../utils"
 
 const configs: Config = {
   permissions: [
-    'BAN_MEMBERS'
+    PermissionFlagsBits.BanMembers
   ]
 }
 
@@ -36,12 +36,12 @@ export class Ban {
     const reason = args.splice(1).join(' ') || 'No reason provided'
 
     const member = guild.members.cache.get(target.id)
-    if (!member) return message.channel.send(`Unable to find member for arguments: ${args[0]}`)
+    if (!member) return (message.channel as any).send(`Unable to find member for arguments: ${args[0]}`)
 
     await member.fetch()
 
-    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
-    
+    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return (channel as any).send(`You don't have the required permissions to perform this action!`)
+
     ModActions.ban(member, (channel as any), reason, author)
 
   }

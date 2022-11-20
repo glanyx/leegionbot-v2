@@ -1,4 +1,4 @@
-import { Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js'
+import { Client, GuildMember, TextChannel, EmbedBuilder, ChannelType } from 'discord.js'
 import { GuildSetting, ModLog, ModeratorAction } from '../db/models'
 import { logger, format } from '../utils'
 
@@ -35,7 +35,7 @@ export class GuildMemberAdd {
       if (channel) {
         await channel.fetch()
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setTitle('Member Joined')
           .setDescription(`${member}`)
           .setAuthor({
@@ -46,9 +46,9 @@ export class GuildMemberAdd {
           .setFooter({ text: `User ID: ${member.user.id}` })
           .setTimestamp()
           .setColor('#00FF00')
-          .addField('Using Discord Since', format(member.user.createdAt))
+          .addFields({ name: 'Using Discord Since', value: format(member.user.createdAt) })
 
-        if (channel.type === 'GUILD_TEXT') {
+        if (channel.type === ChannelType.GuildText) {
           (channel as TextChannel).send({ embeds: [embed] })
         }
         

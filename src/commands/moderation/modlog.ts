@@ -1,10 +1,10 @@
-import { Help, Config, IExecuteArgs, GuildMember, TextChannel, User } from "discord.js"
+import { Help, Config, IExecuteArgs, GuildMember, TextChannel, User, PermissionFlagsBits } from "discord.js"
 import { ModLog } from '../../db/models'
-import { logger, Paginator } from '../../utils'
+import { logger, OldPaginator } from '../../utils'
 
 const configs: Config = {
   permissions: [
-    'MANAGE_MESSAGES'
+    PermissionFlagsBits.ManageMessages
   ]
 }
 
@@ -32,7 +32,7 @@ export class Modlog {
     if (!guild) return
 
     if (!args[0]) {
-      channel.send('Please specify a user to search logs for!')
+      (channel as any).send('Please specify a user to search logs for!')
       return
     }
 
@@ -47,10 +47,10 @@ export class Modlog {
           logger.debug(`Unable to find member for arguments ${arg} in Guild ID ${guild.id}`)
         })
       }
-      if (!foundMember) return channel.send(`Unable to find member for arguments ${arg}`)
+      if (!foundMember) return (channel as any).send(`Unable to find member for arguments ${arg}`)
       sendPaginator(foundMember, (channel as TextChannel), author)
     })
-    
+
   }
 
   public static get help() {
@@ -74,8 +74,8 @@ const sendPaginator = async (member: GuildMember, channel: TextChannel, author: 
   const { items: logs } = await ModLog.fetchByUserId(guild.id, member.id)
 
   if (logs.length === 0) return channel.send(`No logs found for User <@${member.id}>`)
-      
-  new Paginator({
+
+  new OldPaginator({
     channel: channel,
     author: author,
     items: await Promise.all(logs.map(async item => `**Action:** ${item.action}\n**Actioned by:** ${(await guild.members.cache.get(item.userId)?.fetch())}\n**When:** ${item.time}\n**Reason:** ${item.reason}\n\n`)),

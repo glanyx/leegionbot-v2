@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, TextChannel } from "discord.js"
+import { Help, Config, IExecuteArgs, TextChannel, PermissionFlagsBits, ChannelType, Message } from "discord.js"
 import { logger } from "../../utils"
 
 const help: Help = {
@@ -17,7 +17,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'MANAGE_MESSAGES'
+    PermissionFlagsBits.ManageMessages
   ]
 }
 
@@ -49,22 +49,22 @@ export class Slowmode {
     } else {
       const channelId = args[0]
       channel = guild.channels.cache.get(channelId)
-      if (!channel) return message.channel.send('Unable to find a channel by that ID!')
+      if (!channel) return (message.channel as any).send('Unable to find a channel by that ID!')
       await channel.fetch()
-      
+
     }
 
     if (!channel) return
-    
-    if (channel.type === 'GUILD_TEXT') {
+
+    if (channel.type === ChannelType.GuildText) {
       logger.info(`Updating slowmode in Guild ID ${guild.id}, Channel ID ${channel.id} to ${duration} seconds`);
-      (channel as TextChannel).setRateLimitPerUser(duration)
+      (channel as any).setRateLimitPerUser(duration)
     } else {
-      message.channel.send('Unable to set slowmode on specified channel.').then(msg => setTimeout(() => msg.delete(), 5000))
+      (message.channel as any).send('Unable to set slowmode on specified channel.').then((msg: Message) => setTimeout(() => msg.delete(), 5000))
       return
     }
 
-    message.channel.send(duration === 0 ? `Successfully removed slowmode for <#${channel.id}>.` : `Successfully set slowmode for <#${channel.id}> to ${duration} seconds.`)
+    (message.channel as any).send(duration === 0 ? `Successfully removed slowmode for <#${channel.id}>.` : `Successfully set slowmode for <#${channel.id}> to ${duration} seconds.`)
 
   }
 

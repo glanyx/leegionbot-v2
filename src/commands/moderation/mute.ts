@@ -1,9 +1,9 @@
-import { Help, Config, IExecuteArgs } from 'discord.js'
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from 'discord.js'
 import { ModActions } from '../../utils'
 
 const configs: Config = {
   permissions: [
-    'MUTE_MEMBERS'
+    PermissionFlagsBits.MuteMembers
   ]
 }
 
@@ -38,19 +38,19 @@ export class Mute {
     const days = daysIndex >= 0 ? parseInt(args.splice(daysIndex, 1)[0].slice(0, -1)) : 0
     const sum = (minutes * 60 * 1000) + (hours * 60 * 60 * 1000) + (days * 24 * 60 * 60 * 1000)
 
-    if (!minutes && !hours && !days) return channel.send('Please specify a duration for this mute!')
+    if (!minutes && !hours && !days) return (channel as any).send('Please specify a duration for this mute!')
 
-    if (!args[0]) return channel.send('Please specify a user to mute!')
+    if (!args[0]) return (channel as any).send('Please specify a user to mute!')
 
     const target = message.mentions.members && message.mentions.members.first() && message.mentions.members.first() || { id: args[0] }
     const reason = args.splice(1).join(' ') || 'No reason provided'
 
     const member = guild.members.cache.get(target.id)
-    if (!member) return message.channel.send(`Unable to find member for arguments: ${args[0]}`)
+    if (!member) return (message.channel as any).send(`Unable to find member for arguments: ${args[0]}`)
 
     await member.fetch()
 
-    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
+    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return (channel as any).send(`You don't have the required permissions to perform this action!`)
 
     ModActions.mute(member, reason, author, sum, false, (channel as any))
 

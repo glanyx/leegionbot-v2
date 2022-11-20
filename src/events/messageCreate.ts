@@ -1,4 +1,4 @@
-import { Command, User, Client, Message } from 'discord.js'
+import { Command, User, Client, Message, PermissionFlagsBits } from 'discord.js'
 import { logger, hasPerms, Blacklist } from '../utils'
 
 export class MessageCreate {
@@ -18,11 +18,11 @@ export class MessageCreate {
     const prefix = process.env.DISCORD_PREFIX || '='
 
     // Allow members with manage_messages to pass through automod / blacklist
-    if (!member.permissions.has('MANAGE_MESSAGES')) {
+    if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
       if (message.guild) {
         if (Blacklist.compare(guild.id, message.content.startsWith(prefix) ? message.content.slice(prefix.length) : message.content)) {
-          await message.delete()
-          channel.send(`${member} was taken by the Monarch. Please mind the language, ${member}!`).then(m => setTimeout(() => m.delete(), 5000))
+          await message.delete();
+          (channel as any).send(`${member} was taken by the Monarch. Please mind the language, ${member}!`).then((m: Message) => setTimeout(() => m.delete(), 5000))
           return
         }
       }
@@ -67,7 +67,7 @@ export class MessageCreate {
     const execCmd = cmdArray[cmdArray.length - 1]
 
     if (!(hasPerms(execCmd, member, owner))) {
-      message.channel.send(`You don't have the required permissions to use this command!`)
+      (message.channel as any).send(`You don't have the required permissions to use this command!`)
       return
     }
 

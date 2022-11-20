@@ -1,4 +1,4 @@
-import { Client, GuildMember, TextChannel, MessageEmbed } from 'discord.js'
+import { Client, GuildMember, TextChannel, EmbedBuilder, ChannelType } from 'discord.js'
 import { GuildSetting } from '../db/models'
 import { logger, format } from '../utils'
 
@@ -20,7 +20,7 @@ export class GuildMemberRemove {
       if (channel) {
         await channel.fetch()
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setTitle('Member Left')
           .setAuthor({
             name: `${member.user.username}#${member.user.discriminator}`,
@@ -30,9 +30,9 @@ export class GuildMemberRemove {
           .setFooter({ text: `User ID: ${member.user.id}` })
           .setTimestamp()
           .setColor('#FF0000')
-          .addField('Joined on', member.joinedAt ? format(member.joinedAt) : '*Unknown*')
+          .addFields({ name: 'Joined on', value: member.joinedAt ? format(member.joinedAt) : '*Unknown*' })
 
-        if (channel.type === 'GUILD_TEXT') {
+        if (channel.type === ChannelType.GuildText) {
           (channel as TextChannel).send({ embeds: [embed] })
         }
         

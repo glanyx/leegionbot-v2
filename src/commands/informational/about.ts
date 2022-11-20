@@ -1,4 +1,4 @@
-import { Help, IExecuteArgs, MessageEmbed, ClientUser, User } from "discord.js"
+import { Help, IExecuteArgs, EmbedBuilder, ClientUser, User, OAuth2Scopes, PermissionFlagsBits } from "discord.js"
 
 const help: Help = {
   name: "about",
@@ -26,44 +26,50 @@ export class About {
     const owner = app.owner as User
     const clientUser = client.user as ClientUser
 
-  
-    const url = client.generateInvite({ 
+
+    const url = client.generateInvite({
       scopes: [
-        'bot',
-        'applications.commands',
-        'connections'
+        OAuth2Scopes.Bot,
+        OAuth2Scopes.ApplicationsCommands,
+        OAuth2Scopes.Connections,
       ],
       permissions: [
-      'ADMINISTRATOR',
-      'MANAGE_GUILD',
-      'MANAGE_ROLES',
-      'MANAGE_CHANNELS',
-      'KICK_MEMBERS',
-      'BAN_MEMBERS',
-      'CHANGE_NICKNAME',
-      'MANAGE_NICKNAMES',
-      'VIEW_CHANNEL',
-      'SEND_MESSAGES',
-      'MANAGE_MESSAGES',
-      'EMBED_LINKS',
-      'ATTACH_FILES',
-      'READ_MESSAGE_HISTORY',
-      'USE_EXTERNAL_EMOJIS',
-      'ADD_REACTIONS',
-      'MUTE_MEMBERS',
-      'DEAFEN_MEMBERS',
-      'MOVE_MEMBERS'
-    ]})
-    
-    const embed = new MessageEmbed()
-      .setAuthor(clientUser.username, clientUser.avatarURL() || undefined)
+        PermissionFlagsBits.Administrator,
+        PermissionFlagsBits.ManageGuild,
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.ManageChannels,
+        PermissionFlagsBits.KickMembers,
+        PermissionFlagsBits.BanMembers,
+        PermissionFlagsBits.ChangeNickname,
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.EmbedLinks,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.ReadMessageHistory,
+        PermissionFlagsBits.UseExternalEmojis,
+        PermissionFlagsBits.AddReactions,
+        PermissionFlagsBits.MuteMembers,
+        PermissionFlagsBits.DeafenMembers,
+        PermissionFlagsBits.MoveMembers,
+      ]
+    })
+
+    const embed = new EmbedBuilder()
+      .setAuthor({
+        name: clientUser.username,
+        iconURL: clientUser.avatarURL() || undefined,
+      })
       .setDescription(`LeegionBot is a Discord Bot especially created for the LeeandLie Discord server, by <@${owner}>. Do you want LeegionBot to help manage your server? You can invite the bot [here](${url})!`)
-      .addField('Questions, suggestions or concerns?', `Please DM my owner <@${owner}>!`)
-  
-    channel.send({ embeds: [embed] })
+      .addFields({
+        name: 'Questions, suggestions or concerns?',
+        value: `Please DM my owner <@${owner}>!`,
+      });
+
+    (channel as any).send({ embeds: [embed] })
 
   }
-  
+
   public static get help() {
     return help
   }

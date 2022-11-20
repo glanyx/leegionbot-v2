@@ -2,7 +2,7 @@ import './typings/native/date.extension'
 import './typings/native/string.extension'
 import './typings/native/canvas.extension'
 
-import { Client, Collection } from 'discord.js'
+import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js'
 
 import { Events } from './events'
 import { Commands } from './commands'
@@ -16,17 +16,17 @@ import { registerFont } from 'canvas'
 
 const client = new Client({
   intents: [
-    'GUILDS',
-    'GUILD_MEMBERS',
-    'GUILD_BANS',
-    'GUILD_PRESENCES',
-    'GUILD_MESSAGES',
-    'GUILD_MESSAGE_REACTIONS',
-    'DIRECT_MESSAGES',
-    'DIRECT_MESSAGE_REACTIONS',
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageReactions,
   ],
   partials: [
-    'CHANNEL'
+    Partials.Channel
   ]
 })
 client.commands = new Collection()

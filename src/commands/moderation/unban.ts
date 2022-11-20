@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs, TextChannel, MessageEmbed } from 'discord.js'
+import { Help, Config, IExecuteArgs, TextChannel, EmbedBuilder, PermissionFlagsBits } from 'discord.js'
 import { modlogNotify } from '../../utils'
 
 const help: Help = {
@@ -13,7 +13,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'BAN_MEMBERS'
+    PermissionFlagsBits.BanMembers
   ]
 }
 
@@ -37,16 +37,26 @@ export class Unban {
       guild.members.unban(member)
     }
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Unban`)
       .setDescription(`This user has been unbanned.`)
       .setTimestamp()
       .setColor('#00ff00')
-      
+
     if (member) embed
-      .addField('User', `<@${member}>`, true)
-      .addField('Actioned by', `<@${author}>`, true)
-      .setAuthor(`${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`, member.user.avatarURL() || undefined)
+      .addFields({
+        name: 'User',
+        value: `<@${member}>`,
+        inline: true,
+      }, {
+        name: 'Actioned by',
+        value: `<@${author}>`,
+        inline: true,
+      })
+      .setAuthor({
+        name: `${member.user.username}#${member.user.discriminator} [ID: ${member.user.id}]`,
+        iconURL: member.user.avatarURL() || undefined
+      })
 
     modlogNotify(guild, { embeds: [embed] }, (channel as TextChannel))
 

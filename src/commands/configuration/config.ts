@@ -1,4 +1,4 @@
-import { Help, Config as CommandConfig, IExecuteArgs } from "discord.js"
+import { Help, Config as CommandConfig, IExecuteArgs, PermissionFlagsBits } from "discord.js"
 import Configs from './configs'
 
 const help: Help = {
@@ -11,7 +11,7 @@ const help: Help = {
 
 const configs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -28,7 +28,7 @@ export class Config {
     const { guild, channel } = message
     if (!guild) return
 
-    channel.send('Please use subcommands to configure your server.')
+    (channel as any).send('Please use subcommands to configure your server.')
 
   }
 

@@ -1,8 +1,8 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from "discord.js"
 
 const configs: Config = {
   permissions: [
-    'ADMINISTRATOR'
+    PermissionFlagsBits.Administrator
   ],
 }
 
@@ -26,29 +26,31 @@ export class RoleEmoji {
   }: IExecuteArgs) {
 
     const { guild, channel, attachments } = message
-    if (!guild) return channel.send('Please use this command in a server!')
-    if (attachments.size === 0 || attachments.size > 1) return channel.send('Please upload a single image!')
+    if (!guild) return (channel as any).send('Please use this command in a server!')
+    if (attachments.size === 0 || attachments.size > 1) return (channel as any).send('Please upload a single image!')
 
     const name = args.shift()
-    if (!name) return channel.send('Please provide a name!')
+    if (!name) return (channel as any).send('Please provide a name!')
     const roleName = args.shift()
-    if (!roleName) return channel.send('Please provide the name of a role!')
+    if (!roleName) return (channel as any).send('Please provide the name of a role!')
 
     await guild.roles.fetch()
     const role = [...guild.roles.cache.values()].find(r => r.name.toLowerCase() === roleName.toLowerCase())
 
-    if (!role) return channel.send('Unable to find a role by that name!')
+    if (!role) return (channel as any).send('Unable to find a role by that name!')
 
     const attachment = attachments.first()
-    if (!attachment) return channel.send('Unable to find attachment!')
+    if (!attachment) return (channel as any).send('Unable to find attachment!')
 
-    const emoji = await guild.emojis.create(attachment.proxyURL, name, {
+    const emoji = await guild.emojis.create({
+      name,
+      attachment: attachment.proxyURL,
       roles: [role.id]
     })
 
-    message.delete()
+    message.delete();
 
-    channel.send(`${emoji} created for ${role}!`)
+    (channel as any).send(`${emoji} created for ${role}!`)
 
   }
 

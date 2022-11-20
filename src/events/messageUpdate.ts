@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, TextChannel } from 'discord.js'
+import { Client, Message, EmbedBuilder, TextChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
 import { logger } from '../utils'
 
@@ -22,7 +22,7 @@ export class MessageUpdate {
     const channel = guild.channels.cache.get(messageLogChannelId) as TextChannel
     if (!channel) return
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor('#00dbff')
       .setAuthor({
         name: `${author.username || 'Unknown'}#${author.discriminator || '0000'}`,
@@ -30,19 +30,26 @@ export class MessageUpdate {
       })
       .setTitle(`Message Edited`)
       .setDescription(`[Link](${url})`)
-      .addField('Author', `${author}`)
-      .addField('Before', messageOld.content ? messageOld.content.length > 1024 ? `${messageOld.content.substr(0, 1022)}..` : messageOld.content : '*None*')
-      .addField('After', content ? content.length > 1024 ? `${content.substr(0, 1022)}..` : content : '*None*')
+      .addFields({
+        name: 'Author',
+        value: `${author}`
+      }, {
+        name: 'Before',
+        value: messageOld.content ? messageOld.content.length > 1024 ? `${messageOld.content.substr(0, 1022)}..` : messageOld.content : '*None*',
+      }, {
+        name: 'After',
+        value: content ? content.length > 1024 ? `${content.substr(0, 1022)}..` : content : '*None*'
+      })
       .setTimestamp()
 
     if (messageOld.content) embed;
 
     [...messageOld.attachments.values()].forEach((attachment, index) => {
-      embed.addField(`Old Attachment ${index + 1}`, attachment.url)
+      embed.addFields({ name: `Old Attachment ${index + 1}`, value: attachment.url })
     });
 
     [...message.attachments.values()].forEach((attachment, index) => {
-      embed.addField(`New Attachment ${index + 1}`, attachment.url)
+      embed.addFields({ name: `New Attachment ${index + 1}`, value: attachment.url })
     });
 
     channel.send({ embeds: [embed] })

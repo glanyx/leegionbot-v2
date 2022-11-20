@@ -1,4 +1,4 @@
-import { Client, Message, MessageEmbed, TextChannel } from 'discord.js'
+import { Client, Message, EmbedBuilder, TextChannel } from 'discord.js'
 import { GuildSetting } from '../db/models'
 
 export class MessageDelete {
@@ -18,15 +18,22 @@ export class MessageDelete {
     const channel = guild.channels.cache.get(messageLogChannelId) as TextChannel
     if (!channel) return
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor('#ff0000')
       .setAuthor({
         name: `${message.author.username || 'Unknown'}#${message.author.discriminator || '0000'}`,
         iconURL: message.author.displayAvatarURL()
       })
       .setTitle(`Message Deleted`)
-      .addField('Channel', `${message.channel}` || 'Unable to retrieve', true)
-      .addField('Author', `${message.author}` || 'Unable to retrieve', true)
+      .addFields({
+        name: 'Channel',
+        value: `${message.channel}` || 'Unable to retrieve',
+        inline: true,
+      }, {
+        name:'Author',
+        value: `${message.author}` || 'Unable to retrieve',
+        inline: true,
+      })
       .setTimestamp()
 
     if (message.content) {
@@ -35,7 +42,7 @@ export class MessageDelete {
 
     if (message.attachments.size > 0) {
       [...message.attachments.values()].forEach((attachment, index) => {
-        embed.addField(`Attachment ${index + 1}`, attachment.url)
+        embed.addFields({ name: `Attachment ${index + 1}`, value: attachment.url })
       })
     }
 

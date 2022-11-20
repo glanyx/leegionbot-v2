@@ -1,11 +1,12 @@
 import { Message, PermissionResolvable } from 'discord.js';
 import { ClientRoleManager } from '../../managers'
+import { CommandLevel } from '../../utils'
 
 declare module 'discord.js' {
   export interface Client {
     commands: Collection<string, Command>
-    slashCommands: Collection<string, SlashCommand>
     roleManager: ClientRoleManager
+    managers: BotManagers
   }
 
   export interface Command {
@@ -16,8 +17,11 @@ declare module 'discord.js' {
     run: (args: IExecuteArgs) => Promise<Message | void | undefined | NodeJS.Timeout>
   }
 
-  export interface SlashCommand {
-    
+  export abstract class SlashCommand {
+    static description: string
+    static data: SlashCommandBuilder
+    static level: CommandLevel
+    static async run: (args: SlashArgs) => Promise<Message | void | undefined>
   }
 
   export interface Help {
@@ -40,4 +44,9 @@ declare module 'discord.js' {
     args: Array<string>
   }
   
+  export interface BotManagers {
+    applicationCommandManager: ACManager
+    ticketManager: TicketManager
+  }
+
 }

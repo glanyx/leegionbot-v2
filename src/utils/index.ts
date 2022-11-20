@@ -1,6 +1,7 @@
 export { default as logger } from './logger'
 export * from './dateformat-lib'
 export * from './timer'
+export * from './oldPaginator'
 export * from './paginator'
 export * from './perms'
 export * from './modlogNotify'

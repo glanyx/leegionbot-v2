@@ -1,4 +1,4 @@
-import { Client, ClientUser, MessageEmbed } from 'discord.js'
+import { Client, EmbedBuilder } from 'discord.js'
 import { StreamEvent, TwitchClient, TwitchManager } from '../../utils/twitch'
 import { logger } from '../../utils'
 
@@ -17,7 +17,7 @@ export class GoLive {
 
     data.forEach(item => {
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setColor('#6441a5')
         .setTitle(`${stream.display_name} just went live on Twitch!`)
         .setDescription(`**Playing ${stream.game_name}**\n${stream.title}\n\n[Watch Now!](https://www.twitch.tv/${stream.broadcaster_login})`)

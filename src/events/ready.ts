@@ -1,4 +1,5 @@
 import { Client } from 'discord.js'
+import { ActivityType, OAuth2Scopes, PermissionFlagsBits } from 'discord-api-types/v10'
 import { DBClient } from '../db'
 import { Countdown } from '../db/models'
 import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
@@ -33,7 +34,6 @@ export class Ready {
       })
 
     }))
-
     
     logger.info('Fetching active mutes..')
     ModActions.loadAllMutes(client)
@@ -44,37 +44,36 @@ export class Ready {
     
     const url = client.generateInvite({ 
       scopes: [
-        'bot',
-        'applications.commands',
-        'connections'
+        OAuth2Scopes.Bot,
+        OAuth2Scopes.ApplicationsCommands,
+        OAuth2Scopes.Connections,
       ],
       permissions: [
-      'ADMINISTRATOR',
-      'MANAGE_GUILD',
-      'MANAGE_ROLES',
-      'MANAGE_CHANNELS',
-      'KICK_MEMBERS',
-      'BAN_MEMBERS',
-      'CHANGE_NICKNAME',
-      'MANAGE_NICKNAMES',
-      'VIEW_CHANNEL',
-      'SEND_MESSAGES',
-      'MANAGE_MESSAGES',
-      'EMBED_LINKS',
-      'ATTACH_FILES',
-      'READ_MESSAGE_HISTORY',
-      'USE_EXTERNAL_EMOJIS',
-      'ADD_REACTIONS',
-      'MUTE_MEMBERS',
-      'DEAFEN_MEMBERS',
-      'MOVE_MEMBERS',
-    ]})
+        PermissionFlagsBits.Administrator,
+        PermissionFlagsBits.ManageGuild,
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.ManageChannels,
+        PermissionFlagsBits.KickMembers,
+        PermissionFlagsBits.BanMembers,
+        PermissionFlagsBits.ChangeNickname,
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.EmbedLinks,
+        PermissionFlagsBits.AttachFiles,
+        PermissionFlagsBits.ReadMessageHistory,
+        PermissionFlagsBits.UseExternalEmojis,
+        PermissionFlagsBits.AddReactions,
+        PermissionFlagsBits.MuteMembers,
+        PermissionFlagsBits.DeafenMembers,
+        PermissionFlagsBits.MoveMembers,
+      ] })
 
-    client.user?.setActivity('DM to contact staff!', { type: 'LISTENING' })
+    client.user?.setActivity('DM to contact staff!', { type: ActivityType.Listening })
 
     logger.info(`Invite me at: ${url}`)
 
-    logger.info(`Now listening for events..`);
+    logger.info('Now listening for events..');
   }
   
 }

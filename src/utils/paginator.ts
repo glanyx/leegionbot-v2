@@ -1,6 +1,4 @@
-import { User, DMChannel, TextChannel, NewsChannel, Message, MessageEmbed, MessageReaction, TextBasedChannel } from "discord.js";
-import { ReactionOptions } from './constants'
-import logger from "./logger";
+import { User, TextChannel, Message, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder } from "discord.js"
 
 const ReactionNavigation = [
   '⏮️',
@@ -16,9 +14,9 @@ export interface IContentItem {
 }
 
 interface IPaginator {
+  interaction: Interaction
   title?: string
   description?: string
-  message?: Message
   user: User
   items: Array<Array<IContentItem>> | Array<Array<string>>
   currentPage: number
@@ -30,7 +28,7 @@ interface IPaginator {
 interface IPaginatorArgs {
   title?: string
   description?: string
-  channel: TextBasedChannel
+  channel: TextChannel
   author: User
   items: Array<IContentItem> | Array<Array<IContentItem>> | Array<string> | Array<Array<string>>
   displayCount?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
@@ -38,13 +36,14 @@ interface IPaginatorArgs {
   useHeaders?: boolean
   useOptions?: boolean
   timeout?: number
+  allowMultiuser?: boolean
 }
 
 export class Paginator implements IPaginator {
 
+  interaction: Interaction
   title?: string
   description?: string
-  message?: Message
   user: User
   items: Array<Array<IContentItem>>
   currentPage: number
@@ -52,8 +51,10 @@ export class Paginator implements IPaginator {
   useOptions: boolean
   selectedOption?: number
   timeout: number
+  allowMultiuser: boolean
+  timer: NodeJS.Timeout
 
-  constructor({
+  constructor(interaction: Interaction, {
     title,
     description,
     channel,
@@ -63,7 +64,8 @@ export class Paginator implements IPaginator {
     premade = false,
     useHeaders = false,
     useOptions = false,
-    timeout = 30000
+    timeout = 30000,
+    allowMultiuser = false,
   }: IPaginatorArgs) {
 
     if (premade) {
@@ -76,61 +78,194 @@ export class Paginator implements IPaginator {
       this.items = paginatedItems
     }
 
+    this.interaction = interaction
+
     this.currentPage = 1
     this.useHeaders = useHeaders
     this.useOptions = useOptions
     this.title = title
     this.description = description
     this.timeout = timeout
+    this.allowMultiuser = allowMultiuser
 
     this.user = author
 
-    this.create(channel).then(message => {
-      this.message = message
-      this.addReactions()
+    this.create()
+
+    this.timer = setTimeout(() => {
+      this.dispose()
+    }, this.timeout)
+
+    channel.client.on('interactionCreate', this.buttonHandler)
+  }
+
+  private buttonHandler = (interaction: Interaction) => {
+    if (interaction.isSelectMenu()) {
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+
+      this.navigate(parseInt(interaction.values[0]))
+      this.update(interaction)
+      this.refreshTimer()
+      return
+    }
+    if (interaction.isButton()) {
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+
+      const name = interaction.customId
+      if (this.helper[name]) {
+        this.helper[name]()
+        this.update(interaction)
+        if (name === 'stop') return
+        this.refreshTimer()
+        return
+      }
+
+    }
+  }
+
+  private refreshTimer = () => {
+    this.timer = setTimeout(() => {
+      this.dispose()
+    }, this.timeout)
+  }
+
+  private getComponents = () => {
+    const first = new ButtonBuilder()
+      .setCustomId('first')
+      .setLabel('First')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('⏮️')
+    
+    const previous = new ButtonBuilder()
+      .setCustomId('previous')
+      .setLabel('Previous')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('◀️')
+    
+    if (this.currentPage === 1) {
+      first.setDisabled(true)
+      previous.setDisabled(true)
+    }
+
+    const next = new ButtonBuilder()
+      .setCustomId('next')
+      .setLabel('Next')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('▶️')
+    
+    const last = new ButtonBuilder()
+      .setCustomId('last')
+      .setLabel('Last')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('⏭️')
+
+    if (this.currentPage === this.pageCount) {
+      next.setDisabled(true)
+      last.setDisabled(true)
+    }
+
+    const stop = new ButtonBuilder()
+      .setCustomId('stop')
+      .setLabel('End')
+      .setStyle(ButtonStyle.Danger)
+      .setEmoji('⏹️')
+
+    const options = [...Array(this.pageCount).keys()].map((i) => ({
+      label: `${i + 1}`,
+      value: `${i + 1}`,
+    }))
+
+    const skipper = new SelectMenuBuilder()
+      .setCustomId('navigate')
+      .setPlaceholder('Skip to page..')
+      .addOptions(options)
+  
+    const row = new ActionRowBuilder<ButtonBuilder>()
+      .addComponents(first, previous, next, last, stop)
+    const skipRow = new ActionRowBuilder<SelectMenuBuilder>()
+      .addComponents(skipper)
+
+    return [row, skipRow]
+  }
+
+  private create = async () => {
+    if (this.interaction.isCommand())
+      this.interaction.reply({
+        embeds: [this.createEmbed()],
+        components: this.pageCount > 1 ? this.getComponents() : [],
+      })
+  }
+
+  private update = async (interaction: Interaction) => {
+    
+    if (interaction.isButton() && interaction.customId === 'stop') {
+      clearTimeout(this.timer)
+    }
+    if (interaction.isButton() || interaction.isSelectMenu())
+    interaction.update({
+      embeds: [this.createEmbed()],
+      components: this.pageCount <= 1 || interaction.customId === 'stop' ? [] : this.getComponents(),
     })
   }
 
-  private async create(channel: TextBasedChannel) {
-    return channel.send({ embeds: [this.createEmbed()] })
+  private dispose = () => {
+    clearTimeout(this.timer)
+
+    if (this.interaction.isCommand())
+      this.interaction.editReply({
+        embeds: [this.createEmbed()],
+        components: this.pageCount > 1 ? this.getComponents() : [],
+      })
   }
 
-  private next() {
-    if (this.currentPage < this.pageCount) {
-      this.currentPage++
-      this.message?.edit({ embeds: [this.createEmbed()] })
-    }
-  }
-
-  private previous() {
-    if (this.currentPage > 1) {
-      this.currentPage--
-      this.message?.edit({ embeds: [this.createEmbed()] })
-    }
-  }
-
-  private last() {
-    if (this.currentPage !== this.pageCount) {
-      this.currentPage = this.pageCount
-      this.message?.edit({ embeds: [this.createEmbed()] })
-    }
-  }
-
-  private first() {
+  private first = () => {
     if (this.currentPage !== 1) {
       this.currentPage = 1
-      this.message?.edit({ embeds: [this.createEmbed()] })
     }
+  }
+
+  private previous = () => {
+    if (this.currentPage > 1) {
+      this.currentPage--
+    }
+  }
+
+  private next = () => {
+    if (this.currentPage < this.pageCount) {
+      this.currentPage++
+    }
+  }
+
+  private last = () => {
+    if (this.currentPage !== this.pageCount) {
+      this.currentPage = this.pageCount
+    }
+  }
+
+  private stop = () => {}
+
+  private navigate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= this.pageCount) this.currentPage = pageNumber
+  }
+
+  private helper: { [K: string]: Function } = {
+    next: this.next,
+    previous: this.previous,
+    last: this.last,
+    first: this.first,
+    stop: this.stop,
   }
 
   private get pageCount() {
     return this.items.length
   }
 
-  private createEmbed() {
+  private createEmbed = () => {
 
-    const embed = new MessageEmbed()
-      .setFooter(`Page ${this.currentPage} / ${this.pageCount}`)
+    const embed = new EmbedBuilder()
+      .setFooter({
+        text: `Page ${this.currentPage} / ${this.pageCount}`
+      })
 
     if (this.title) {
       embed.setTitle(this.title)
@@ -147,130 +282,21 @@ export class Paginator implements IPaginator {
       embed.setDescription(descriptionString)
     } else if (this.useHeaders) {
       this.items[this.currentPage - 1].forEach(item => {
-        embed.addField(item.header || 'Unknown', typeof(item) === 'string' ? item : item.content)
+        embed.addFields({
+          name: item.header || 'Header',
+          value: typeof(item) === 'string' ? item : item.content,
+        })
       })
     } else if (this.useOptions) {
       this.items[this.currentPage - 1].forEach((item, index) => {
-        embed.addField(`Option ${index + 1}`, typeof(item) === 'string' ? item : item.content)
+        embed.addFields({
+          name: `Option ${index + 1}`,
+          value: typeof(item) === 'string' ? item : item.content,
+        })
       })
     }
 
     return embed
-  }
-
-  private async addReactions() {
-    let reactionArray: Array<string> = []
-    if (this.currentPage > 1) {
-      reactionArray.push('⏮️')
-      reactionArray.push('◀️')
-      // await this.message?.react('⏮️')
-      // await this.message?.react('◀️')
-    }
-    if (this.currentPage < this.pageCount) {
-      reactionArray.push('▶️')
-      reactionArray.push('⏭️')
-      // await this.message?.react('▶️')
-      // await this.message?.react('⏭️')
-    }
-    if (this.pageCount > 1) {
-      // await this.message?.react('⏹️')
-      reactionArray.push('⏹️')
-    }
-    if (this.useOptions) {
-      await Promise.all(this.items[this.currentPage - 1].map(async (_, index) => {
-        reactionArray.push(ReactionOptions[index])
-        // await this.message?.react(ReactionOptions[index])
-      }))
-    }
-
-    return new Promise((resolve, reject) => {
-      const interval = setInterval(() => {
-        if (reactionArray.length === 0) {
-          clearInterval(interval)
-          this.createCollector()
-          resolve(null)
-        }
-
-        const emoji = reactionArray.shift()
-        if (emoji) {
-          this.message?.react(emoji)
-        }
-      }, 750)
-    })
-
-    // this.createCollector()
-  }
-
-  private async clearReactions() {
-    try {
-      if (this.message?.channel.type !== 'DM') await this.message?.reactions.removeAll()
-    } catch (e) {
-      logger.error(e)
-    }
-  }
-
-  private createCollector() {
-
-    const filter = (reaction : MessageReaction, user: User) => [...ReactionOptions, ...ReactionNavigation].includes(reaction.emoji.name || '') && user.id === this.user.id
-
-    const collector = this.message?.createReactionCollector({
-      filter,
-      time: this.timeout,
-      maxEmojis: 1,
-    })
-
-    collector?.on('collect', async reaction => {
-
-      await this.clearReactions()
-
-      if (ReactionNavigation.includes(reaction.emoji.name || '')) {
-        switch (reaction.emoji.name) {
-          case '⏮️':
-            this.first()
-            break
-          case '◀️':
-            this.previous()
-            break
-          case '▶️':
-            this.next()
-            break
-          case '⏭️':
-            this.last()
-            break
-          case '⏹️':
-            return
-          default:
-            break
-        }
-      } else if (ReactionOptions.includes(reaction.emoji.name || '')) {
-        const index = ReactionOptions.findIndex(option => option === reaction.emoji.name)
-        this.selectedOption = this.items.reduce((acc, cur, index) => {
-          if (index < this.currentPage - 1) {
-            return acc + cur.length
-          }
-          return acc
-        }, 0) + index
-        return
-      }
-
-      await this.addReactions()
-    })
-
-    collector?.on('end', collected => {
-      this.clearReactions()
-      if (collected.size === 0) this.selectedOption = -1
-    })
-  }
-
-  public async getOptionResponse(): Promise<number> {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (this.selectedOption !== undefined) {
-          clearInterval(interval)
-          resolve(this.selectedOption)
-        }
-      }, 250)
-    })
   }
 
 }

@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": [
+    "typescript",
+    "javascript",
+    "json"
+  ]
+}

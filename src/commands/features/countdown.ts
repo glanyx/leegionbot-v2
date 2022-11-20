@@ -1,10 +1,10 @@
-import { Help, Config, IExecuteArgs } from "discord.js"
+import { Help, Config, IExecuteArgs, PermissionFlagsBits, ChannelType } from "discord.js"
 import { GuildSetting, Countdown as CountdownModel } from '../../db/models'
 import { getTimerValue, CountdownTimer } from '../../utils'
 
 const configs: Config = {
   permissions: [
-    'MANAGE_CHANNELS'
+    PermissionFlagsBits.ManageChannels
   ]
 }
 
@@ -38,7 +38,7 @@ export class Countdown {
 
     const dateIndex = args.findIndex(item => item.includes('/'))
     const date = dateIndex >= 0 ? args.splice(dateIndex, 1)[0] : `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
-    
+
     const timeIndex = args.findIndex(item => item.includes(':'))
     const time = timeIndex >= 0 ? args.splice(timeIndex, 1)[0] : '00:00'
 
@@ -50,13 +50,14 @@ export class Countdown {
 
     const everyoneRole = guild.roles.everyone
 
-    const createdChannel = await guild.channels.create(`${name} - ${getTimerValue(target.getTime())}`, {
-      type: 'GUILD_VOICE',
+    const createdChannel = await guild.channels.create({
+      name: `${name} - ${getTimerValue(target.getTime())}`,
+      type: ChannelType.GuildVoice,
       permissionOverwrites: [
         {
           id: everyoneRole.id,
-          allow: ['VIEW_CHANNEL'],
-          deny: ['CONNECT']
+          allow: [PermissionFlagsBits.ViewChannel],
+          deny: [PermissionFlagsBits.Connect]
         }
       ]
     })
@@ -67,13 +68,13 @@ export class Countdown {
       time: target,
       name: name,
     }).then(countdown => {
-      
+
       CountdownTimer.add({
         countdown,
         lastUpdated: today.getTime()
-      })
+      });
 
-      channel.send('Created!')
+      (channel as any).send('Created!')
 
     })
 

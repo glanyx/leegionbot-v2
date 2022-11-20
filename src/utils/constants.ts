@@ -18,6 +18,12 @@ export const ReactionOptions = [
   '🔟'
 ]
 
+export enum CommandLevel {
+  GUILD = 'guild',
+  GLOBAL = 'global',
+  LIMITED = 'limited',
+}
+
 export const levels = [
   // Level 0 - Growth 0
   0,
@@ -121,6 +127,56 @@ export const levels = [
   316370,
   // Level 50 - Growth 25100
   341470,
-  // Level 75 - Growth 70000 (9600)
+  // Level 51 - Growth 25850 (750 + 100n)
+  367320,
+  // Level 52 - Growth 26700
+  394020,
+  // Level 53 - Growth 27650
+  421670,
+  // Level 54 - Growth 28700
+  450370,
+  // Level 55 - Growth 29850
+  480220,
+  // Level 56 - Growth 31100
+  511320,
+  // Level 57 - Growth 32450
+  543770,
+  // Level 58 - Growth 33900
+  577670,
+  // Level 59 - Growth 35450
+  613120,
+  // Level 60 - Growth 37100
+  650220,
+  // Level 61 - Growth 38850
+  689070,
+  // Level 62 - Growth 40700
+  729770,
+  // Level 63 - Growth 42650
+  772420,
+  // Level 64 - Growth 44700
+  817120,
+  // Level 65 - Growth 46850
+  863970,
+  // Level 66 - Growth 49100
+  913070,
+  // Level 67 - Growth 51450
+  964520,
+  // Level 68 - Growth 53900
+  1018420,
+  // Level 69 - Growth 56450
+  1074870,
+  // Level 70 - Growth 59100
+  1133970,
+  // Level 71 - Growth 61850
+  1195820,
+  // Level 72 - Growth 64700
+  1260520,
+  // Level 73 - Growth 67650
+  1328170,
+  // Level 74 - Growth 70700
+  1398870,
+  // Level 75 - Growth 73850
+  1472720,
   // Level 100 - Growth 300000
+  1000000000000
 ]

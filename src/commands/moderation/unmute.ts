@@ -1,4 +1,4 @@
-import { Help, Config, IExecuteArgs } from 'discord.js'
+import { Help, Config, IExecuteArgs, PermissionFlagsBits } from 'discord.js'
 import { ModLog } from '../../db/models'
 import { ModActions } from '../../utils'
 
@@ -15,7 +15,7 @@ const help: Help = {
 
 const configs: Config = {
   permissions: [
-    'MUTE_MEMBERS'
+    PermissionFlagsBits.MuteMembers
   ]
 }
 
@@ -32,14 +32,14 @@ export class Unmute {
     const target = message.mentions.members && message.mentions.members.first() && message.mentions.members.first() || { id: args[0] }
 
     const member = guild.members.cache.get(target.id)
-    if (!member) return channel.send(`Unable to find member for arguments: ${args[0]}`)
+    if (!member) return (channel as any).send(`Unable to find member for arguments: ${args[0]}`)
 
     await member.fetch()
 
-    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return channel.send(`You don't have the required permissions to perform this action!`)
+    if (authorMember.roles.highest.position <= member.roles.highest.position && authorMember.id !== guild.ownerId) return (channel as any).send(`You don't have the required permissions to perform this action!`)
 
     const action = await ModLog.fetchActiveUserMute(guild.id, member.id)
-    if (!action) return channel.send(`Unable to find an active mute for that user.`)
+    if (!action) return (channel as any).send(`Unable to find an active mute for that user.`)
 
     ModActions.unmute(member, action, authorMember.user)
 

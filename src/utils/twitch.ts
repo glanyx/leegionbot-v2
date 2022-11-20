@@ -4,7 +4,7 @@ import { Timer } from './timer'
 import axios from 'axios'
 import { logger } from '.'
 
-import { Client, TextChannel, NewsChannel } from 'discord.js'
+import { Client, TextChannel, NewsChannel, ChannelType } from 'discord.js'
 import { GuildSetting } from '../db/models'
 
 import TwitchEvents from '../events/twitch'
@@ -223,7 +223,7 @@ export class TwitchManager {
       const guild = client.guilds.cache.get(gSetting.guildId)
       if (!guild) return
       const ch = await guild.channels.fetch(gSetting.twitchAnnounceChannelId, { cache: true })
-      if (!ch || (ch.type !== 'GUILD_TEXT' && ch.type !== 'GUILD_NEWS')) return
+      if (!ch || (ch.type !== ChannelType.GuildText && ch.type !== ChannelType.GuildAnnouncement)) return
       gSetting.twitchFeeds.forEach(feed => {
         this.track(feed, ch, gSetting.twitchMentionId)
       })

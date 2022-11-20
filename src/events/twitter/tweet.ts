@@ -1,4 +1,4 @@
-import { Client, TextChannel, MessageEmbed } from 'discord.js'
+import { Client, TextChannel, EmbedBuilder } from 'discord.js'
 import { TweetEvent, TwitterClient } from '../../utils/twitter'
 import { GuildSetting } from '../../db/models'
 
@@ -25,7 +25,7 @@ export class Tweet {
 
         const channel = guild.channels.cache.get(setting.twitterAnnounceChannelId) || await guild.channels.fetch(setting.twitterAnnounceChannelId)
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setColor('#1DA1F2')
           .setTitle(`New Tweet by @${rule.from}`)
           .setDescription(`${data.text}${data.imageUrls.length > 0 ? `\n\n${data.imageUrls.map((url, i) => `[Image ${i + 1}](${url})`).join('\n')}` : ''}\n\n[View on Twitter](https://twitter.com/${rule.from}/status/${data.id})`)

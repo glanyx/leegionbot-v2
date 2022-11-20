@@ -1,4 +1,4 @@
-import { Help, Config as CommandConfig, IExecuteArgs } from "discord.js"
+import { Help, Config as CommandConfig, IExecuteArgs, PermissionFlagsBits, ChannelType } from "discord.js"
 import { GuildSetting } from '../../../db/models'
 import { logger } from '../../../utils'
 
@@ -12,12 +12,12 @@ const help: Help = {
 
 const configs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
 export class Tickets {
-  
+
   public static async run({
     message
   }: IExecuteArgs) {
@@ -25,7 +25,7 @@ export class Tickets {
     const { guild, channel } = message
     if (!guild) return
 
-    channel.send('Please use subcommands to configure your server.')
+    (channel as any).send('Please use subcommands to configure your server.')
 
   }
 
@@ -53,7 +53,7 @@ const setupHelp: Help = {
 
 const setupConfigs: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -66,32 +66,34 @@ class Setup {
     const { guild, channel } = message
     if (!guild) return
 
-    const cat = await guild.channels.create('TICKETS', {
-      type: 'GUILD_CATEGORY',
+    const cat = await guild.channels.create({
+      name: 'TICKETS',
+      type: ChannelType.GuildCategory,
       permissionOverwrites: [
         {
           id: guild.roles.everyone.id,
-          deny: 'VIEW_CHANNEL',
+          deny: PermissionFlagsBits.ViewChannel,
         }
       ]
     })
 
-    await guild.channels.create('ticket-logs', {
-      type: 'GUILD_TEXT',
+    await guild.channels.create({
+      name: 'ticket-logs',
+      type: ChannelType.GuildText,
       parent: cat.id,
       permissionOverwrites: [
         {
           id: guild.roles.everyone.id,
-          deny: 'SEND_MESSAGES',
+          deny: PermissionFlagsBits.SendMessages,
         }
       ]
     })
 
     const settings = await GuildSetting.fetchByGuildId(guild.id)
-    if (!settings) return channel.send('Unable to configure server at this time.')
+    if (!settings) return (channel as any).send('Unable to configure server at this time.')
 
-    settings.setTicketCategoryId(cat.id).update()
-    channel.send('Setup Complete!')
+    settings.setTicketCategoryId(cat.id).update();
+    (channel as any).send('Setup Complete!')
 
   }
 
@@ -115,7 +117,7 @@ const mentionHelp: Help = {
 
 const mentionConfig: CommandConfig = {
   permissions: [
-    'MANAGE_GUILD'
+    PermissionFlagsBits.ManageGuild
   ]
 }
 
@@ -130,16 +132,16 @@ class RoleMention {
     if (!guild) return
 
     const roleName = args.shift()
-    if (!roleName) return channel.send('Please provide the name of a role!')
-    
+    if (!roleName) return (channel as any).send('Please provide the name of a role!')
+
     const role = [...guild.roles.cache.values()].find(r => r.name.toLowerCase() === roleName.toLowerCase())
-    if (!role) return channel.send('Unable to find a role by that name!')
+    if (!role) return (channel as any).send('Unable to find a role by that name!')
 
     const settings = await GuildSetting.fetchByGuildId(guild.id)
-    if (!settings) return channel.send('Unable to configure server at this time.')
+    if (!settings) return (channel as any).send('Unable to configure server at this time.')
 
-    settings.addTicketMentionRoleIds(role.id).update()
-    channel.send('Mention Roles updated!')
+    settings.addTicketMentionRoleIds(role.id).update();
+    (channel as any).send('Mention Roles updated!')
 
   }
 

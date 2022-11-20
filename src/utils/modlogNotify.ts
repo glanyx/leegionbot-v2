@@ -1,7 +1,7 @@
-import { MessageEmbed, TextChannel, Guild } from "discord.js"
+import { EmbedBuilder, TextChannel, Guild } from "discord.js"
 import { GuildSetting } from '../db/models'
 
-export const modlogNotify = async (guild: Guild, content: { embeds?: Array<MessageEmbed>, content?: string }, backup: TextChannel) => {
+export const modlogNotify = async (guild: Guild, content: { embeds?: Array<EmbedBuilder>, content?: string }, backup: TextChannel) => {
   const settings = await GuildSetting.fetchByGuildId(guild.id)
   if (settings) {
     const { modLogChannelId } = settings
