@@ -36,6 +36,7 @@ export class TicketManager {
       ? await parent.threads.create({
         name: `${member.user.username}-${member.user.discriminator}`,
         message: {
+          content: 'A new Ticket has been created!',
         }
       })
       : await guild.channels.create({
@@ -144,6 +145,8 @@ class Ticket {
   }
 
   private instructionsEmbed = () => {
+    const everyoneRole = this.member.guild.roles.everyone
+    const roles = [...this.member.roles.cache.values()].filter(r => !r.name.startsWith('⁣⁣⁣⁣') && r.id !== everyoneRole.id)
     return new EmbedBuilder()
       .setColor(Colors.Blue)
       .setTitle('A new Ticket has been created!')
@@ -154,6 +157,12 @@ class Ticket {
         Please use the \`/reply\` and \`/close\` commands to interact with this ticket.`
       )
       .addFields({
+        name: 'User',
+        value: `${this.member}`,
+      }, {
+        name: 'Roles',
+        value: `${roles.map(r => `${r}`).join('\n')}`
+      }, {
         name: 'Ticket ID',
         value: `${this.model.id}`,
       })
