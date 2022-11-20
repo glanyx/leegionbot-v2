@@ -47,7 +47,7 @@ export class Reply extends SlashCommand {
     const anonymous: boolean | undefined = interaction.options.get('anonymous')?.value as boolean | undefined
 
     if (!guild || !member) throw new Error('NO_GUILD_FOUND')
-    if (!channel || channel.type !== ChannelType.GuildText) throw new Error('CHANNEL_MISMATCH')
+    if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.PublicThread && channel.type !== ChannelType.PrivateThread)) throw new Error('CHANNEL_MISMATCH')
 
     const ticket = ticketManager.getTicketByChannel(channel)
     if (!ticket) return interaction.editReply('No ticket relating to this channel found.')

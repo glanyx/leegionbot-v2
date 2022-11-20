@@ -20,7 +20,7 @@ export class TicketManager {
     return this.guildMap.get(guild.id)?.get(user.id)
   }
 
-  public getTicketByChannel = (channel: GuildChannel) => {
+  public getTicketByChannel = (channel: GuildChannel | ThreadChannel) => {
     const { guild } = channel
     const guildTickets = this.guildMap.get(guild.id)
     if (!guildTickets) return
