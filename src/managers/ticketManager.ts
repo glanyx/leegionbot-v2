@@ -110,7 +110,7 @@ class Ticket {
       .setTimestamp()
       .addFields({
         name: 'Ticket ID',
-        value: `${this.model.id}`,
+        value: `${this.model.guildTicketId}`,
         inline: true,
       }, {
         name: 'Author',
@@ -128,7 +128,7 @@ class Ticket {
       .setTimestamp()
       .addFields({
         name: 'Ticket ID',
-        value: `${this.model.id}`,
+        value: `${this.model.guildTicketId}`,
         inline: true,
       }, {
         name: 'Author',
@@ -146,7 +146,7 @@ class Ticket {
 
   private instructionsEmbed = () => {
     const everyoneRole = this.member.guild.roles.everyone
-    const roles = [...this.member.roles.cache.values()].filter(r => !r.name.startsWith('⁣⁣⁣⁣') && r.id !== everyoneRole.id)
+    const roles = [...this.member.roles.cache.values()].filter(r => !r.name.includes('⁣') && r.id !== everyoneRole.id)
     return new EmbedBuilder()
       .setColor(Colors.Blue)
       .setTitle('A new Ticket has been created!')
@@ -164,7 +164,7 @@ class Ticket {
         value: `${roles.map(r => `${r}`).join('\n')}`
       }, {
         name: 'Ticket ID',
-        value: `${this.model.id}`,
+        value: `${this.model.guildTicketId}`,
       })
       .setTimestamp()
   }

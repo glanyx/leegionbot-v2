@@ -88,7 +88,7 @@ export class TwitterClient extends EventEmitter {
     super()
 
     this.rules = new Map<string, IRuleSet>()
-    
+
     const key = process.env.TWITTER_CONSUMER_KEY
     const secret = process.env.TWITTER_CONSUMER_SECRET
     if (!key || !secret) return
@@ -129,11 +129,13 @@ export class TwitterClient extends EventEmitter {
               words.pop()
             }
 
-            if (resData.conversation_id === data.id) this.emit('tweet', { data: {
-              ...data,
-              text: words.join(' '),
-              imageUrls: includes.media.map(m => m.url),
-            }, rule })
+            if (resData.conversation_id === data.id) this.emit('tweet', {
+              data: {
+                ...data,
+                text: words.join(' '),
+                imageUrls: includes.media.map(m => m.url),
+              }, rule
+            })
 
           }).catch(e => {
             console.log(e)
@@ -152,8 +154,11 @@ export class TwitterClient extends EventEmitter {
         }, 10000)
         return
       }
-      logger.warn(`Twitter Stream closed. Reason: ${e.message}\nReconnecting..`)
-      this.listen()
+      logger.warn(`Twitter Stream closed. Reason: ${e.message}\nReconnecting in 10 seconds..`)
+      const timeout = setTimeout(() => {
+        clearTimeout(timeout)
+        this.listen()
+      }, 10000)
     }
   }
 
@@ -177,7 +182,7 @@ export class TwitterClient extends EventEmitter {
           const id = item.id
           this.client.post(endpoint, {
             delete: {
-              ids: [ id ]
+              ids: [id]
             }
           }).then(() => {
             this.addRule(guildId, args)
@@ -189,7 +194,7 @@ export class TwitterClient extends EventEmitter {
 
         const item = data.shift()
         if (!item) return
-  
+
         if (args.from) logger.debug(`Now tracking Tweets for ${args.from}`)
         this.rules.set(args.tag || args.from, {
           id: item.id,
