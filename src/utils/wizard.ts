@@ -45,7 +45,7 @@ export class StepMessage extends EmbedBuilder {
     this.client = client
     this.responseType = type
 
-    const components = []
+    const components: Array<ButtonBuilder | SelectMenuBuilder> = []
 
     const confirmButton = new ButtonBuilder()
       .setCustomId('confirm')
@@ -123,12 +123,12 @@ export class StepMessage extends EmbedBuilder {
             time: this.timeout,
             max: 1
           })
-    
+
           collector.on('collect', async (m: Message) => {
             collector.stop()
             resolve({ message: message, text: m.content })
           })
-    
+
           collector.on('end', (collected: Collection<string, Message<boolean>>) => {
             if (!collected || collected.size === 0) {
               logger.debug(`0 Items Collected | Channel ID ${channel.id} | User ID ${user ? user.id : 'None'}`)

@@ -1,5 +1,5 @@
 import { Message, PermissionResolvable } from 'discord.js';
-import { ClientRoleManager } from '../../managers'
+import { ClientRoleManager, ApplicationCommandManager as ACManager, TicketManager } from '../../managers'
 import { CommandLevel } from '../../utils'
 
 declare module 'discord.js' {
@@ -43,7 +43,7 @@ declare module 'discord.js' {
     content: string
     args: Array<string>
   }
-  
+
   export interface BotManagers {
     applicationCommandManager: ACManager
     ticketManager: TicketManager

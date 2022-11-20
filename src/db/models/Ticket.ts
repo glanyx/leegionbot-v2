@@ -1,66 +1,87 @@
 import { DBModel } from '../db-model'
-import { ConversationStatus } from '../../utils'
+import { TicketMessage } from './TicketMessage'
 
-interface ITicketConversation extends INewTicketConversation {
+interface ITicket extends ITicketArgs {
   id: number
+  guildTicketId: number
+  active: boolean
+  closedAt?: Date
+  closeReason?: string
 }
 
-interface INewTicketConversation {
+interface ITicketArgs {
   guildId: string
   channelId: string
-  userId: string
-  status: ConversationStatus
+  memberId: string
 }
 
-const convCollection = 'ticket_conversations'
+const collection = 'ticket'
 
-export class TicketConversation extends DBModel<ITicketConversation> {
+export class Ticket extends DBModel<ITicket> {
 
-  public collection = convCollection
+  public collection = collection
 
-  public static async add(conversation: INewTicketConversation) {
-    return super.create<TicketConversation>(`
-      INSERT INTO ${convCollection} ("guildId", "channelId", "userId", status) VALUES (
-        '${conversation.guildId}',
-        '${conversation.channelId}',
-        '${conversation.userId}',
-        '${conversation.status}'
+  public static async storeNew({
+    guildId,
+    channelId,
+    memberId,
+  }: ITicketArgs) {
+    return super.create<Ticket>(`
+      INSERT INTO ${collection} ("guildTicketId", "guildId", "channelId", "memberId") VALUES (
+        (SELECT COALESCE(MAX("guildTicketId"), 0) FROM ${collection} WHERE "guildId" = '${guildId}') + 1,
+        '${guildId}',
+        '${channelId}',
+        '${memberId}'
       )
-    `, TicketConversation)
+    `, Ticket)
   }
 
-  public static async fetchById(id: number) {
-    return super.fetchOne<TicketConversation>(`
-      SELECT * FROM ${convCollection}
-      WHERE id = id
-    `, TicketConversation)
+  public static async fetchAll() {
+    return super.query<Ticket>(`
+      SELECT * FROM ${collection}
+    `, Ticket)
   }
 
-  public static async fetchOngoingForUserId(userId: string) {
-    return super.query<TicketConversation>(`
-      SELECT * FROM ${convCollection}
-        WHERE "userId" = '${userId}'
-        AND status = '${ConversationStatus.ONGOING}'
-    `, TicketConversation)
+  public static async fetchAllActive() {
+    return super.query<Ticket>(`
+      SELECT * FROM ${collection}
+      WHERE active = ${true}
+    `, Ticket)
   }
 
-  public static async fetchAllOngoing() {
-    return super.query<TicketConversation>(`
-      SELECT * FROM ${convCollection}
-        WHERE status = '${ConversationStatus.ONGOING}'
-    `, TicketConversation)
+  public static async fetchAllGuild(guildId: string) {
+    return super.fetchOne<Ticket>(`
+      SELECT * FROM ${collection}
+      WHERE "guildId" = '${guildId}'
+      AND active = ${true}
+    `, Ticket)
+  }
+
+  public static async fetchSingle(guildId: string, id: number) {
+    return super.fetchOne<Ticket>(`
+      SELECT * FROM ${collection}
+      WHERE id = ${id}
+      AND "guildId" = '${guildId}'
+    `, Ticket)
   }
 
   public async update() {
-    return super.edit<TicketConversation>(`
-      UPDATE ${convCollection} SET
-        status = '${this.data.status}'
+    return super.edit<Ticket>(`
+      UPDATE ${collection}
+      SET
+        active = ${this.data.active},
+        "closeReason" = '${this.data.closeReason ? this.data.closeReason.replace(/'/g, "''") : 'None provided'}',
+        "closedAt" = ${this.data.closedAt ? `to_timestamp(${this.data.closedAt.getTime()} / 1000.0)` : null}
       WHERE id = ${this.data.id}
-    `, TicketConversation)
+    `, Ticket)
   }
 
   public get id() {
     return this.data.id
+  }
+
+  public get guildTicketId() {
+    return this.data.guildTicketId
   }
 
   public get guildId() {
@@ -71,81 +92,39 @@ export class TicketConversation extends DBModel<ITicketConversation> {
     return this.data.channelId
   }
 
-  public get userId() {
-    return this.data.userId
+  public get memberId() {
+    return this.data.memberId
   }
 
-  public get status() {
-    return this.data.status
+  public get active() {
+    return this.data.active
   }
 
-  public setStatus = (status: ConversationStatus) => {
-    this.data.status = status
+  public setActive = (active: boolean) => {
+    this.data.active = active
     return this
   }
 
-}
-
-interface ITicketMessage extends INewTicketMessage {
-  id: number
-}
-
-interface INewTicketMessage {
-  conversationId: number
-  userId: string
-  text: string
-  attachmentCount: number
-}
-
-const msgCollection = 'ticket_messages'
-
-export class TicketMessage extends DBModel<ITicketMessage> {
-
-  public collection = msgCollection
-
-  public static async add(message: INewTicketMessage) {
-    return super.create<TicketMessage>(`
-      INSERT INTO ${msgCollection} ("conversationId", "userId", text, "attachmentCount") VALUES (
-        ${message.conversationId},
-        '${message.userId}',
-        '${message.text}',
-        ${message.attachmentCount}
-      )
-    `, TicketMessage)
+  public get closedAt() {
+    return this.data.closedAt
   }
 
-  public static async fetchByConversationId(id: number) {
-    return super.query<TicketMessage>(`
-      SELECT * FROM ${msgCollection}
-      WHERE "conversationId" = ${id}
-    `, TicketMessage)
+  public setClosedAt = (timestamp: Date) => {
+    this.data.closedAt = timestamp
+    return this
   }
 
-  public static async fetchById(id: number) {
-    return super.fetchOne<TicketMessage>(`
-      SELECT * FROM ${msgCollection}
-      WHERE id = ${id}
-    `, TicketMessage)
+  public get closeReason() {
+    return this.data.closeReason
   }
 
-  public get id() {
-    return this.data.id
+  public setReason = (reason: string) => {
+    this.data.closeReason = reason
+    return this
   }
 
-  public get conversationId() {
-    return this.data.conversationId
-  }
-
-  public get text() {
-    return this.data.text
-  }
-
-  public get attachmentCount() {
-    return this.data.attachmentCount
-  }
-
-  public get userId() {
-    return this.data.userId
+  public fetchMessages = () => {
+    return TicketMessage.fetchByConversation(this.data.id)
   }
 
 }

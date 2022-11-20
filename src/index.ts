@@ -9,7 +9,7 @@ import { Commands } from './commands'
 import { TwitterEvents } from './events/twitter'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchManager, TwitterClient, SpamFilter, TicketManager, LevelsManager } from './utils'
+import { logger, TwitchManager, TwitterClient, SpamFilter, LevelsManager } from './utils'
 import { ClientRoleManager } from './managers'
 
 import { registerFont } from 'canvas'
@@ -78,5 +78,4 @@ TwitterEvents.forEach((event: any) => {
 client.login(process.env.DISCORD_TOKEN)
 
 new SpamFilter(client)
-new TicketManager(client)
 new LevelsManager(client)
