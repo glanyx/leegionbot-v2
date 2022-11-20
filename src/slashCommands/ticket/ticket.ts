@@ -18,6 +18,7 @@ const data = new SlashCommandBuilder()
       .setName('attachment')
       .setDescription('Do you have any attachments to add?')
   )
+  .setDMPermission(false)
   .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
 
 
