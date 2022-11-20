@@ -29,18 +29,18 @@ export class MessageCreate {
     }
 
     if (!message.content.startsWith(prefix)) return
-  
+
     const args = message.content
       .slice(prefix.length)
       .trim()
       .split(/ +/g)
 
     const command = args.shift()?.toLowerCase()
-  
+
     if (!command) return
-              
+
     const cmd = client.commands.get(command) || client.commands.find((cmd: Command) => cmd.alias ? cmd.alias.includes(command) : false)
-    
+
     if (!cmd) return
 
     const cmdArray: Array<Command> = []
@@ -58,7 +58,7 @@ export class MessageCreate {
 
       if (!subcommand) break
       if (!hasPerms(subcommand, member, owner)) break
-      
+
       args.shift()
       cmdArray.push(subcommand)
 

@@ -181,7 +181,7 @@ class Ticket {
   private postCreate = async () => {
     const logsChannel = this.getLogsChannel()
     const ch = this.channel
-    if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) logsChannel.send({ embeds: [this.openedEmbed()] })
+    if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) (logsChannel as any).send({ embeds: [this.openedEmbed()] })
     if (ch.isTextBased()) (ch as any).send({ embeds: [this.instructionsEmbed()] })
   }
 
@@ -201,10 +201,10 @@ class Ticket {
       anonymous,
       channel: ch
     }).then(_ => {
-      if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) logsChannel.send({ embeds: [this.closedEmbed(user, reason, true)] })
+      if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) (logsChannel as any).send({ embeds: [this.closedEmbed(user, reason, true)] })
     }).catch(e => {
       logger.debug(e.message)
-      if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) logsChannel.send({ embeds: [this.closedEmbed(user, reason, false)] })
+      if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) (logsChannel as any).send({ embeds: [this.closedEmbed(user, reason, false)] })
     })
     this.model
       .setActive(false)
