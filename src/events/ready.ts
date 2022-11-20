@@ -1,7 +1,7 @@
 import { Client } from 'discord.js'
 import { ActivityType, OAuth2Scopes, PermissionFlagsBits } from 'discord-api-types/v10'
 import { DBClient } from '../db'
-import { Countdown } from '../db/models'
+import { Countdown, Ticket } from '../db/models'
 import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
 import { VoteManager, ApplicationCommandManager, TicketManager } from '../managers'
 
@@ -40,6 +40,28 @@ export class Ready {
       })
 
     }))
+
+    /* Get active tickets */
+    Ticket.fetchAllActive().then(async ({ items: tickets }) => {
+      const { ticketManager } = client.managers
+      const uniqueGuildIds = [...new Set(tickets.map(t => t.guildId))]
+      await client.guilds.fetch()
+      const guilds = [...client.guilds.cache.values()].filter(g => uniqueGuildIds.includes(g.id))
+      guilds.forEach(async g => {
+        await g.channels.fetch()
+        const guildTickets = tickets.filter(t => t.guildId === g.id)
+        const guildMemberIds = guildTickets.map(g => g.memberId)
+        await g.members.fetch({ user: guildMemberIds })
+
+        guildTickets.forEach(ticket => {
+          const member = g.members.cache.get(ticket.memberId)
+          const channel = g.channels.cache.get(ticket.channelId)
+
+          if (!member || !channel) return ticket.setActive(false).setReason('Automated invalidation').setClosedAt(new Date()).update()
+          ticketManager.createTicket(member, channel, ticket)
+        })
+      })
+    })
 
     logger.info('Fetching active mutes..')
     ModActions.loadAllMutes(client)
