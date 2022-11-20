@@ -3,7 +3,7 @@ import { logger } from '../utils'
 import Slashcommands from '../slashCommands'
 import { CommandLevel } from '../utils/constants'
 
-class ApplicationCommandManager {
+export class ApplicationCommandManager {
 
   private client: Client
   private rest: REST

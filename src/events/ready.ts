@@ -3,13 +3,19 @@ import { ActivityType, OAuth2Scopes, PermissionFlagsBits } from 'discord-api-typ
 import { DBClient } from '../db'
 import { Countdown } from '../db/models'
 import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
-import { VoteManager } from '../managers'
+import { VoteManager, ApplicationCommandManager, TicketManager } from '../managers'
 
 export class Ready {
 
   public static async execute(client: Client) {
-    logger.info(`Logged in as ${client.user?.tag}!`);
-  
+    logger.info(`Logged in as ${client.user?.tag}!`)
+
+    client.managers = {
+      applicationCommandManager: new ApplicationCommandManager(client),
+      ticketManager: new TicketManager(),
+    }
+    client.managers.applicationCommandManager.registerGlobal()
+
     logger.info('Establising DB connection..')
     await DBClient.connect().then(() => {
       logger.info('Successfully connected to DB!')
@@ -34,15 +40,15 @@ export class Ready {
       })
 
     }))
-    
+
     logger.info('Fetching active mutes..')
     ModActions.loadAllMutes(client)
     ModActions.monitorMutes()
 
     TwitchManager.getManager().fetchTrackers(client)
     new VoteManager(client)
-    
-    const url = client.generateInvite({ 
+
+    const url = client.generateInvite({
       scopes: [
         OAuth2Scopes.Bot,
         OAuth2Scopes.ApplicationsCommands,
@@ -67,13 +73,14 @@ export class Ready {
         PermissionFlagsBits.MuteMembers,
         PermissionFlagsBits.DeafenMembers,
         PermissionFlagsBits.MoveMembers,
-      ] })
+      ]
+    })
 
-    client.user?.setActivity('DM to contact staff!', { type: ActivityType.Listening })
+    client.user?.setActivity('/ticket to contact staff!', { type: ActivityType.Watching })
 
     logger.info(`Invite me at: ${url}`)
 
     logger.info('Now listening for events..');
   }
-  
+
 }
