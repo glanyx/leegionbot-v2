@@ -22,7 +22,7 @@ interface IPaginatorArgs {
   description?: string
   author: User
   items: Array<IContentItem> | Array<Array<IContentItem>> | Array<string> | Array<Array<string>>
-  displayCount?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
+  displayCount?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   premade?: boolean
   useHeaders?: boolean
   useOptions?: boolean

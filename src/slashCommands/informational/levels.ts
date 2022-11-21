@@ -54,19 +54,12 @@ export class Levels extends SlashCommand {
       return entry
     })
 
-    const header = `**Rank᲼᲼Level᲼᲼Total EXP᲼᲼User**`
-
-    userStrings.splice(40, 0, header)
-    userStrings.splice(30, 0, header)
-    userStrings.splice(20, 0, header)
-    userStrings.splice(10, 0, header)
-    userStrings.splice(0, 0, header)
-
     new Paginator(interaction, {
       title: 'Top 50 Members',
       author: user,
       items: userStrings,
-      displayCount: 11,
+      displayCount: 10,
+      description: `**Rank᲼᲼Level᲼᲼Total EXP᲼᲼User**`
     })
 
   }
