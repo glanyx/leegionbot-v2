@@ -53,7 +53,7 @@ export class User extends SlashCommand {
 const getEmbed = (member: GuildMember) => {
 
   const roleString = member.roles.cache.size > 1 ? member.roles.cache
-    .sort((roleA, roleB) => roleA.position - roleB.position)
+    .sort((roleA, roleB) => roleB.position - roleA.position)
     .map(role => {
       if (role.name !== "@everyone") {
         return `${role}`
