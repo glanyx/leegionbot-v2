@@ -44,21 +44,17 @@ export class Levels extends SlashCommand {
       }
     })
 
-    const userNames = withLevels.map(u => `${u.member?.nickname || u.member?.user.username || 'Unknown User'}`)
-    const longest = userNames.reduce(
-      (long: number, str: string) => Math.max(long, str.length),
-      0
-    )
+    const highestExp = `${Math.max(...withLevels.map(l => l.totalExp), 9)}`.length
 
     const userStrings = withLevels.map((item, index) => {
       const entry = `
-        ${index + 1}${index < 9 ? '᲼' : ''}᲼᲼᲼᲼${item.member || 'Unknown User'}${"᲼".repeat(longest - (item.member?.nickname || item.member?.user.username || 'Unknown User').length)}᲼᲼᲼${item.level}᲼᲼᲼᲼᲼᲼${item.totalExp}
+        ${index + 1}${index < 9 ? '᲼' : ''}᲼᲼᲼${"᲼".repeat(5 - (`${item.level}`).length)}᲼᲼${"᲼".repeat(highestExp - (`${item.totalExp}`).length)}᲼᲼${item.member || 'Unknown User'}
       `
-      if (item.member?.id === user.id) return `__**${entry}**__`
+      if (item.member?.id === user.id) return `**${entry}**`
       return entry
     })
 
-    const header = `**Rank᲼᲼᲼User${" ".repeat(longest - 4)}᲼᲼᲼Level᲼᲼᲼Total EXP**`
+    const header = `**Rank᲼᲼Level᲼᲼Total EXP᲼᲼User**`
 
     userStrings.splice(40, 0, header)
     userStrings.splice(30, 0, header)
