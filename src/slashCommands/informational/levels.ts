@@ -48,7 +48,7 @@ export class Levels extends SlashCommand {
 
     const userStrings = withLevels.map((item, index) => {
       const entry = `
-        ${index + 1}${index < 9 ? '᲼' : ''}᲼᲼᲼᲼᲼${item.level}${"᲼".repeat(5 - (`${item.level}`).length)}᲼᲼${item.totalExp}${"᲼".repeat(highestExp - (`${item.totalExp}`).length)}᲼᲼᲼${item.member || 'Unknown User'}
+        ${index + 1}${index < 9 ? '᲼' : ''}᲼᲼᲼᲼${item.level}${"᲼".repeat(5 - (`${item.level}`).length)}᲼᲼${item.totalExp}${"᲼".repeat(highestExp - (`${item.totalExp}`).length)}᲼᲼᲼᲼${item.member || 'Unknown User'}
       `
       if (item.member?.id === user.id) return `**${entry}**`
       return entry
