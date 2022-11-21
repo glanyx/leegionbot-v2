@@ -40,11 +40,11 @@ export class Levels extends SlashCommand {
       return {
         totalExp: ul.exp,
         level: ul ? levels.findIndex(l => l > ul.exp) - 1 : 0,
-        member: guild.members.cache.get(ul.userId) as GuildMember
+        member: guild.members.cache.get(ul.userId)
       }
     })
 
-    const userNames = withLevels.map(u => `${u.member.nickname || u.member.user.username}`)
+    const userNames = withLevels.map(u => `${u.member?.nickname || u.member?.user.username || 'Unknown'}`)
     const longest = userNames.reduce(
       (long: number, str: string) => Math.max(long, str.length),
       0
@@ -52,9 +52,9 @@ export class Levels extends SlashCommand {
 
     const userStrings = withLevels.map((item, index) => {
       const entry = `
-        ${index + 1}${index < 9 && ' '}    ${item.member}${" ".repeat(longest - (item.member.nickname || item.member.user.username).length)}   ${item.level}      ${item.totalExp}
+        ${index + 1}${index < 9 && ' '}    ${item.member}${" ".repeat(longest - (item.member?.nickname || item.member?.user.username || 'Unknown').length)}   ${item.level}      ${item.totalExp}
       `
-      if (item.member.id === user.id) return `**${entry}**`
+      if (item.member?.id === user.id) return `**${entry}**`
       return entry
     })
 
