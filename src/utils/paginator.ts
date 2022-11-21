@@ -279,7 +279,7 @@ export class Paginator implements IPaginator {
 
     if (!this.useHeaders && !this.useOptions) {
       const content = `
-        ${`${this.description}\n` || ''}${this.items[this.currentPage - 1].map(item => `${typeof (item) === 'string' ? item : item.content}`).join('\n')}
+        ${this.description ? `${this.description}\n` : ''}${`${this.items[this.currentPage - 1].map(item => `${typeof (item) === 'string' ? item : item.content}`).join('\n')}`}
       `
       embed.setDescription(content)
     } else if (this.useHeaders) {
