@@ -71,7 +71,7 @@ export class Levels extends SlashCommand {
     new Paginator(interaction, {
       title: 'Top 50 Members',
       author: user,
-      items: [userStrings],
+      items: userStrings,
       displayCount: 11,
     })
 
