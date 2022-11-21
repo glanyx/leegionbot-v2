@@ -91,7 +91,10 @@ export class Paginator implements IPaginator {
 
   private buttonHandler = (interaction: Interaction) => {
     if (interaction.isSelectMenu()) {
-      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) {
+        interaction.reply({ content: "Only the owner of this menu is allowed to navigate!", ephemeral: true })
+        return
+      }
 
       this.navigate(parseInt(interaction.values[0]))
       this.update(interaction)
@@ -99,7 +102,10 @@ export class Paginator implements IPaginator {
       return
     }
     if (interaction.isButton()) {
-      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) {
+        interaction.reply({ content: "Only the owner of this menu is allowed to navigate!", ephemeral: true })
+        return
+      }
 
       const name = interaction.customId
       if (this.helper[name]) {
