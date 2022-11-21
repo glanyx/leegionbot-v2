@@ -1,5 +1,5 @@
 import { Sync } from './admin'
-import { Ping, Rank, Levels } from './informational'
+import { Ping, Rank, Levels, User } from './informational'
 import { Close, Log, Reply, Setup, Ticket } from './ticket'
 
 export default [
@@ -14,4 +14,5 @@ export default [
   Rank,
   Levels,
   Ping,
+  User,
 ]

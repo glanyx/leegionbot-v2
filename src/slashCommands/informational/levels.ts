@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, GuildMember } from "discord.js"
+import { PermissionFlagsBits } from "discord.js"
 import { Levels as LevelsModel } from '../../db/models'
 import { levels, Paginator } from '../../utils'
 import { SlashCommandBuilder } from '@discordjs/builders'
