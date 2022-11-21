@@ -37,12 +37,14 @@ export class Levels extends SlashCommand {
     })
 
     const withLevels = userLevels.map(ul => {
+      console.log(ul)
       return {
         totalExp: ul.exp,
         level: ul ? levels.findIndex(l => l > ul.exp) - 1 : 0,
         member: guild.members.cache.get(ul.userId)
       }
     })
+    console.log(withLevels[0])
 
     const userNames = withLevels.map(u => `${u.member?.nickname || u.member?.user.username || 'Unknown'}`)
     const longest = userNames.reduce(

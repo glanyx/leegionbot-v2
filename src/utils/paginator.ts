@@ -180,10 +180,17 @@ export class Paginator implements IPaginator {
 
   private create = async () => {
     if (this.interaction.isCommand())
-      this.interaction.reply({
-        embeds: [this.createEmbed()],
-        components: this.pageCount > 1 ? this.getComponents() : [],
-      })
+      if (this.interaction.deferred) {
+        this.interaction.editReply({
+          embeds: [this.createEmbed()],
+          components: this.pageCount > 1 ? this.getComponents() : [],
+        })
+      } else {
+        this.interaction.reply({
+          embeds: [this.createEmbed()],
+          components: this.pageCount > 1 ? this.getComponents() : [],
+        })
+      }
   }
 
   private update = async (interaction: Interaction) => {
