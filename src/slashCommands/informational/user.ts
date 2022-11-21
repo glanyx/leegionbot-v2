@@ -52,11 +52,13 @@ export class User extends SlashCommand {
 
 const getEmbed = (member: GuildMember) => {
 
-  const roleString = member.roles.cache.size > 1 ? member.roles.cache.map(role => {
-    if (role.name !== "@everyone") {
-      return `${role}`
-    }
-  }).join('\n') : '*None*'
+  const roleString = member.roles.cache.size > 1 ? member.roles.cache
+    .sort((roleA, roleB) => roleA.position - roleB.position)
+    .map(role => {
+      if (role.name !== "@everyone") {
+        return `${role}`
+      }
+    }).join('\n') : '*None*'
 
   const defaultImage = 'https://discord.com/assets/6debd47ed13483642cf09e832ed0bc1b.png'
 
