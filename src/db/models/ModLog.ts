@@ -1,10 +1,11 @@
 import { DBModel } from '../db-model'
 
 export enum ModeratorAction {
-  BAN = 'ban',
-  KICK = 'kick',
+  NOTE = 'note',
+  WARN = 'warn',
   MUTE = 'mute',
-  WARN = 'warn'
+  KICK = 'kick',
+  BAN = 'ban',
 }
 
 interface INewModLog {
@@ -84,7 +85,7 @@ export class ModLog extends DBModel<IModLog> {
       ${guildId ? `AND "guildId" = '${guildId}'` : ''}
     `, ModLog)
   }
-  
+
   public async update() {
     return super.edit<ModLog>(`
       UPDATE ${collection} SET
