@@ -1,12 +1,4 @@
-import { User, TextChannel, Message, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder } from "discord.js"
-
-const ReactionNavigation = [
-  '⏮️',
-  '◀️',
-  '▶️',
-  '⏭️',
-  '⏹️',
-]
+import { User, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, CommandInteraction } from "discord.js"
 
 export interface IContentItem {
   content: string
@@ -14,7 +6,7 @@ export interface IContentItem {
 }
 
 interface IPaginator {
-  interaction: Interaction
+  interaction: Interaction | CommandInteraction
   title?: string
   description?: string
   user: User
@@ -28,7 +20,6 @@ interface IPaginator {
 interface IPaginatorArgs {
   title?: string
   description?: string
-  channel: TextChannel
   author: User
   items: Array<IContentItem> | Array<Array<IContentItem>> | Array<string> | Array<Array<string>>
   displayCount?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
@@ -41,7 +32,7 @@ interface IPaginatorArgs {
 
 export class Paginator implements IPaginator {
 
-  interaction: Interaction
+  interaction: Interaction | CommandInteraction
   title?: string
   description?: string
   user: User
@@ -54,10 +45,9 @@ export class Paginator implements IPaginator {
   allowMultiuser: boolean
   timer: NodeJS.Timeout
 
-  constructor(interaction: Interaction, {
+  constructor(interaction: Interaction | CommandInteraction, {
     title,
     description,
-    channel,
     author,
     items,
     displayCount = 5,
@@ -96,12 +86,15 @@ export class Paginator implements IPaginator {
       this.dispose()
     }, this.timeout)
 
-    channel.client.on('interactionCreate', this.buttonHandler)
+    interaction.client.on('interactionCreate', this.buttonHandler)
   }
 
   private buttonHandler = (interaction: Interaction) => {
     if (interaction.isSelectMenu()) {
-      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) {
+        interaction.reply({ content: "Only the owner of this menu is allowed to navigate!", ephemeral: true })
+        return
+      }
 
       this.navigate(parseInt(interaction.values[0]))
       this.update(interaction)
@@ -109,7 +102,10 @@ export class Paginator implements IPaginator {
       return
     }
     if (interaction.isButton()) {
-      if (!this.allowMultiuser && this.user.id !== interaction.user.id) return
+      if (!this.allowMultiuser && this.user.id !== interaction.user.id) {
+        interaction.reply({ content: "Only the owner of this menu is allowed to navigate!", ephemeral: true })
+        return
+      }
 
       const name = interaction.customId
       if (this.helper[name]) {
@@ -135,13 +131,13 @@ export class Paginator implements IPaginator {
       .setLabel('First')
       .setStyle(ButtonStyle.Primary)
       .setEmoji('⏮️')
-    
+
     const previous = new ButtonBuilder()
       .setCustomId('previous')
       .setLabel('Previous')
       .setStyle(ButtonStyle.Primary)
       .setEmoji('◀️')
-    
+
     if (this.currentPage === 1) {
       first.setDisabled(true)
       previous.setDisabled(true)
@@ -152,7 +148,7 @@ export class Paginator implements IPaginator {
       .setLabel('Next')
       .setStyle(ButtonStyle.Primary)
       .setEmoji('▶️')
-    
+
     const last = new ButtonBuilder()
       .setCustomId('last')
       .setLabel('Last')
@@ -179,7 +175,7 @@ export class Paginator implements IPaginator {
       .setCustomId('navigate')
       .setPlaceholder('Skip to page..')
       .addOptions(options)
-  
+
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(first, previous, next, last, stop)
     const skipRow = new ActionRowBuilder<SelectMenuBuilder>()
@@ -190,22 +186,29 @@ export class Paginator implements IPaginator {
 
   private create = async () => {
     if (this.interaction.isCommand())
-      this.interaction.reply({
-        embeds: [this.createEmbed()],
-        components: this.pageCount > 1 ? this.getComponents() : [],
-      })
+      if (this.interaction.deferred) {
+        this.interaction.editReply({
+          embeds: [this.createEmbed()],
+          components: this.pageCount > 1 ? this.getComponents() : [],
+        })
+      } else {
+        this.interaction.reply({
+          embeds: [this.createEmbed()],
+          components: this.pageCount > 1 ? this.getComponents() : [],
+        })
+      }
   }
 
   private update = async (interaction: Interaction) => {
-    
+
     if (interaction.isButton() && interaction.customId === 'stop') {
       clearTimeout(this.timer)
     }
     if (interaction.isButton() || interaction.isSelectMenu())
-    interaction.update({
-      embeds: [this.createEmbed()],
-      components: this.pageCount <= 1 || interaction.customId === 'stop' ? [] : this.getComponents(),
-    })
+      interaction.update({
+        embeds: [this.createEmbed()],
+        components: this.pageCount <= 1 || interaction.customId === 'stop' ? [] : this.getComponents(),
+      })
   }
 
   private dispose = () => {
@@ -242,7 +245,7 @@ export class Paginator implements IPaginator {
     }
   }
 
-  private stop = () => {}
+  private stop = () => { }
 
   private navigate = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= this.pageCount) this.currentPage = pageNumber
@@ -273,25 +276,24 @@ export class Paginator implements IPaginator {
     if (this.description) {
       embed.setDescription(this.description)
     }
-  
+
     if (!this.useHeaders && !this.useOptions) {
-      let descriptionString = this.description ? `${this.description}\n` : ''
-      this.items[this.currentPage - 1].forEach(item => {
-        descriptionString += `${typeof(item) === 'string' ? item : item.content}\n`
-      })
-      embed.setDescription(descriptionString)
+      const content = `
+        ${this.description ? `${this.description}\n` : ''}${`${this.items[this.currentPage - 1].map(item => `${typeof (item) === 'string' ? item : item.content}`).join('')}`}
+      `
+      embed.setDescription(content)
     } else if (this.useHeaders) {
       this.items[this.currentPage - 1].forEach(item => {
         embed.addFields({
           name: item.header || 'Header',
-          value: typeof(item) === 'string' ? item : item.content,
+          value: typeof (item) === 'string' ? item : item.content,
         })
       })
     } else if (this.useOptions) {
       this.items[this.currentPage - 1].forEach((item, index) => {
         embed.addFields({
           name: `Option ${index + 1}`,
-          value: typeof(item) === 'string' ? item : item.content,
+          value: typeof (item) === 'string' ? item : item.content,
         })
       })
     }

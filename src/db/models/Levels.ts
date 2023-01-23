@@ -40,6 +40,16 @@ export class Levels extends DBModel<ILevels> {
     `, Levels)
   }
 
+  public static fetchTop(guildId: string, count: number) {
+    return super.query<Levels>(`
+      SELECT l.*, r.rank FROM ${collection} l LEFT JOIN (
+        SELECT "guildId", "userId", ROW_NUMBER() OVER(ORDER BY exp DESC) AS rank FROM ${collection} WHERE "guildId" = '${guildId}'
+      ) AS r ON l."userId" = r."userId" AND l."guildId" = r."guildId"
+      WHERE l."guildId" = '${guildId}'
+      LIMIT ${count}
+    `, Levels)
+  }
+
   public static async addExp(guildId: string, userId: string, exp: number) {
     await Levels.add({ guildId, userId, exp: 0 }).catch(e => logger.debug(e.message))
     return super.fetchOne<Levels>(`
