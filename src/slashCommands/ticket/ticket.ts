@@ -12,6 +12,7 @@ const data = new SlashCommandBuilder()
     option
       .setName('text')
       .setDescription('Message you would like to send.')
+      .setRequired(true)
   )
   .addAttachmentOption(option =>
     option
