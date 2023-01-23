@@ -1,6 +1,5 @@
 import './typings/native/date.extension'
 import './typings/native/string.extension'
-import './typings/native/canvas.extension'
 
 import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js'
 

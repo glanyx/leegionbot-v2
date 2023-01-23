@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js"
 import { Levels } from '../../db/models'
-import { levels } from '../../utils'
+import { levels, roundedRect, loadingBar } from '../../utils'
 import { SlashCommandBuilder } from '@discordjs/builders'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
@@ -65,7 +65,7 @@ export class Rank extends SlashCommand {
     ctx.drawImage(image, BANNER.x, BANNER.y, BANNER.dx, BANNER.dy, 0, 0, WIDTH, HEIGHT)
 
     // Shaded backdrop
-    ctx.roundedRect(10, 10, WIDTH - 20, HEIGHT - 20, 5)
+    roundedRect(ctx, 10, 10, WIDTH - 20, HEIGHT - 20, 5)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'
     ctx.fill()
 
@@ -82,7 +82,7 @@ export class Rank extends SlashCommand {
     ctx.restore()
 
     // Avatar background
-    ctx.roundedRect(25, 25, AVATAR.radius * 2, AVATAR.radius * 2, AVATAR.radius * 2)
+    roundedRect(ctx, 25, 25, AVATAR.radius * 2, AVATAR.radius * 2, AVATAR.radius * 2)
     ctx.fillStyle = '#ffff'
     ctx.fill()
 
@@ -103,7 +103,7 @@ export class Rank extends SlashCommand {
     ctx.restore()
 
     // XP bar
-    ctx.loadingBar(150, 100, 330, 30, 30, remainder / expLim)
+    loadingBar(ctx, 150, 100, 330, 30, 30, remainder / expLim)
 
     // Ranking text
     ctx.font = 'bold 20pt Roboto Bold'
