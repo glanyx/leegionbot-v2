@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders'
-import { Colors, EmbedBuilder } from 'discord.js'
+import { Colors, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 const desc = 'Check bot latency.'

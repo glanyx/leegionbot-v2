@@ -1,5 +1,4 @@
-import { PermissionFlagsBits } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 import { CommandLevel } from '../../utils'
 
@@ -23,7 +22,7 @@ export class Log extends SlashCommand {
   static description = desc
   static data = data
   static level = CommandLevel.GUILD
-  
+
   public static async run({
     client,
     interaction
@@ -36,7 +35,7 @@ export class Log extends SlashCommand {
     if (!guild) throw new Error('MISSING_GUILD')
 
     const ticketId: number = interaction.options.get('id', true).value as number
-    
+
     const ticket = await Ticket.fetchSingle(guild.id, ticketId)
     if (!ticket) return interaction.editReply('Unable to find a ticket by that ID.')
 

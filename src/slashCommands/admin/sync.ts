@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders'
-import { PermissionFlagsBits } from 'discord.js'
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { logger } from '../../utils'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 

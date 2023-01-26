@@ -19,6 +19,7 @@ export class ApplicationCommandManager {
 
   public registerGlobal = async () => {
     const commands = Slashcommands.filter(acmd => acmd.level === CommandLevel.GLOBAL).map(acmd => acmd.data.toJSON())
+    console.log(commands)
 
     try {
 

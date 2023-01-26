@@ -1,5 +1,4 @@
-import { PermissionFlagsBits, GuildMember, Attachment, EmbedBuilder, Colors, ChannelType } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { PermissionFlagsBits, GuildMember, Attachment, EmbedBuilder, Colors, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 import { logger } from '../../utils'
 

@@ -22,12 +22,12 @@ export class InteractionCreate {
       return
     }
 
-    if (interaction.isCommand()) {
+    if (interaction.isCommand() || interaction.isContextMenuCommand()) {
 
-      const command = interaction.commandName.toLowerCase()
+      const command = interaction.commandName.toCamelCase()
       if (!command) return
 
-      const cmd = Slashcommands.find(acmd => acmd.name.toLowerCase() === command)
+      const cmd = Slashcommands.find(acmd => acmd.name.toCamelCase() === command)
 
       if (!cmd) return
 

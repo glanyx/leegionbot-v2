@@ -1,7 +1,10 @@
-import { EmbedBuilder, GuildMember, TextChannel, PermissionFlagsBits } from "discord.js"
-import { format, logger } from '../../utils'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { EmbedBuilder, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import { format } from '../../utils'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
+
+interface UserSlashcommandInteractionArgs extends SlashcommandInteractionArgs {
+  ephemeral?: boolean
+}
 
 enum PresenceStatus {
   dnd = 'Do Not Disturb',
@@ -31,9 +34,10 @@ export class User extends SlashCommand {
 
   public static async run({
     interaction,
-  }: SlashcommandInteractionArgs) {
+    ephemeral = false
+  }: UserSlashcommandInteractionArgs) {
 
-    await interaction.deferReply()
+    await interaction.deferReply({ ephemeral })
 
     const { guild, member } = interaction
     if (!guild || !member) return

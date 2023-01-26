@@ -1,7 +1,6 @@
-// import { PermissionFlagsBits } from "discord.js"
+// import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 // import { Levels } from '../../db/models'
 // import { levels, roundedRect, loadingBar } from '../../utils'
-// import { SlashCommandBuilder } from '@discordjs/builders'
 // import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 // import { createCanvas, loadImage } from 'canvas'
