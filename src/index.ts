@@ -33,11 +33,11 @@ client.commands = new Collection()
 client.roleManager = new ClientRoleManager()
 
 new TwitchManager(client)
-const twitterClient = new TwitterClient()
+// const twitterClient = new TwitterClient()
 
-twitterClient.addRule('453582519087005696', {
-  from: 'LeeandLie'
-})
+// twitterClient.addRule('453582519087005696', {
+//   from: 'LeeandLie'
+// })
 
 // twitterClient.addRule('259715388462333952', {
 //   from: 'MikeFfatb'
@@ -67,13 +67,13 @@ Commands.forEach(command => {
   client.commands.set(commandName, command)
 })
 
-TwitterEvents.forEach((event: any) => {
-  const eventName = event.name.toCamelCase()
-  twitterClient.on(eventName, event.execute.bind(null, {
-    discordClient: client,
-    twitterClient
-  }))
-})
+// TwitterEvents.forEach((event: any) => {
+//   const eventName = event.name.toCamelCase()
+//   twitterClient.on(eventName, event.execute.bind(null, {
+//     discordClient: client,
+//     twitterClient
+//   }))
+// })
 
 client.login(process.env.DISCORD_TOKEN)
 

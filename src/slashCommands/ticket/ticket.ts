@@ -39,7 +39,7 @@ export class Ticket extends SlashCommand {
     const member = gMember as GuildMember
 
     const text: string | undefined = interaction.options.get('text')?.value as string | undefined
-    const attachment: Attachment | undefined = interaction.options.get('attachment')?.value as Attachment | undefined
+    const attachment: Attachment | undefined = interaction.options.get('attachment')?.attachment as Attachment | undefined
 
     if (!guild || !member) {
 
