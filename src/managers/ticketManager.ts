@@ -161,7 +161,7 @@ class Ticket {
         value: `${this.member}`,
       }, {
         name: 'Roles',
-        value: `${roles.map(r => `${r}`).join('\n')}`
+        value: roles.length > 0 ? `${roles.map(r => `${r}`).join('\n')}` : '*None*'
       }, {
         name: 'Ticket ID',
         value: `${this.model.guildTicketId}`,
