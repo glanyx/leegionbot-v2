@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
-import { Levels as LevelsModel } from '../../db/models'
-import { levels, Paginator } from '../../utils'
+import { Levels as LevelsModel } from '../../../db/models'
+import { levels, Paginator } from '../../../utils'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 const desc = 'Displays the top 50 users in the ranking.'

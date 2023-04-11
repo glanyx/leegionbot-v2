@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, GuildMember, Attachment, EmbedBuilder, Colors, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
-import { logger } from '../../utils'
+import { logger } from '../../../utils'
 
 const desc = 'Create a new ticket.'
 

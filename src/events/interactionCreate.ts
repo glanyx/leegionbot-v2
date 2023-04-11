@@ -1,5 +1,6 @@
 import { Client, Interaction } from 'discord.js'
-import Slashcommands from '../slashCommands'
+import SlashCommands from '../applicationCommands/slashCommands'
+import ContextMenus from '../applicationCommands/contextMenus'
 import { ButtonHandlers } from '../buttonHandlers'
 import { logger } from '../utils'
 
@@ -22,16 +23,31 @@ export class InteractionCreate {
       return
     }
 
-    if (interaction.isCommand() || interaction.isContextMenuCommand()) {
+    if (interaction.isChatInputCommand()) {
 
       const command = interaction.commandName.toCamelCase()
       if (!command) return
 
-      const cmd = Slashcommands.find(acmd => acmd.name.toCamelCase() === command)
+      const cmd = SlashCommands.find(acmd => acmd.name.toCamelCase() === command)
 
       if (!cmd) return
 
       logger.debug(`SlashCommand : ${cmd.name} executed by ${interaction.user.username}#${interaction.user.discriminator} (ID: ${interaction.user.id})`)
+
+      cmd.run({ client, interaction })
+
+    }
+
+    if (interaction.isContextMenuCommand()) {
+
+      const command = interaction.commandName.toCamelCase()
+      if (!command) return
+
+      const cmd = ContextMenus.find(cm => cm.name.toCamelCase() === command || cm.name.toCamelCase() === `${command}Context`)
+
+      if (!cmd) return
+
+      logger.debug(`ContextMenu : ${cmd.name} executed by ${interaction.user.username}#${interaction.user.discriminator} (ID: ${interaction.user.id})`)
 
       cmd.run({ client, interaction })
 

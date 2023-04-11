@@ -1,8 +1,8 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
-import { CommandLevel } from '../../utils'
+import { CommandLevel } from '../../../utils'
 
-import { Ticket } from '../../db/models'
+import { Ticket } from '../../../db/models'
 
 const desc = 'Receive a transcript for the specified Ticket ID'
 

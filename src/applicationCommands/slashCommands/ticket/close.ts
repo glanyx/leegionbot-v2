@@ -1,30 +1,25 @@
-import { PermissionFlagsBits, Attachment, ChannelType, GuildMember, EmbedBuilder, Colors, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, PermissionFlagsBits, GuildMember, EmbedBuilder, Colors, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
-import { CommandLevel } from '../../utils'
+import { logger, CommandLevel } from '../../../utils'
 
-const desc = 'Sends a reply on the ticket associated to this channel.'
+const desc = 'Closes the ticket associated to this channel.'
 
 const data = new SlashCommandBuilder()
-  .setName('reply')
+  .setName('close')
   .setDescription(desc)
   .addBooleanOption(option =>
     option
       .setName('anonymous')
-      .setDescription('Respond to the ticket anonymously?')
+      .setDescription('Close the ticket anonymously?')
   )
   .addStringOption(option =>
     option
-      .setName('text')
-      .setDescription('Message you would like to send.')
-  )
-  .addAttachmentOption(option =>
-    option
-      .setName('attachment')
-      .setDescription('Do you have any attachments to add?')
+      .setName('reason')
+      .setDescription('Optional reason for closing the ticket.')
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 
-export class Reply extends SlashCommand {
+export class Close extends SlashCommand {
 
   static description = desc
   static data = data
@@ -41,38 +36,40 @@ export class Reply extends SlashCommand {
     const { guild, channel, member: gMember } = interaction
     const member = gMember as GuildMember
 
-    const text: string | undefined = interaction.options.get('text')?.value as string | undefined
-    const attachment: Attachment | undefined = interaction.options.get('attachment')?.value as Attachment | undefined
+    const reason: string | undefined = interaction.options.get('reason')?.value as string | undefined
     const anonymous: boolean | undefined = interaction.options.get('anonymous')?.value as boolean | undefined
 
-    if (!guild || !member) throw new Error('NO_GUILD_FOUND')
+    if (!guild) throw new Error('NO_GUILD_FOUND')
     if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.PublicThread && channel.type !== ChannelType.PrivateThread)) throw new Error('CHANNEL_MISMATCH')
 
     const ticket = ticketManager.getTicketByChannel(channel)
     if (!ticket) return interaction.editReply('No ticket relating to this channel found.')
 
-    await ticket.forwardToMember({
+    await ticket.close({
       user: member,
-      text,
-      attachment,
+      reason,
       anonymous,
     }).then(_ => {
       const embed = new EmbedBuilder()
-        .setTitle('Message Sent!')
+        .setTitle('Ticket Closed!')
         .setColor(Colors.Green)
 
-      if (text) embed.setDescription(text)
-      if (attachment) embed.addFields({
-        name: 'Attachment?',
-        value: attachment ? 'Yes' : 'No'
-      })
+      if (reason) embed.setDescription(reason)
 
       interaction.editReply({
+        content: 'This channel will be deleted in 5 seconds',
         embeds: [embed]
+      }).then(_ => {
+        setTimeout(() => {
+          channel.delete().catch(e => {
+            logger.debug(e.message)
+            interaction.editReply('Unable to delete channel. Please delete manually.')
+          })
+        }, 5000)
       })
     }).catch(_ => {
       const embed = new EmbedBuilder()
-        .setTitle('Unable to deliver message')
+        .setTitle('Unable to close ticket')
         .setColor(Colors.Red)
 
       interaction.editReply({

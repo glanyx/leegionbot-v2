@@ -1,5 +1,5 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
-import { logger } from '../../utils'
+import { logger } from '../../../utils'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 const desc = 'Requests a sync for guild-specific Application Commands'

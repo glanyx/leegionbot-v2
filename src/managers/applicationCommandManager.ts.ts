@@ -1,6 +1,6 @@
 import { Client, REST, Routes } from 'discord.js'
 import { logger } from '../utils'
-import Slashcommands from '../slashCommands'
+import Slashcommands from '../applicationCommands'
 import { CommandLevel } from '../utils/constants'
 
 export class ApplicationCommandManager {

@@ -11,7 +11,7 @@ interface GuildMapInterface {
 interface MuteMapInterface {
   member: GuildMember
   data?: ModLog
-  endDatetime: number 
+  endDatetime: number
 }
 
 const GuildMap = new Map<string, GuildMapInterface>()
@@ -32,7 +32,7 @@ export class ModActions {
         })
       })
     }, 5000)
-    
+
   }
 
   public static warn = async (member: GuildMember, sourceChannel: GuildChannel, reason: string, user: User) => {
@@ -74,7 +74,7 @@ export class ModActions {
       })
       .catch(err => {
         logger.error(`Error saving warn to DB\n${err.message}`)
-        
+
         embed.setTitle(`ID *Unknown* | Warn`)
         embed.addFields({
           name: 'Error',
@@ -128,7 +128,7 @@ export class ModActions {
           })
           .catch(err => {
             logger.error(`Error saving kick to DB\n${err.message}`)
-            
+
             embed.setTitle(`ID *Unknown* | Kick`)
             embed.addFields({
               name: 'Error',
@@ -247,10 +247,10 @@ export class ModActions {
       if (!GuildMap.has(guild.id)) {
         const mutedRole = !mutedRoleId ? await ModActions.createMuteRole(guild) : guild.roles.cache.get(mutedRoleId) || await guild.roles.fetch(mutedRoleId)
         if (!mutedRole) return
-  
+
         GuildMap.set(guild.id, { guild, mutedRole, mutes: new Map<string, MuteMapInterface>() })
       }
-  
+
       const instance = GuildMap.get(guild.id)
       if (!instance) return
 
@@ -338,7 +338,7 @@ export class ModActions {
       })
       .catch(err => {
         logger.error(`Error saving mute to DB\n${err}`)
-        
+
         embed.setTitle(`ID *Unknown* | Mute`)
         embed.addFields({
           name: 'Error',

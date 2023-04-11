@@ -1,9 +1,10 @@
-import { EmbedBuilder, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
-import { format } from '../../utils'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import { format } from '../../../utils'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 interface UserSlashcommandInteractionArgs extends SlashcommandInteractionArgs {
   ephemeral?: boolean
+  displayMenu?: boolean
 }
 
 enum PresenceStatus {
@@ -24,7 +25,7 @@ const data = new SlashCommandBuilder()
       .setName('user')
       .setDescription('The user to get information for.')
   )
-  .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
+  .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
   .setDMPermission(false)
 
 export class User extends SlashCommand {
@@ -34,7 +35,8 @@ export class User extends SlashCommand {
 
   public static async run({
     interaction,
-    ephemeral = false
+    ephemeral = false,
+    displayMenu = false
   }: UserSlashcommandInteractionArgs) {
 
     await interaction.deferReply({ ephemeral })
@@ -42,10 +44,34 @@ export class User extends SlashCommand {
     const { guild, member } = interaction
     if (!guild || !member) return
 
-    const memberArgs = interaction.options.getMember('user')
+    const memberArgs = interaction.options.getMember('user') as GuildMember | null
 
     if (memberArgs) {
-      interaction.editReply({ embeds: [getEmbed((memberArgs as GuildMember))] })
+
+      const menu: Array<ActionRowBuilder<ButtonBuilder>> = []
+
+      if (displayMenu) {
+        const timeout = new ButtonBuilder()
+          .setCustomId(`quicktimeout-${memberArgs.user.id}`)
+          .setLabel('Timeout (5m)')
+          .setStyle(ButtonStyle.Primary)
+
+        const kick = new ButtonBuilder()
+          .setCustomId(`quickkick-${memberArgs.user.id}`)
+          .setLabel('Kick')
+          .setStyle(ButtonStyle.Danger)
+
+        const ban = new ButtonBuilder()
+          .setCustomId(`quickban-${memberArgs.user.id}`)
+          .setLabel('Ban')
+          .setStyle(ButtonStyle.Danger)
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(timeout, kick, ban)
+
+        menu.push(row)
+      }
+
+      interaction.editReply({ embeds: [getEmbed((memberArgs as GuildMember))], components: menu })
       return
     }
     interaction.editReply({ embeds: [getEmbed((member as GuildMember))] })

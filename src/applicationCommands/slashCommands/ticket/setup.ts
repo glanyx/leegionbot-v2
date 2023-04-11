@@ -1,6 +1,6 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
-import { CommandLevel } from '../../utils'
+import { CommandLevel } from '../../../utils'
 
 const desc = 'Ticketer setup command that initializes the Ticketer system.'
 
