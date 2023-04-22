@@ -9,7 +9,8 @@
     "test": "jest",
     "build": "tsc",
     "dev": "ts-node -r dotenv/config src/index.ts",
-    "compiled": "node -r dotenv/config build/src/index.js"
+    "compiled": "node -r dotenv/config build/src/index.js",
+    "docker": "docker build -t leegionbot ."
   },
   "author": "Glanyx",
   "license": "ISC",
