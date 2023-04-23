@@ -279,6 +279,10 @@ class Ticket {
   private instructionsEmbed = () => {
     const everyoneRole = this.member.guild.roles.everyone
     const roles = [...this.member.roles.cache.values()].filter(r => !r.name.includes('⁣') && r.id !== everyoneRole.id)
+    const roleArray = roles
+    while (roleArray.map(r => `${r}`).join('\n').length > 1024) {
+      roleArray.pop()
+    }
     return new EmbedBuilder()
       .setColor(Colors.Blue)
       .setTitle('A new Ticket has been created!')
