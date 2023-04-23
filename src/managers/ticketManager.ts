@@ -1,5 +1,5 @@
 import { Client, GuildMember, GuildChannel, Attachment, DMChannel, EmbedBuilder, ThreadChannel, Colors, ChannelType, Guild, ButtonStyle, ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js'
-import { Ticket as TicketModel, TicketMessage } from '../db/models'
+import { Ticket as TicketModel, TicketMessage, GuildSetting } from '../db/models'
 import { logger } from '../utils'
 import { ButtonBuilder } from '@discordjs/builders'
 
@@ -56,16 +56,22 @@ export class TicketManager {
     const parent = this.getParent(guild)
     if (!parent) throw new Error('INVALID_PARENT')
 
+    const setting = await GuildSetting.fetchByGuildId(guild.id)
+    const mentions = setting?.ticketMentionRoleIds.map(id => `<@&${id}>`).join(' ')
+
     const ch = parent.type === ChannelType.GuildForum
       ? await parent.threads.create({
         name: `${member.user.username}-${member.user.discriminator}`,
         message: {
-          content: 'A new Ticket has been created!',
+          content: mentions,
         }
       })
       : await guild.channels.create({
         name: `${member.user.username}-${member.user.discriminator}`,
         parent: parent.id
+      }).then(async ch => {
+        await ch.send({ content: mentions })
+        return ch
       })
 
     return this.createTicket(member, ch)
@@ -365,7 +371,7 @@ class Ticket {
 
     return (channel as any).send({
       embeds: [embed],
-      components: [actionRow],
+      components: text?.toLowerCase().startsWith('this ticket has been closed.') ? [] : [actionRow],
       files: attachment ? [attachment] : []
     }).catch(e => {
       logger.debug(e.message)
