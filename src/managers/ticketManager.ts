@@ -22,9 +22,12 @@ export class TicketManager {
       if (interaction.isButton()) {
         const args = interaction.customId.split('-')
         const cmd = args.shift()
-        if (cmd?.toLowerCase() !== 'ticket') return
-
-        this.displayModal(interaction, args)
+        if (cmd?.toLowerCase() === 'ticket') {
+          this.displayModal(interaction, args)
+        }
+        if (cmd?.toLowerCase() === 'ticketclose') {
+          this.closeTicket(interaction, args[0], args[1])
+        }
       }
 
       if (interaction.isModalSubmit()) {
@@ -92,6 +95,41 @@ export class TicketManager {
     if (!tickets) return
     tickets.delete(memberId)
     if (tickets.size === 0) this.guildMap.delete(guildId)
+  }
+
+  private closeTicket = async (interaction: ButtonInteraction, guildId: string, memberId: string) => {
+    await interaction.deferReply()
+
+    const failureEmbed = new EmbedBuilder()
+      .setTitle('Unable to deliver message')
+      .setColor(Colors.Red)
+      .setDescription('Unable to close ticket at this time. Please try again later.')
+
+    const guild = this.client.guilds.cache.get(guildId)
+    if (!guild) return interaction.editReply({ embeds: [failureEmbed] })
+    const member = guild.members.cache.get(memberId) || await guild.members.fetch(memberId)
+    const sourceMember = guild.members.cache.get(interaction.user.id) || await guild.members.fetch(interaction.user.id)
+
+    const ticket = this.getTicketByMember(member)
+    if (!ticket) return interaction.editReply({ embeds: [failureEmbed] })
+
+    ticket.close({ user: sourceMember })
+
+    const embed = new EmbedBuilder()
+      .setTitle('Ticket Closed!')
+      .setColor(Colors.Green)
+
+    interaction.editReply({
+      content: 'This channel will be deleted in 5 seconds',
+      embeds: [embed]
+    }).then(_ => {
+      setTimeout(() => {
+        ticket.channel.delete().catch(e => {
+          logger.debug(e.message)
+          interaction.editReply('Unable to delete channel. Please delete manually.')
+        })
+      }, 5000)
+    })
   }
 
   private getParent = (guild: Guild) => {
@@ -282,7 +320,7 @@ class Ticket {
   public close = async ({
     user,
     reason = 'No reason provided',
-    anonymous = false,
+    anonymous = true,
   }: ICloseArgs) => {
 
     const logsChannel = this.getLogsChannel()
@@ -323,7 +361,7 @@ class Ticket {
     user,
     text,
     attachment,
-    anonymous = false,
+    anonymous = true,
   }: IMessageArgs) => {
     const ch = this.member.dmChannel || await this.member.createDM()
     return this.forward({ user, text, attachment, anonymous, channel: ch, source: Source.GUILD }).catch(e => {
@@ -344,8 +382,14 @@ class Ticket {
       .setCustomId(`ticket-${source}-${this.member.guild.id}-${source === Source.MEMBER ? `${this.member.id}` : `${this.channel.id}`}`)
       .setLabel('Reply')
       .setStyle(ButtonStyle.Primary)
+    const closeButton = new ButtonBuilder()
+      .setCustomId(`ticketclose-${this.member.guild.id}-${this.member.id}`)
+      .setLabel('Close')
+      .setStyle(ButtonStyle.Danger)
     const actionRow = new ActionRowBuilder()
       .addComponents(respondButton)
+
+    if (source === Source.MEMBER) actionRow.addComponents(closeButton)
 
     if (!channel.isTextBased()) throw new Error('INVALID_CHANNEL_TYPE')
 
