@@ -278,9 +278,9 @@ class Ticket {
 
   private instructionsEmbed = () => {
     const everyoneRole = this.member.guild.roles.everyone
-    const roles = [...this.member.roles.cache.values()].filter(r => !r.name.includes('⁣') && r.id !== everyoneRole.id)
-    const roleArray = roles
-    while (roleArray.map(r => `${r}`).join('\n').length > 1024) {
+    const roles = [...this.member.roles.cache.values()].filter(r => !r.name.includes('⁣') && r.id !== everyoneRole.id).sort((roleA, roleB) => roleB.position - roleA.position)
+    const roleArray = [...roles]
+    while (roleArray.map(r => `${r}`).join('\n').length > 1000) {
       roleArray.pop()
     }
     return new EmbedBuilder()
@@ -297,7 +297,7 @@ class Ticket {
         value: `${this.member}`,
       }, {
         name: 'Roles',
-        value: roles.length > 0 ? `${roles.map(r => `${r}`).join('\n')}` : '*None*'
+        value: roleArray.length > 0 ? `${roleArray.map(r => `${r}`).join('\n')}${roles.length !== roleArray.length ? `\nAnd ${roles.length - roleArray.length} more..` : ''}` : '*None*'
       }, {
         name: 'Ticket ID',
         value: `${this.model.guildTicketId}`,
