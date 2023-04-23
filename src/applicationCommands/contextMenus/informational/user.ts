@@ -1,6 +1,6 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType } from "discord.js"
 import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
-import { User } from '../../slashCommands/informational'
+import { User as UserClass } from '../../common'
 
 const desc = 'Displays information about a user.'
 
@@ -12,7 +12,7 @@ const data = new ContextMenuCommandBuilder()
     "en-US": 'User Info'
   })
 
-export class UserContext extends ContextMenu {
+export class User extends ContextMenu {
 
   static description = desc
   static data = data
@@ -22,7 +22,7 @@ export class UserContext extends ContextMenu {
     client
   }: ContextMenuInteractionArgs) {
 
-    User.run({
+    UserClass.run({
       client,
       interaction,
       ephemeral: true

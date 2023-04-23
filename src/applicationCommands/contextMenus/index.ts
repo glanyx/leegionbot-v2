@@ -1,6 +1,11 @@
-import { UserContext, ModUserContext } from './informational'
+import { User, ModUser } from './informational'
+import { QuickBan, QuickKick, QuickTimeout } from './moderation'
 
 export default [
-  UserContext,
-  ModUserContext
+  User,
+  ModUser,
+
+  QuickBan,
+  QuickKick,
+  QuickTimeout,
 ]

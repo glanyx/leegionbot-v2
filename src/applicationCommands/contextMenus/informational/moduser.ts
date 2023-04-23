@@ -1,18 +1,19 @@
-import { ContextMenuCommandBuilder, ApplicationCommandType } from "discord.js"
+import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits } from "discord.js"
 import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
-import { User } from '../../slashCommands/informational'
+import { User as UserClass } from '../../common'
 
 const desc = 'Displays information about a user.'
 
 const data = new ContextMenuCommandBuilder()
   .setName('modUser')
   .setType(ApplicationCommandType.User)
+  .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
   .setNameLocalizations({
-    "en-GB": 'Mod User Info',
-    "en-US": 'Mod User Info'
+    "en-GB": 'User Info (Mod)',
+    "en-US": 'User Info (Mod)'
   })
 
-export class ModUserContext extends ContextMenu {
+export class ModUser extends ContextMenu {
 
   static description = desc
   static data = data
@@ -22,7 +23,7 @@ export class ModUserContext extends ContextMenu {
     client
   }: ContextMenuInteractionArgs) {
 
-    User.run({
+    UserClass.run({
       client,
       interaction,
       ephemeral: true,
