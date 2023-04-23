@@ -12,7 +12,7 @@ export class Ready {
 
     client.managers = {
       applicationCommandManager: new ApplicationCommandManager(client),
-      ticketManager: new TicketManager(),
+      ticketManager: new TicketManager(client),
     }
     client.managers.applicationCommandManager.registerGlobal()
 

@@ -1,13 +1,37 @@
-import { GuildMember, GuildChannel, Attachment, DMChannel, EmbedBuilder, ThreadChannel, Colors, ChannelType, Guild } from 'discord.js'
+import { Client, GuildMember, GuildChannel, Attachment, DMChannel, EmbedBuilder, ThreadChannel, Colors, ChannelType, Guild, ButtonStyle, ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle, ModalActionRowComponentBuilder, ModalSubmitInteraction } from 'discord.js'
 import { Ticket as TicketModel, TicketMessage } from '../db/models'
 import { logger } from '../utils'
+import { ButtonBuilder } from '@discordjs/builders'
+
+enum Source {
+  GUILD = 'guild',
+  MEMBER = 'member'
+}
 
 export class TicketManager {
 
   private guildMap: Map<string, Map<string, Ticket>>
+  private client: Client
 
-  constructor() {
+  constructor(client: Client) {
     this.guildMap = new Map<string, Map<string, Ticket>>()
+    this.client = client
+
+    client.on('interactionCreate', interaction => {
+
+      if (interaction.isButton()) {
+        const args = interaction.customId.split('-')
+        const cmd = args.shift()
+        if (cmd?.toLowerCase() !== 'ticket') return
+
+        this.displayModal(interaction, args)
+      }
+
+      if (interaction.isModalSubmit()) {
+        if (!interaction.customId.startsWith('ticketmodal')) return
+        this.respondToModal(interaction)
+      }
+    })
   }
 
   public addGuild = (guildId: string) => {
@@ -68,6 +92,69 @@ export class TicketManager {
     return [...guild.channels.cache.values()].find(ch => ch.name.toLowerCase() === 'tickets')
   }
 
+  private displayModal = async (interaction: ButtonInteraction, args: Array<string>) => {
+
+    const modal = new ModalBuilder()
+      .setCustomId(`ticketmodal-${args.join('-')}`)
+      .setTitle('Respond to your ticket')
+
+    const response = new TextInputBuilder()
+      .setCustomId(`ticketresponse`)
+      .setLabel('Your Response')
+      .setPlaceholder('Enter your response here')
+      .setMaxLength(1000)
+      .setStyle(TextInputStyle.Paragraph)
+      .setRequired(true)
+
+    modal.addComponents(new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(response))
+
+    await interaction.showModal(modal)
+  }
+
+  private respondToModal = async (interaction: ModalSubmitInteraction) => {
+
+    await interaction.deferReply()
+    const args = interaction.customId.split('-')
+    args.shift()
+
+    const failureEmbed = new EmbedBuilder()
+      .setTitle('Unable to deliver message')
+      .setColor(Colors.Red)
+      .setDescription('Unable to send your response at this time. Please try again later.')
+
+    const responseType = args.shift()
+    const guildId = args.shift()
+    const destinationId = args.shift()
+    if (!responseType || !guildId || !destinationId) return interaction.editReply({ embeds: [failureEmbed] })
+
+    const guild = this.client.guilds.cache.get(guildId)
+    if (!guild) return interaction.editReply({ embeds: [failureEmbed] })
+
+    if (responseType === Source.MEMBER) {
+      const member = guild.members.cache.get(destinationId) || await guild.members.fetch(destinationId)
+      if (!member) return interaction.editReply({ embeds: [failureEmbed] })
+      const sourceMember = guild.members.cache.get(interaction.user.id) || await guild.members.fetch(interaction.user.id)
+
+      const ticket = this.getTicketByMember(member)
+      if (!ticket) return interaction.editReply({ embeds: [failureEmbed] })
+      await ticket.forwardToMember({ user: sourceMember, text: interaction.fields.getTextInputValue('ticketresponse'), anonymous: true })
+    } else {
+      const ch = guild.channels.cache.get(destinationId) || await guild.channels.fetch(destinationId)
+      if (!ch) return interaction.editReply({ embeds: [failureEmbed] })
+
+      const ticket = this.getTicketByChannel(ch)
+      if (!ticket) return interaction.editReply({ embeds: [failureEmbed] })
+      await ticket.forwardToGuild({ text: interaction.fields.getTextInputValue('ticketresponse') })
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle('Message Sent!')
+      .setColor(Colors.Green)
+      .setDescription(interaction.fields.getTextInputValue('ticketresponse'))
+
+    interaction.editReply({ embeds: [embed] })
+  }
+
 }
 
 interface IMessageArgs {
@@ -79,6 +166,7 @@ interface IMessageArgs {
 
 interface IForwardMessageArgs extends IMessageArgs {
   channel: GuildChannel | ThreadChannel | DMChannel
+  source: Source
 }
 
 interface ICloseArgs {
@@ -199,7 +287,8 @@ class Ticket {
       user,
       text: `This ticket has been closed. Thank you for contacting ${guild.name}.`,
       anonymous,
-      channel: ch
+      channel: ch,
+      source: Source.MEMBER
     }).then(_ => {
       if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) (logsChannel as any).send({ embeds: [this.closedEmbed(user, reason, true)] })
     }).catch(e => {
@@ -219,7 +308,7 @@ class Ticket {
     attachment,
     anonymous = false,
   }: Omit<IMessageArgs, 'user'>) => {
-    return this.forward({ user: this.member, text, attachment, anonymous, channel: this.channel }).catch(e => {
+    return this.forward({ user: this.member, text, attachment, anonymous, channel: this.channel, source: Source.MEMBER }).catch(e => {
       throw new Error('UNDELIVERED')
     })
   }
@@ -231,7 +320,7 @@ class Ticket {
     anonymous = false,
   }: IMessageArgs) => {
     const ch = this.member.dmChannel || await this.member.createDM()
-    return this.forward({ user, text, attachment, anonymous, channel: ch }).catch(e => {
+    return this.forward({ user, text, attachment, anonymous, channel: ch, source: Source.GUILD }).catch(e => {
       throw new Error('UNDELIVERED')
     })
   }
@@ -242,14 +331,25 @@ class Ticket {
     attachment,
     anonymous,
     channel,
+    source,
   }: IForwardMessageArgs) => {
+
+    const respondButton = new ButtonBuilder()
+      .setCustomId(`ticket-${source}-${this.member.guild.id}-${source === Source.MEMBER ? `${this.member.id}` : `${this.channel.id}`}`)
+      .setLabel('Reply')
+      .setStyle(ButtonStyle.Primary)
+    const actionRow = new ActionRowBuilder()
+      .addComponents(respondButton)
+
     if (!channel.isTextBased()) throw new Error('INVALID_CHANNEL_TYPE')
+
     TicketMessage.storeNew({
       conversationId: this.model.id,
       senderId: user.id,
       text,
       attachmentUrl: attachment?.url
     })
+
     const embed = new EmbedBuilder()
       .setTitle('New Message Received')
       .setColor(Colors.Blue)
@@ -260,9 +360,12 @@ class Ticket {
             ? user.guild.name
             : `${user.user.username}#${user.user.discriminator}${user.nickname ? ` (Nickname: ${user.nickname})` : ''}`
       })
+
     if (text) embed.setDescription(text)
+
     return (channel as any).send({
       embeds: [embed],
+      components: [actionRow],
       files: attachment ? [attachment] : []
     }).catch(e => {
       logger.debug(e.message)
