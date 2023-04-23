@@ -66,7 +66,7 @@ export class TicketManager {
       ? await parent.threads.create({
         name: `${member.user.username}-${member.user.discriminator}`,
         message: {
-          content: mentions,
+          content: mentions || 'A new ticket has been created!',
         }
       })
       : await guild.channels.create({
