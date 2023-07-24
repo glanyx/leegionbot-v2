@@ -1,10 +1,11 @@
-import { Client, Message, EmbedBuilder, TextChannel } from 'discord.js'
+import { Client, Message, EmbedBuilder, TextChannel, BufferResolvable } from 'discord.js'
 import { GuildSetting } from '../db/models'
+import { Stream } from 'stream'
 
 export class MessageDelete {
 
   public static async execute(client: Client, message: Message) {
-    
+
     if (message.author.id === client.user?.id) return
 
     const { guild } = message
@@ -18,6 +19,8 @@ export class MessageDelete {
     const channel = guild.channels.cache.get(messageLogChannelId) as TextChannel
     if (!channel) return
 
+    const attachments: Array<BufferResolvable | Stream> = []
+
     const embed = new EmbedBuilder()
       .setColor('#ff0000')
       .setAuthor({
@@ -30,7 +33,7 @@ export class MessageDelete {
         value: `${message.channel}` || 'Unable to retrieve',
         inline: true,
       }, {
-        name:'Author',
+        name: 'Author',
         value: `${message.author}` || 'Unable to retrieve',
         inline: true,
       })
@@ -41,14 +44,24 @@ export class MessageDelete {
     }
 
     if (message.attachments.size > 0) {
-      [...message.attachments.values()].forEach((attachment, index) => {
-        embed.addFields({ name: `Attachment ${index + 1}`, value: attachment.url })
+      embed.addFields({
+        name: 'Attachments',
+        value: `${message.attachments.size}`,
+        inline: true
+      })
+    }
+
+    if (message.attachments.size > 0) {
+      [...message.attachments.values()].forEach((attachment) => {
+        if (attachment.contentType !== null && ['jpg', 'jpeg', 'png', 'gif'].includes(attachment.contentType)) {
+          attachments.push(attachment.attachment)
+        }
       })
     }
 
     if (!message.content && message.attachments.size === 0) embed.setDescription('Unable to retrieve content')
 
-    channel.send({ embeds: [embed] })
+    channel.send({ embeds: [embed], files: attachments })
 
   }
 
