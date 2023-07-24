@@ -1,4 +1,4 @@
-import { Client, Message, EmbedBuilder, TextChannel, BufferResolvable } from 'discord.js'
+import { Client, Message, EmbedBuilder, TextChannel, BufferResolvable, AttachmentBuilder } from 'discord.js'
 import { GuildSetting } from '../db/models'
 import { Stream } from 'stream'
 import axios from 'axios'
@@ -57,7 +57,9 @@ export class MessageDelete {
 
     if (!message.content && message.attachments.size === 0) embed.setDescription('Unable to retrieve content')
 
-    channel.send({ embeds: [embed], files: attachmentBuffers })
+    channel.send({
+      embeds: [embed], files: attachmentBuffers.map(att => new AttachmentBuilder(att).setSpoiler(true))
+    })
 
   }
 
