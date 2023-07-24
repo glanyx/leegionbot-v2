@@ -79,8 +79,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "ticketMentionRoleIds" = ARRAY[${!this.data.ticketMentionRoleIds ? [] : this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
         "twitchFeeds" = ARRAY[${!this.data.twitchFeeds ? [] : this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
-        blacklist = ARRAY[${!this.data.blacklist ? [] : this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[],
-        "voteChannels" = ARRAY[${!this.data.voteChannels ? [] : this.data.voteChannels.map(c => `'${c}'`).join(',')}]::text[]
+        blacklist = ARRAY[${!this.data.blacklist ? [] : this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `
     console.log(temp)
