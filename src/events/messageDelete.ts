@@ -52,7 +52,7 @@ export class MessageDelete {
 
     const attachmentBuffers = await Promise.all([...message.attachments.values()].map(async att => {
       const res = await axios.get(att.proxyURL, { responseType: 'arraybuffer' })
-      return new AttachmentBuilder(res.data).setSpoiler(true)
+      return new AttachmentBuilder(res.data, { name: `SPOILER_${att.name}` })
     }))
 
     if (!message.content && message.attachments.size === 0) embed.setDescription('Unable to retrieve content')
