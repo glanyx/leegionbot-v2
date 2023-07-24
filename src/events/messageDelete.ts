@@ -1,6 +1,7 @@
 import { Client, Message, EmbedBuilder, TextChannel, BufferResolvable } from 'discord.js'
 import { GuildSetting } from '../db/models'
 import { Stream } from 'stream'
+import axios from 'axios'
 
 export class MessageDelete {
 
@@ -18,8 +19,6 @@ export class MessageDelete {
 
     const channel = guild.channels.cache.get(messageLogChannelId) as TextChannel
     if (!channel) return
-
-    const attachments: Array<BufferResolvable | Stream> = []
 
     const embed = new EmbedBuilder()
       .setColor('#ff0000')
@@ -51,17 +50,14 @@ export class MessageDelete {
       })
     }
 
-    if (message.attachments.size > 0) {
-      [...message.attachments.values()].forEach((attachment) => {
-        if (attachment.contentType !== null && ['jpg', 'jpeg', 'png', 'gif'].includes(attachment.contentType)) {
-          attachments.push(attachment.attachment)
-        }
-      })
-    }
+    const attachmentBuffers = await Promise.all([...message.attachments.values()].map(async att => {
+      const res = await axios.get(att.proxyURL, { responseType: 'arraybuffer' })
+      return Buffer.from(res.data, 'utf-8')
+    }))
 
     if (!message.content && message.attachments.size === 0) embed.setDescription('Unable to retrieve content')
 
-    channel.send({ embeds: [embed], files: attachments })
+    channel.send({ embeds: [embed], files: attachmentBuffers })
 
   }
 
