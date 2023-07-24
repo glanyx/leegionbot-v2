@@ -76,11 +76,11 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "twitchMentionId" = ${this.data.twitchMentionId ? `'${this.data.twitchMentionId}'` : null},
         "patreonAnnounceChannelId" = ${this.data.patreonAnnounceChannelId ? `'${this.data.patreonAnnounceChannelId}'` : null},
         "ticketCategoryId" = ${this.data.ticketCategoryId ? `'${this.data.ticketCategoryId}'` : null},
-        "ticketMentionRoleIds" = ARRAY[${this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
+        "ticketMentionRoleIds" = ARRAY[${!this.data.ticketMentionRoleIds ? [] : this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
-        "twitchFeeds" = ARRAY[${this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
-        blacklist = ARRAY[${this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[],
-        "voteChannels" = ARRAY[${this.data.voteChannels.map(c => `'${c}'`).join(',')}]::text[]
+        "twitchFeeds" = ARRAY[${!this.data.twitchFeeds ? [] : this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
+        blacklist = ARRAY[${!this.data.blacklist ? [] : this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[],
+        "voteChannels" = ARRAY[${!this.data.voteChannels ? [] : this.data.voteChannels.map(c => `'${c}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `
     console.log(temp)
