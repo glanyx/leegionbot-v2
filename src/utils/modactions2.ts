@@ -1,7 +1,28 @@
-import { Colors, EmbedBuilder, GuildMember, GuildChannel, ColorResolvable, CommandInteraction } from "discord.js"
+import { Colors, EmbedBuilder, Guild, GuildMember, GuildChannel, ColorResolvable, CommandInteraction } from "discord.js"
 import { logger, formatDiff } from './'
 import { GuildSetting, ModLog, ModeratorAction } from '../db/models'
 
+interface ActionArgs {
+  user: GuildMember
+  target: GuildMember
+  reason?: string
+  interaction?: CommandInteraction
+}
+
+interface TimedActionArgs extends ActionArgs {
+  duration?: number
+}
+
+interface GuildMap {
+  guild: Guild
+  memberMap: Map<string, MemberMap>
+}
+
+interface MemberMap {
+  member: GuildMember
+  action: typeof Unmute | Unban
+  timer: NodeJS.Timeout
+}
 abstract class ModAction {
 
   protected interaction?: CommandInteraction
@@ -17,10 +38,15 @@ abstract class ModAction {
   protected reason: string = 'No reason provided'
   protected duration?: number
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    this.interaction = interaction
-    this.user = user
-    this.target = target
+  protected scheduleMap: Map<string, GuildMap>
+
+  constructor(args: TimedActionArgs) {
+    this.scheduleMap = new Map<string, GuildMap>
+    this.interaction = args.interaction
+    this.user = args.user
+    this.target = args.target
+    this.duration = args.duration
+    if (args.reason) this.reason = args.reason
   }
 
   protected execute = (action: Promise<any>) => {
@@ -125,12 +151,30 @@ abstract class ModAction {
     })
   }
 
+  protected addGuild = (guild: Guild) => {
+    if (!this.hasGuild(guild.id)) this.scheduleMap.set(guild.id, {
+      guild,
+      memberMap: new Map<string, MemberMap>()
+    })
+    return this.scheduleMap.get(guild.id)
+  }
+
+  protected hasGuild = (guildId: string) => {
+    return this.scheduleMap.has(guildId)
+  }
+
+  protected addMember = (member: GuildMember) => {
+    const gMap = this.addGuild(member.guild)
+    if (!gMap) return
+
+  }
+
 }
 
 export class Ban extends ModAction {
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    super(user, target, reason, interaction)
+  constructor(args: TimedActionArgs) {
+    super(args)
     this.actionText = 'banned'
     this.shortActionText = 'ban'
     this.actionType = ModeratorAction.BAN
@@ -145,8 +189,11 @@ export class Ban extends ModAction {
 
 export class Unban extends ModAction {
 
-  constructor(user: GuildMember, targetId: string, reason?: string, interaction?: CommandInteraction) {
-    super(user, ({ user: { id: targetId } } as GuildMember), reason, interaction)
+  constructor(args: Omit<ActionArgs, 'target'> & { targetId: string }) {
+    super({
+      ...args,
+      target: { user: { id: args.targetId } } as GuildMember
+    })
     this.actionText = 'unbanned'
     this.shortActionText = 'unban'
     this.actionType = ModeratorAction.UNBAN
@@ -154,15 +201,15 @@ export class Unban extends ModAction {
   }
 
   public action = () => {
-    this.execute(this.target.guild.members.unban(this.target.user.id))
+    this.execute(this.user.guild.members.unban(this.target.user.id))
   }
 
 }
 
 export class Kick extends ModAction {
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    super(user, target, reason, interaction)
+  constructor(args: ActionArgs) {
+    super(args)
     this.actionText = 'kicked'
     this.shortActionText = 'kick'
     this.actionType = ModeratorAction.KICK
@@ -177,8 +224,8 @@ export class Kick extends ModAction {
 
 export class Warn extends ModAction {
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    super(user, target, reason, interaction)
+  constructor(args: ActionArgs) {
+    super(args)
     this.actionText = 'warned'
     this.shortActionText = 'warn'
     this.joinText = 'in'
@@ -196,8 +243,8 @@ export class Warn extends ModAction {
 
 export class Mute extends ModAction {
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    super(user, target, reason, interaction)
+  constructor(args: TimedActionArgs) {
+    super(args)
     this.actionText = 'muted'
     this.shortActionText = 'mute'
     this.joinText = 'in'
@@ -213,7 +260,9 @@ export class Mute extends ModAction {
     const role = await (settings.mutedRoleId ? this.getMutedRole(settings.mutedRoleId) : this.createMutedRole(settings))
     if (!role) return this.interaction?.editReply('Unable to execute at this time.')
 
-    return this.target.roles.add(role)
+    if (this.duration)
+
+      return this.target.roles.add(role)
 
   }
 
@@ -258,8 +307,8 @@ export class Mute extends ModAction {
 
 export class Unmute extends ModAction {
 
-  constructor(user: GuildMember, target: GuildMember, reason?: string, interaction?: CommandInteraction) {
-    super(user, target, reason, interaction)
+  constructor(args: ActionArgs) {
+    super(args)
     this.actionText = 'unmuted'
     this.shortActionText = 'unmute'
     this.joinText = 'in'
