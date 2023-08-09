@@ -89,7 +89,11 @@ abstract class ModAction {
     if (this.duration) embed.addFields({
       name: 'Duration',
       value: formatDiff(this.duration),
-      inline: true
+      inline: true,
+    }, {
+      name: 'Approximate end time',
+      value: `<t:${(Date.now() + this.duration) / 1000}>`,
+      inline: true,
     })
 
     return this.target.send({ embeds: [embed] })
@@ -119,6 +123,16 @@ abstract class ModAction {
       })
       .setTimestamp()
       .setColor(this.colour)
+
+    if (this.duration) embed.addFields({
+      name: 'Duration',
+      value: formatDiff(this.duration),
+      inline: true,
+    }, {
+      name: 'Approximate end time',
+      value: `<t:${(Date.now() + this.duration) / 1000}>`,
+      inline: true,
+    })
 
     GuildSetting.fetchByGuildId(guild.id).then(async settings => {
       if (!settings || !settings.memberLogChannelId) return
