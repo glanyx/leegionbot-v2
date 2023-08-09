@@ -2,6 +2,8 @@ import { Colors, EmbedBuilder, Guild, GuildMember, GuildChannel, ColorResolvable
 import { logger, formatDiff } from './'
 import { GuildSetting, ModLog, ModeratorAction } from '../db/models'
 
+const scheduleMap = new Map<string, MemberMap>()
+
 interface ActionArgs {
   user: GuildMember
   target: GuildMember
@@ -13,14 +15,8 @@ interface TimedActionArgs extends ActionArgs {
   duration?: number
 }
 
-interface GuildMap {
-  guild: Guild
-  memberMap: Map<string, MemberMap>
-}
-
 interface MemberMap {
   member: GuildMember
-  action: typeof Unmute | Unban
   timer: NodeJS.Timeout
 }
 abstract class ModAction {
@@ -38,10 +34,7 @@ abstract class ModAction {
   protected reason: string = 'No reason provided'
   protected duration?: number
 
-  protected scheduleMap: Map<string, GuildMap>
-
   constructor(args: TimedActionArgs) {
-    this.scheduleMap = new Map<string, GuildMap>
     this.interaction = args.interaction
     this.user = args.user
     this.target = args.target
@@ -56,6 +49,7 @@ abstract class ModAction {
       this.notifyUser().then(userMsg => {
 
         action.then(() => {
+          if (this.duration) this.delayedUndo()
           resolve(true)
         }).catch(e => {
           logger.debug(`Unable to ${this.shortActionText} target user. ID: ${this.target.id} | Guild ID ${this.target.guild.id}`)
@@ -140,6 +134,15 @@ abstract class ModAction {
     this.interaction.editReply({ embeds: [embed] })
   }
 
+  private dispose = () => {
+    const key = `${this.target.user.id}-${this.user.guild.id}-${}`
+    const instance = scheduleMap.get(key)
+    if (instance) {
+      clearTimeout(instance.timer)
+      scheduleMap.delete(key)
+    }
+  }
+
   protected store = () => {
     return ModLog.storeNewAction({
       guildId: this.target.guild.id,
@@ -151,22 +154,42 @@ abstract class ModAction {
     })
   }
 
-  protected addGuild = (guild: Guild) => {
-    if (!this.hasGuild(guild.id)) this.scheduleMap.set(guild.id, {
-      guild,
-      memberMap: new Map<string, MemberMap>()
+  private delayedUndo = () => {
+    if (!this.hasExistingEntry()) {
+      scheduleMap.set(`${this.target.user.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase()}`, {
+        member: this.target,
+        timer: setTimeout(() => {
+          this.constructor.name.toLowerCase() === 'ban' ? new Unban({
+            user: this.user,
+            targetId: this.target.user.id
+          })
+            : new Unmute({
+              user: this.user,
+              target: this.target,
+            })
+        }, this.duration)
+      })
+    }
+  }
+
+  public static delayedAction = (user: GuildMember, target: GuildMember, guildId: string, action: string, duration: number) => {
+    scheduleMap.set(`${target.user.id}-${guildId}-${action.toLowerCase()}`, {
+      member: target,
+      timer: setTimeout(() => {
+        this.constructor.name.toLowerCase() === 'ban' ? new Unban({
+          user,
+          targetId: target.user.id,
+        })
+          : new Unmute({
+            user,
+            target: target,
+          })
+      }, duration)
     })
-    return this.scheduleMap.get(guild.id)
   }
 
-  protected hasGuild = (guildId: string) => {
-    return this.scheduleMap.has(guildId)
-  }
-
-  protected addMember = (member: GuildMember) => {
-    const gMap = this.addGuild(member.guild)
-    if (!gMap) return
-
+  private hasExistingEntry = () => {
+    return scheduleMap.has(`${this.target.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase()}`)
   }
 
 }
