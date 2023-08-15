@@ -5,19 +5,22 @@ import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js'
 
 import { Events } from './events'
 import { Commands } from './commands'
-import { TwitterEvents } from './events/twitter'
 
 import * as Sentry from '@sentry/node'
-import { logger, TwitchManager, TwitterClient, SpamFilter, LevelsManager } from './utils'
+import { logger, TwitchManager, SpamFilter, LevelsManager } from './utils'
 import { ClientRoleManager } from './managers'
 
 import { registerFont } from 'canvas'
+
+import express from 'express'
+import cors from 'cors'
+import { Levels } from './api/routes'
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMessageReactions,
@@ -33,15 +36,6 @@ client.commands = new Collection()
 client.roleManager = new ClientRoleManager()
 
 new TwitchManager(client)
-// const twitterClient = new TwitterClient()
-
-// twitterClient.addRule('453582519087005696', {
-//   from: 'LeeandLie'
-// })
-
-// twitterClient.addRule('259715388462333952', {
-//   from: 'MikeFfatb'
-// })
 
 process.title = 'leegionbot'
 
@@ -67,15 +61,21 @@ Commands.forEach(command => {
   client.commands.set(commandName, command)
 })
 
-// TwitterEvents.forEach((event: any) => {
-//   const eventName = event.name.toCamelCase()
-//   twitterClient.on(eventName, event.execute.bind(null, {
-//     discordClient: client,
-//     twitterClient
-//   }))
-// })
-
 client.login(process.env.DISCORD_TOKEN)
 
 new SpamFilter(client)
 new LevelsManager(client)
+
+const app = express()
+
+app.use(cors())
+
+app.get('/', (req, res) => {
+  res.send('Hello World')
+})
+
+app.use('/levels', Levels)
+
+app.listen(process.env.PORT, () => {
+  logger.info(`[API]: Server listening at http://localhost:${process.env.PORT}`)
+})
