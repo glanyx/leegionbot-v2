@@ -1,8 +1,8 @@
 import { Client } from 'discord.js'
 import { ActivityType, OAuth2Scopes, PermissionFlagsBits } from 'discord-api-types/v10'
 import { DBClient } from '../db'
-import { Countdown, Ticket } from '../db/models'
-import { logger, Blacklist, CountdownTimer, ModActions, TwitchManager } from '../utils'
+import { Countdown, Ticket, ModLog } from '../db/models'
+import { logger, Blacklist, CountdownTimer, TwitchManager, ModAction } from '../utils'
 import { VoteManager, ApplicationCommandManager, TicketManager } from '../managers'
 
 export class Ready {
@@ -39,6 +39,15 @@ export class Ready {
         })
       })
 
+      ModLog.fetchActiveMutes(guild.id).then(({ items: mutes }) => {
+        mutes.forEach(async mute => {
+          const user = guild.members.cache.get(mute.userId) || await guild.members.fetch(mute.userId)
+          const target = guild.members.cache.get(mute.targetId) || await guild.members.fetch(mute.targetId)
+          if (!user || !target || !mute.muteTime) return mute.unmute().update()
+          ModAction.delayedAction(user, target, guild.id, 'mute', mute.muteTime.getTime() - Date.now())
+        })
+      })
+
     }))
 
     /* Get active tickets */
@@ -64,8 +73,8 @@ export class Ready {
     })
 
     logger.info('Fetching active mutes..')
-    ModActions.loadAllMutes(client)
-    ModActions.monitorMutes()
+    // ModActions.loadAllMutes(client)
+    // ModActions.monitorMutes()
 
     TwitchManager.getManager().fetchTrackers(client)
     new VoteManager(client)

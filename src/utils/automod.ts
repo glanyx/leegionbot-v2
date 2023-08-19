@@ -1,6 +1,6 @@
 import { Client, ClientUser, Message, Guild, GuildMember, PermissionFlagsBits, ChannelType } from 'discord.js'
 import { GuildSetting } from '../db/models'
-import { ModActions } from '.'
+import { Mute } from '.'
 
 interface GuildMap {
   guild: Guild
@@ -38,6 +38,9 @@ export class SpamFilter {
       const { guild, member, channel } = message
       if (!guild || !member) return
 
+      const clientMember = guild.members.cache.get(clientUser.id)
+      if (!clientMember) return
+
       // exemption
       if (member.permissions.has(PermissionFlagsBits.ManageMessages)) return
 
@@ -69,7 +72,12 @@ export class SpamFilter {
         // Too many messages, execute mute
         const messages = [...memberInstance.messageMap.values()].map(item => item.message)
         if (channel.type === ChannelType.GuildText) (channel as any).bulkDelete(messages)
-        ModActions.mute(member, 'Muted by AutoMod for spam.', clientUser, instance.muteDuration)
+        new Mute({
+          user: clientMember,
+          target: member,
+          reason: 'Muted by AutoMod for spam.',
+          duration: instance.muteDuration,
+        })
       }
 
     })

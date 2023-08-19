@@ -1,6 +1,6 @@
 import { GuildMember, User } from 'discord.js'
 import { ButtonHandler, HandlerProps } from '../handler'
-import { ModActions } from "../../utils"
+import { Kick } from "../../utils"
 
 export class QuickKick extends ButtonHandler {
 
@@ -11,7 +11,7 @@ export class QuickKick extends ButtonHandler {
 
     if (!interaction.isButton()) return
 
-    const { guild, member, channel } = interaction
+    const { guild, member } = interaction
 
     const targetId = args.shift()
     if (!guild || !member) return
@@ -20,12 +20,16 @@ export class QuickKick extends ButtonHandler {
 
     if (!targetId) return interaction.editReply('Unable to kick at this time')
 
-    const targetMember = guild.members.cache.get(targetId) || await guild.members.fetch(targetId)
-    if (!targetMember) return interaction.editReply('Unable to kick at this time')
+    const target = guild.members.cache.get(targetId) || await guild.members.fetch(targetId)
+    if (!target) return interaction.editReply('Unable to kick at this time')
 
-    if ((member as GuildMember).roles.highest.position <= targetMember.roles.highest.position && member.user.id !== guild.ownerId) return interaction.editReply(`You don't have the required permissions to perform this action!`)
+    if ((member as GuildMember).roles.highest.position <= target.roles.highest.position && member.user.id !== guild.ownerId) return interaction.editReply(`You don't have the required permissions to perform this action!`)
 
-    ModActions.kick(targetMember, (channel as any), reason, (member.user as User))
+    new Kick({
+      user: (member as GuildMember),
+      target,
+      reason,
+    })
 
   }
 
