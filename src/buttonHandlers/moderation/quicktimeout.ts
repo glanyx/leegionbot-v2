@@ -1,6 +1,6 @@
 import { GuildMember, User } from 'discord.js'
 import { ButtonHandler, HandlerProps } from '../handler'
-import { ModActions } from "../../utils"
+import { Mute } from "../../utils"
 
 export class QuickTimeout extends ButtonHandler {
 
@@ -20,12 +20,17 @@ export class QuickTimeout extends ButtonHandler {
 
     if (!targetId) return interaction.editReply('Unable to mute at this time')
 
-    const targetMember = guild.members.cache.get(targetId) || await guild.members.fetch(targetId)
-    if (!targetMember) return interaction.editReply('Unable to mute at this time')
+    const target = guild.members.cache.get(targetId) || await guild.members.fetch(targetId)
+    if (!target) return interaction.editReply('Unable to mute at this time')
 
-    if ((member as GuildMember).roles.highest.position <= targetMember.roles.highest.position && member.user.id !== guild.ownerId) return interaction.editReply(`You don't have the required permissions to perform this action!`)
+    if ((member as GuildMember).roles.highest.position <= target.roles.highest.position && member.user.id !== guild.ownerId) return interaction.editReply(`You don't have the required permissions to perform this action!`)
 
-    ModActions.mute(targetMember, reason, (member.user as User), 300000)
+    new Mute({
+      user: (member as GuildMember),
+      target,
+      reason,
+      duration: 300000
+    })
 
   }
 
