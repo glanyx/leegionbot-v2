@@ -136,8 +136,8 @@ export abstract class ModAction {
     })
 
     GuildSetting.fetchByGuildId(guild.id).then(async settings => {
-      if (!settings || !settings.memberLogChannelId) return
-      const channel = guild.channels.cache.get(settings.memberLogChannelId) || await guild.channels.fetch(settings.memberLogChannelId)
+      if (!settings || !settings.modLogChannelId) return
+      const channel = guild.channels.cache.get(settings.modLogChannelId) || await guild.channels.fetch(settings.modLogChannelId)
       if (!channel) return
       if (channel.isTextBased()) channel.send({ embeds: [embed] })
     })
