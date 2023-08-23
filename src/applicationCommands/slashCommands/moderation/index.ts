@@ -4,3 +4,7 @@ export * from './mute'
 export * from './unban'
 export * from './unmute'
 export * from './warn'
+
+export * from './modlog'
+export * from './purge'
+export * from './slowmode'
