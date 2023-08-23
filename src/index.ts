@@ -8,7 +8,7 @@ import { Commands } from './commands'
 
 import * as Sentry from '@sentry/node'
 import { logger, TwitchManager, SpamFilter, LevelsManager } from './utils'
-import { ClientRoleManager } from './managers'
+import { BirthdayManager, ClientRoleManager } from './managers'
 
 import { registerFont } from 'canvas'
 
@@ -32,6 +32,7 @@ client.commands = new Collection()
 client.roleManager = new ClientRoleManager()
 
 new TwitchManager(client)
+new BirthdayManager(client)
 
 process.title = 'leegionbot'
 
