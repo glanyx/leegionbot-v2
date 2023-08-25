@@ -20,6 +20,7 @@ interface IGuildSetting extends INewGuildSetting {
   ticketCategoryId: string
   ticketMentionRoleIds: Array<string>
   voteChannels: Array<string>
+  birthdayRoleId: string
 }
 
 interface INewGuildSetting {
@@ -79,10 +80,10 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "ticketMentionRoleIds" = ARRAY[${!this.data.ticketMentionRoleIds ? [] : this.data.ticketMentionRoleIds.map(t => `'${t}'`).join(',')}]::text[],
         "alertOnAction" = ${this.data.alertOnAction},
         "twitchFeeds" = ARRAY[${!this.data.twitchFeeds ? [] : this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
+        "birthdayRoleId" = ${this.data.birthdayRoleId ? `'${this.data.birthdayRoleId}'` : null},
         blacklist = ARRAY[${!this.data.blacklist ? [] : this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `
-    console.log(temp)
     return super.edit<GuildSetting>(temp, GuildSetting)
   }
 
@@ -267,6 +268,10 @@ export class GuildSetting extends DBModel<IGuildSetting> {
   public addVoteChannel(id: string) {
     this.data.voteChannels.push(id)
     return this
+  }
+
+  public get birthdayRoleId() {
+    return this.data.birthdayRoleId
   }
 
 }
