@@ -28,8 +28,6 @@ export class Modlog extends ContextMenu {
 
     const { targetMember, member } = interaction
 
-    logger.debug(targetMember)
-    logger.debug(member)
     if (!targetMember) return interaction.editReply('Unable to view details at this time')
 
     sendPaginator((targetMember as GuildMember), interaction, (member as GuildMember).user)
