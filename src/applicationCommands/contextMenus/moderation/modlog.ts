@@ -23,11 +23,14 @@ export class Modlog extends ContextMenu {
     interaction,
   }: ContextMenuInteractionArgs) {
 
+    logger.debug('sample 1')
     await interaction.deferReply({ ephemeral: true })
     if (!interaction.inGuild()) return interaction.editReply('Please use this action in a server')
 
     const { targetMember, member } = interaction
 
+    logger.debug(targetMember)
+    logger.debug(member)
     if (!targetMember) return interaction.editReply('Unable to view details at this time')
 
     sendPaginator((targetMember as GuildMember), interaction, (member as GuildMember).user)
@@ -38,7 +41,6 @@ export class Modlog extends ContextMenu {
 
 const sendPaginator = async (member: GuildMember, interaction: ContextMenuCommandInteraction, author: User) => {
 
-  logger.debug('sample 1')
   const { guild } = member
 
   const { items: logs } = await ModLog.fetchByUserId(guild.id, member.id)

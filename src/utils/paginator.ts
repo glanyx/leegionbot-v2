@@ -1,5 +1,4 @@
 import { User, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, CommandInteraction, UserContextMenuCommandInteraction, ChatInputCommandInteraction } from "discord.js"
-import { logger } from './'
 
 export interface IContentItem {
   content: string
@@ -198,8 +197,6 @@ export class Paginator implements IPaginator {
           components: this.pageCount > 1 ? this.getComponents() : [],
         })
       }
-    } else {
-      logger.debug('sample 2')
     }
   }
 
