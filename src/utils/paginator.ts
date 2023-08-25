@@ -6,7 +6,7 @@ export interface IContentItem {
 }
 
 interface IPaginator {
-  interaction: Interaction | CommandInteraction
+  interaction: Interaction | CommandInteraction | UserContextMenuCommandInteraction | ChatInputCommandInteraction
   title?: string
   description?: string
   user: User
@@ -45,7 +45,7 @@ export class Paginator implements IPaginator {
   allowMultiuser: boolean
   timer: NodeJS.Timeout
 
-  constructor(interaction: Interaction | CommandInteraction, {
+  constructor(interaction: Interaction | CommandInteraction | UserContextMenuCommandInteraction | ChatInputCommandInteraction, {
     title,
     description,
     author,
@@ -214,7 +214,7 @@ export class Paginator implements IPaginator {
   private dispose = () => {
     clearTimeout(this.timer)
 
-    if (this.interaction.isCommand())
+    if (this.interaction.isCommand() || this.interaction.isChatInputCommand() || this.interaction.isUserContextMenuCommand())
       this.interaction.editReply({
         embeds: [this.createEmbed()],
         components: this.pageCount > 1 ? this.getComponents() : [],
