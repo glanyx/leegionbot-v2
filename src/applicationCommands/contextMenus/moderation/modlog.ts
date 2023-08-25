@@ -1,4 +1,4 @@
-import { CommandInteraction, ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, GuildMember, User } from 'discord.js'
+import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, GuildMember, User, ContextMenuCommandInteraction } from 'discord.js'
 import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
 import { ModLog } from '../../../db/models'
 import { Paginator } from '../../../utils'
@@ -36,7 +36,7 @@ export class Modlog extends ContextMenu {
 
 }
 
-const sendPaginator = async (member: GuildMember, interaction: CommandInteraction, author: User) => {
+const sendPaginator = async (member: GuildMember, interaction: ContextMenuCommandInteraction, author: User) => {
 
   const { guild } = member
 

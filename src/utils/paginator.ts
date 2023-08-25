@@ -1,4 +1,4 @@
-import { User, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, CommandInteraction } from "discord.js"
+import { User, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, CommandInteraction, UserContextMenuCommandInteraction, ChatInputCommandInteraction } from "discord.js"
 
 export interface IContentItem {
   content: string
@@ -32,7 +32,7 @@ interface IPaginatorArgs {
 
 export class Paginator implements IPaginator {
 
-  interaction: Interaction | CommandInteraction
+  interaction: Interaction | CommandInteraction | UserContextMenuCommandInteraction | ChatInputCommandInteraction
   title?: string
   description?: string
   user: User
@@ -185,7 +185,7 @@ export class Paginator implements IPaginator {
   }
 
   private create = async () => {
-    if (this.interaction.isCommand())
+    if (this.interaction.isCommand() || this.interaction.isChatInputCommand() || this.interaction.isUserContextMenuCommand())
       if (this.interaction.deferred) {
         this.interaction.editReply({
           embeds: [this.createEmbed()],

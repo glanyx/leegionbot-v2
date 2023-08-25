@@ -38,7 +38,7 @@ export class InteractionCreate {
 
     }
 
-    if (interaction.isContextMenuCommand()) {
+    if (interaction.isUserContextMenuCommand()) {
 
       const command = interaction.commandName.toCamelCase()
       if (!command) return
