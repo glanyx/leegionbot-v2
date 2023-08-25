@@ -40,7 +40,6 @@ export class Modlog extends SlashCommand {
   }
 }
 
-
 const sendPaginator = async (member: GuildMember, interaction: CommandInteraction, author: User) => {
 
   const { guild } = member

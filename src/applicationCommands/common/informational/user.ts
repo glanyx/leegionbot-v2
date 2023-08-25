@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, PermissionFlagsBits } from "discord.js"
 import { format } from '../../../utils'
 import { ApplicationcommandInteractionArgs } from '../applicationCommand'
 
@@ -24,33 +24,33 @@ export class User {
   public static async run({
     interaction,
     ephemeral = false,
-    displayMenu = false
   }: UserSlashcommandInteractionArgs) {
 
     await interaction.deferReply({ ephemeral })
 
-    const { guild, member } = interaction
-    if (!guild || !member) return
+    if (!interaction.inGuild()) return
 
-    const memberArgs = interaction.options.getMember('user') as GuildMember | null
+    const { member } = interaction
 
-    if (memberArgs) {
+    const targetMember = interaction.isChatInputCommand() ? interaction.options.getMember('user') as GuildMember | null : interaction.isUserContextMenuCommand() ? interaction.targetMember : null
+
+    if (targetMember) {
 
       const menu: Array<ActionRowBuilder<ButtonBuilder>> = []
 
-      if (displayMenu) {
+      if ((member as GuildMember).permissions.has(PermissionFlagsBits.MuteMembers)) {
         const timeout = new ButtonBuilder()
-          .setCustomId(`quicktimeout-${memberArgs.user.id}`)
+          .setCustomId(`quicktimeout-${targetMember.user.id}`)
           .setLabel('Timeout (5m)')
           .setStyle(ButtonStyle.Primary)
 
         const kick = new ButtonBuilder()
-          .setCustomId(`quickkick-${memberArgs.user.id}`)
+          .setCustomId(`quickkick-${targetMember.user.id}`)
           .setLabel('Kick')
           .setStyle(ButtonStyle.Danger)
 
         const ban = new ButtonBuilder()
-          .setCustomId(`quickban-${memberArgs.user.id}`)
+          .setCustomId(`quickban-${targetMember.user.id}`)
           .setLabel('Ban')
           .setStyle(ButtonStyle.Danger)
 
@@ -59,10 +59,9 @@ export class User {
         menu.push(row)
       }
 
-      interaction.editReply({ embeds: [getEmbed((memberArgs as GuildMember))], components: menu })
+      interaction.editReply({ embeds: [getEmbed((targetMember as GuildMember))], components: menu })
       return
     }
-    interaction.editReply({ embeds: [getEmbed((member as GuildMember))] })
 
   }
 }

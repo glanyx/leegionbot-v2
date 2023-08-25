@@ -1,9 +1,9 @@
-import { Client, CommandInteraction, ContextMenuCommandBuilder } from 'discord.js'
+import { Client, ContextMenuCommandBuilder, UserContextMenuCommandInteraction } from 'discord.js'
 import { CommandLevel } from '../../utils/constants'
 
 export interface ContextMenuInteractionArgs {
   client: Client,
-  interaction: CommandInteraction
+  interaction: UserContextMenuCommandInteraction
 }
 
 const desc = ''

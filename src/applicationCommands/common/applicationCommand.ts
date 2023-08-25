@@ -1,8 +1,8 @@
-import { Client, CommandInteraction } from 'discord.js'
+import { ChatInputCommandInteraction, Client, ContextMenuCommandInteraction } from 'discord.js'
 
 export interface ApplicationcommandInteractionArgs {
   client: Client,
-  interaction: CommandInteraction
+  interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction
 }
 
 export abstract class ApplicationCommand {

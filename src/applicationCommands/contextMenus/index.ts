@@ -1,10 +1,10 @@
-import { User, ModUser } from './informational'
-import { QuickBan, QuickKick, QuickTimeout } from './moderation'
+import { User } from './informational'
+import { Modlog, QuickBan, QuickKick, QuickTimeout } from './moderation'
 
 export default [
   User,
-  ModUser,
 
+  Modlog,
   QuickBan,
   QuickKick,
   QuickTimeout,

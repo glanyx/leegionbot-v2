@@ -1,9 +1,9 @@
-import { Client, CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, Client, SlashCommandBuilder } from 'discord.js'
 import { CommandLevel } from '../../utils/constants'
 
 export interface SlashcommandInteractionArgs {
   client: Client,
-  interaction: CommandInteraction
+  interaction: ChatInputCommandInteraction
 }
 
 const desc = ''
