@@ -1,7 +1,7 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, GuildMember, User, ContextMenuCommandInteraction } from 'discord.js'
 import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
 import { ModLog } from '../../../db/models'
-import { Paginator } from '../../../utils'
+import { Paginator, logger } from '../../../utils'
 
 const desc = 'Checks moderation logs for a user.'
 
@@ -38,6 +38,7 @@ export class Modlog extends ContextMenu {
 
 const sendPaginator = async (member: GuildMember, interaction: ContextMenuCommandInteraction, author: User) => {
 
+  logger.debug('sample 1')
   const { guild } = member
 
   const { items: logs } = await ModLog.fetchByUserId(guild.id, member.id)

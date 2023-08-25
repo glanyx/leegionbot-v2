@@ -1,4 +1,5 @@
 import { User, EmbedBuilder, Interaction, ActionRowBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder, CommandInteraction, UserContextMenuCommandInteraction, ChatInputCommandInteraction } from "discord.js"
+import { logger } from './'
 
 export interface IContentItem {
   content: string
@@ -185,7 +186,7 @@ export class Paginator implements IPaginator {
   }
 
   private create = async () => {
-    if (this.interaction.isCommand() || this.interaction.isChatInputCommand() || this.interaction.isUserContextMenuCommand())
+    if (this.interaction.isCommand() || this.interaction.isChatInputCommand() || this.interaction.isUserContextMenuCommand()) {
       if (this.interaction.deferred) {
         this.interaction.editReply({
           embeds: [this.createEmbed()],
@@ -197,6 +198,9 @@ export class Paginator implements IPaginator {
           components: this.pageCount > 1 ? this.getComponents() : [],
         })
       }
+    } else {
+      logger.debug('sample 2')
+    }
   }
 
   private update = async (interaction: Interaction) => {
