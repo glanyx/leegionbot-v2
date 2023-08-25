@@ -23,11 +23,12 @@ export class Modlog extends ContextMenu {
     interaction,
   }: ContextMenuInteractionArgs) {
 
-    if (!interaction.inGuild()) return
+    await interaction.deferReply({ ephemeral: true })
+    if (!interaction.inGuild()) return interaction.editReply('Please use this action in a server')
 
     const { targetMember, member } = interaction
 
-    if (!targetMember) return interaction.editReply('Unable to ban at this time')
+    if (!targetMember) return interaction.editReply('Unable to view details at this time')
 
     sendPaginator((targetMember as GuildMember), interaction, (member as GuildMember).user)
 
