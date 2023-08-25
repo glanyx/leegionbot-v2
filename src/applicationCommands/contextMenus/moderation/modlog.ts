@@ -19,11 +19,10 @@ export class Modlog extends ContextMenu {
   static description = desc
   static data = data
 
-  public static async execute({
+  public static async run({
     interaction,
   }: ContextMenuInteractionArgs) {
 
-    logger.debug('sample 1')
     await interaction.deferReply({ ephemeral: true })
     if (!interaction.inGuild()) return interaction.editReply('Please use this action in a server')
 

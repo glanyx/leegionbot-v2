@@ -18,7 +18,7 @@ export class QuickBan extends ContextMenu {
   static description = desc
   static data = data
 
-  public static async execute({
+  public static async run({
     interaction,
   }: ContextMenuInteractionArgs) {
 
