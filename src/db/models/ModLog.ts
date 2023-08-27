@@ -7,6 +7,7 @@ export enum ModeratorAction {
   MUTE = 'mute',
   UNMUTE = 'unmute',
   WARN = 'warn',
+  NOTE = 'note',
 }
 
 interface INewModLog {

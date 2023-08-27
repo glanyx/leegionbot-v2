@@ -42,9 +42,11 @@ export abstract class ModAction {
     if (args.reason) this.reason = args.reason
   }
 
-  protected execute = (action: Promise<any>) => {
+  protected execute = (action: Promise<any>, notify: boolean = true) => {
 
     return new Promise<boolean>(async (resolve, reject) => {
+
+      if (!notify) resolve(false)
 
       this.notifyUser().then(userMsg => {
 
@@ -286,6 +288,24 @@ export class Warn extends ModAction {
 
   public action = () => {
     this.execute(this.warn())
+  }
+
+}
+
+export class Note extends ModAction {
+
+  constructor(args: ActionArgs) {
+    super(args)
+    this.actionText = 'made a note on'
+    this.shortActionText = 'make a note on'
+    this.actionType = ModeratorAction.NOTE
+    this.colour = Colors.DarkGold
+  }
+
+  private note = async () => { }
+
+  public action = () => {
+    this.execute(this.note(), false)
   }
 
 }
