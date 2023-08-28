@@ -59,11 +59,12 @@ export class ModLog extends DBModel<IModLog> {
     `, ModLog)
   }
 
-  public static async fetchByUserId(guildId: string, userId: string, action?: ModeratorAction) {
+  public static async fetchByUserId(guildId: string, userId: string, action?: Omit<ModeratorAction, 'unban' | 'unmute'>) {
     return super.query<ModLog>(`
       SELECT * FROM ${collection}
         WHERE "targetId" = '${userId}'
         AND "guildId" = '${guildId}'
+        AND "action" NOT IN ("${ModeratorAction.UNBAN}", "${ModeratorAction.UNMUTE}")
         ${action ? `AND "action" = '${action}'` : ''}
         ORDER BY time DESC
     `, ModLog)
