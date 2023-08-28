@@ -64,7 +64,7 @@ export class ModLog extends DBModel<IModLog> {
       SELECT * FROM ${collection}
         WHERE "targetId" = '${userId}'
         AND "guildId" = '${guildId}'
-        AND "action" NOT IN ("${ModeratorAction.UNBAN}", "${ModeratorAction.UNMUTE}")
+        AND "action" NOT IN ('${ModeratorAction.UNBAN}', '${ModeratorAction.UNMUTE}')
         ${action ? `AND "action" = '${action}'` : ''}
         ORDER BY time DESC
     `, ModLog)

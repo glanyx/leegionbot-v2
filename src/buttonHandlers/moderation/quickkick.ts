@@ -1,4 +1,4 @@
-import { GuildMember, User } from 'discord.js'
+import { GuildMember, PermissionFlagsBits, User } from 'discord.js'
 import { ButtonHandler, HandlerProps } from '../handler'
 import { Kick } from "../../utils"
 
@@ -15,6 +15,8 @@ export class QuickKick extends ButtonHandler {
 
     const targetId = args.shift()
     if (!guild || !member) return
+
+    if (!(member as GuildMember).permissions.has(PermissionFlagsBits.KickMembers)) return interaction.editReply('You are not allowed to perform this action!')
 
     const reason = 'No reason provided (Quick Action)'
 
