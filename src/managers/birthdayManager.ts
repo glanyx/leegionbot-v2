@@ -1,5 +1,5 @@
 import schedule from 'node-schedule'
-import { Client, Guild, Role } from 'discord.js'
+import { Client, Guild } from 'discord.js'
 
 import { Birthday, GuildSetting } from '../db/models'
 import { IActionType, IRoleAction } from './roleManager'
@@ -14,22 +14,15 @@ export class BirthdayManager {
 
     // Remove yesterday
     schedule.scheduleJob('59 59 23 * * *', () => {
-      this.getBirthdays().then(({ items: birthdays }) => {
-        const guildIds = new Set(birthdays.map(b => b.guildId))
 
-        guildIds.forEach(async gid => {
-          const guild = this.client.guilds.cache.get(gid) || await this.client.guilds.fetch(gid)
-          const setting = await GuildSetting.fetchByGuildId(gid)
-          if (!setting) return
+      [...client.guilds.cache.values()].forEach(async guild => {
+        const role = await BirthdayManager.getRole(guild)
+        if (!role) return
 
-          const { birthdayRoleId } = setting
-          const role = guild.roles.cache.get(birthdayRoleId) || await guild.roles.fetch(birthdayRoleId)
-          if (!role) return
-
-          const memberIds = birthdays.filter(b => b.guildId === gid).map(b => b.userId)
-          this.assignRoles(guild, role, memberIds, IRoleAction.REMOVE)
-        })
+        const memberIds = [...role.members.values()].map(m => m.id)
+        BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.REMOVE)
       })
+
     })
 
     // Assign today
@@ -38,33 +31,42 @@ export class BirthdayManager {
         const guildIds = new Set(birthdays.map(b => b.guildId))
 
         guildIds.forEach(async gid => {
-          const guild = this.client.guilds.cache.get(gid) || await this.client.guilds.fetch(gid)
-          const setting = await GuildSetting.fetchByGuildId(gid)
-          if (!setting) return
-
-          const { birthdayRoleId } = setting
-          const role = guild.roles.cache.get(birthdayRoleId) || await guild.roles.fetch(birthdayRoleId)
-          if (!role) return
-
+          const guild = client.guilds.cache.get(gid) || await client.guilds.fetch(gid)
           const memberIds = birthdays.filter(b => b.guildId === gid).map(b => b.userId)
-          this.assignRoles(guild, role, memberIds, IRoleAction.ADD)
+          BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.ADD)
         })
       })
     })
 
   }
 
-  private getBirthdays = () => {
+  public getBirthdays = () => {
     return Birthday.fetchToday()
   }
 
-  private assignRoles = (guild: Guild, role: Role, memberIds: Array<string>, action: IRoleAction) => {
-    memberIds.forEach(async mid => {
-      const member = guild.members.cache.get(mid) || await guild.members.fetch(mid)
-      this.client.roleManager.add(member, role, action, IActionType.MANUAL)
-    })
+  private static getRole = async (guild: Guild) => {
+
+    const setting = await GuildSetting.fetchByGuildId(guild.id)
+    if (!setting) return
+
+    const { birthdayRoleId } = setting
+    return guild.roles.cache.get(birthdayRoleId) || await guild.roles.fetch(birthdayRoleId)
   }
 
+  public static assignRoles = async (client: Client, guild: Guild, memberIds: Array<string>, action: IRoleAction) => {
 
+    const role = await BirthdayManager.getRole(guild)
+    if (!role) return
 
+    memberIds.forEach(async mid => {
+      const member = guild.members.cache.get(mid) || await guild.members.fetch(mid)
+      client.roleManager.add(member, role, action, IActionType.MANUAL)
+    })
+
+  }
+
+}
+
+export const test = () => {
+  
 }

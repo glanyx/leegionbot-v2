@@ -22,7 +22,6 @@ export class Wyr extends SlashCommand {
   static data = data
 
   public static async run({
-    client,
     interaction
   }: SlashcommandInteractionArgs) {
 

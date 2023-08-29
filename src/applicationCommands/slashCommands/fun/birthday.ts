@@ -2,6 +2,8 @@ import { GuildMember, SlashCommandBuilder } from "discord.js"
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 import { Birthday as BirthdayModel } from "../../../db/models"
+import { IRoleAction } from "../../../managers/roleManager"
+import { BirthdayManager } from "../../../managers/birthdayManager"
 
 const desc = 'Sets your birthday. A Happy Birthday role will be assigned to you on your birthday.'
 
@@ -33,6 +35,7 @@ export class Birthday extends SlashCommand {
   static data = data
 
   public static async run({
+    client,
     interaction,
   }: SlashcommandInteractionArgs) {
 
@@ -45,6 +48,10 @@ export class Birthday extends SlashCommand {
     const day = (interaction.options.get('day')?.value as number | undefined) || 0
     const month = (interaction.options.get('month')?.value as number | undefined) || 0
     const year = (interaction.options.get('year')?.value as number | undefined)
+
+    const today = new Date()
+
+    if (day === today.getDate() && month - 1 === today.getMonth()) BirthdayManager.assignRoles(client, guild, [(member as GuildMember).id], IRoleAction.ADD)
 
     await BirthdayModel.add({
       guildId: guild.id,
