@@ -21,6 +21,7 @@ interface IGuildSetting extends INewGuildSetting {
   ticketMentionRoleIds: Array<string>
   voteChannels: Array<string>
   birthdayRoleId: string
+  appealUrl: string
 }
 
 interface INewGuildSetting {
@@ -81,6 +82,7 @@ export class GuildSetting extends DBModel<IGuildSetting> {
         "alertOnAction" = ${this.data.alertOnAction},
         "twitchFeeds" = ARRAY[${!this.data.twitchFeeds ? [] : this.data.twitchFeeds.map(t => `'${t}'`).join(',')}]::text[],
         "birthdayRoleId" = ${this.data.birthdayRoleId ? `'${this.data.birthdayRoleId}'` : null},
+        "appealUrl" = ${this.data.appealUrl ? `'${this.data.appealUrl}'` : null},
         blacklist = ARRAY[${!this.data.blacklist ? [] : this.data.blacklist.map(w => `'${w}'`).join(',')}]::text[]
       WHERE "guildId" = '${this.data.guildId}'
     `
@@ -272,6 +274,10 @@ export class GuildSetting extends DBModel<IGuildSetting> {
 
   public get birthdayRoleId() {
     return this.data.birthdayRoleId
+  }
+
+  public get appealUrl() {
+    return this.data.appealUrl
   }
 
 }

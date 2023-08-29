@@ -78,7 +78,7 @@ export abstract class ModAction {
 
   }
 
-  protected notifyUser = () => {
+  protected notifyUser = async () => {
     const embed = new EmbedBuilder()
       .setTitle(`${this.actionText}!`)
       .setColor(this.colour)
@@ -98,6 +98,17 @@ export abstract class ModAction {
       value: `<t:${(Date.now() + this.duration) / 1000}>`,
       inline: true,
     })
+
+    if (this.constructor.name.toLowerCase() === 'ban') {
+      const { guild } = this.target
+      const setting = await GuildSetting.fetchByGuildId(guild.id)
+      if (setting && setting.appealUrl) {
+        embed.addFields({
+          name: 'Appeal URL',
+          value: `[Ban Appeal Link](${setting.appealUrl})`,
+        })
+      }
+    }
 
     return this.target.send({ embeds: [embed] })
   }
