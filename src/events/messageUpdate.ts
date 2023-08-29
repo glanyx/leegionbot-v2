@@ -7,6 +7,7 @@ export class MessageUpdate {
   public static async execute(client: Client, messageOld: Message, message: Message) {
 
     if (message.author.id === client.user?.id) return
+    if (message.interaction) return
     if (messageOld.content === message.content && messageOld.attachments.size === message.attachments.size) return
 
     const { guild, author, content, url } = message
