@@ -13,14 +13,16 @@ export class BirthdayManager {
     this.client = client
 
     // Remove yesterday
-    schedule.scheduleJob('59 59 23 * * *', () => {
+    schedule.scheduleJob('55 59 23 * * *', () => {
 
-      [...client.guilds.cache.values()].forEach(async guild => {
-        const role = await BirthdayManager.getRole(guild)
-        if (!role) return
+      this.getBirthdays().then(({ items: birthdays }) => {
+        const guildIds = new Set(birthdays.map(b => b.guildId))
 
-        const memberIds = [...role.members.values()].map(m => m.id)
-        BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.REMOVE)
+        guildIds.forEach(async gid => {
+          const guild = client.guilds.cache.get(gid) || await client.guilds.fetch(gid)
+          const memberIds = birthdays.filter(b => b.guildId === gid).map(b => b.userId)
+          BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.ADD)
+        })
       })
 
     })
