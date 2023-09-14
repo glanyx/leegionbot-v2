@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
-import { IActionType, IRoleAction } from '../../../managers'
+import { IActionType, IRoleAction } from '../../../managers/roleManager'
 import { v4 as uuid } from 'uuid'
 
 const desc = 'Temporary function to grant legacy role'
