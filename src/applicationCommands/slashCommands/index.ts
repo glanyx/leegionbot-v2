@@ -1,4 +1,4 @@
-import { Sync } from './admin'
+import { Sync, Rolesync } from './admin'
 import { Birthday, Dadjoke, Wyr } from './fun'
 import { Ping, Levels, User, Rank } from './informational'
 import { Close, Log, Reply, Setup, Ticket } from './ticket'
@@ -19,6 +19,7 @@ export default [
 
   // Admin
   Sync,
+  Rolesync,
 
   // Info
   Rank,
