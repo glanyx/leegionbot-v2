@@ -11,15 +11,8 @@ const validContentTypes = [
 
 export class ImageManager {
 
-  private client: Client
-
   constructor(client: Client) {
-    this.client = client
-    this.init()
-  }
-
-  private init = () => {
-    this.client.on('messageCreate', (message) => {
+    client.on('messageCreate', (message) => {
       this.checkMessage(message)
     })
   }
