@@ -3,10 +3,10 @@ import { ImageTool } from '../utils'
 import { GuildSetting } from '../db/models'
 
 const validContentTypes = [
-  '.png',
-  '.gif',
-  '.jpg',
-  '.jpeg',
+  'image/png',
+  'image/gif',
+  'image/jpg',
+  'image/jpeg',
 ]
 
 export class ImageManager {
