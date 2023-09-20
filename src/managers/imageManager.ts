@@ -12,24 +12,29 @@ const validContentTypes = [
 export class ImageManager {
 
   constructor(client: Client) {
+    console.log('created')
     client.on('messageCreate', (message) => {
       this.checkMessage(message)
     })
   }
 
   private checkMessage = (message: Message) => {
+    console.log('checking')
 
     if (!message.attachments || !message.inGuild()) return
 
     GuildSetting.fetchByGuildId(message.guildId)
       .then(async set => {
 
+        console.log('settings found')
         if (!set || !set.modLogChannelId) return
 
         const ch = message.guild.channels.cache.get(set.modLogChannelId) || await message.guild.channels.fetch(set.modLogChannelId)
         if (!ch || !ch.isTextBased()) return
 
+        console.log('channel found')
         message.attachments.forEach(att => {
+          console.log('checking att')
           if (validContentTypes.includes(att.contentType || '')) {
             ImageTool.validateImage(att.url).then(({ report }) => {
 
