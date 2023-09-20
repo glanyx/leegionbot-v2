@@ -29,10 +29,8 @@ export class ImageManager {
         if (!ch || !ch.isTextBased()) return
 
         message.attachments.forEach(att => {
-          console.log(att.contentType)
           if (validContentTypes.includes(att.contentType || '')) {
             ImageTool.validateImage(att.url).then(({ report }) => {
-              console.log(report)
 
               const embed = new EmbedBuilder()
                 .setTitle('AI Art Detected')
@@ -51,7 +49,7 @@ export class ImageManager {
                   }
                 ])
 
-              ch.send({ embeds: [embed] })
+              if (report.ai.is_detected) ch.send({ embeds: [embed] })
 
             }).catch(e => console.log(e.message))
           }
