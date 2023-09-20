@@ -32,6 +32,9 @@ export class ImageManager {
           if (validContentTypes.includes(att.contentType || '')) {
             ImageTool.validateImage(att.url).then(({ report }) => {
 
+              const keys = ['dall_e', 'midjourney', 'stable_diffusion', 'this_person_does_not_exist']
+              const algorithm = keys.reduce((a, b) => report[a].confidence > report[b].confidence ? a : b)
+
               const embed = new EmbedBuilder()
                 .setTitle('AI Art Detected')
                 .setDescription(`AI Art was detected [here](${message.url})`)
@@ -46,6 +49,9 @@ export class ImageManager {
                     name: 'AI Confidence',
                     value: `${report.ai.confidence}`,
                     inline: true
+                  }, {
+                    name: 'Suspected Algorithm',
+                    value: `${algorithm} (Confidence: ${report[algorithm].confidence})`
                   }
                 ])
 

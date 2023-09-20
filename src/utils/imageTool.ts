@@ -1,5 +1,4 @@
 import axios from 'axios'
-import logger from './logger'
 
 interface ConfidenceModel {
   confidence: number
