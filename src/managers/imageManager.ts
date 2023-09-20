@@ -24,15 +24,15 @@ export class ImageManager {
     GuildSetting.fetchByGuildId(message.guildId)
       .then(async set => {
 
-        console.log(set?.modLogChannelId)
-
         if (!set || !set.modLogChannelId) return
-        console.log('no set')
 
         const ch = message.guild.channels.cache.get(set.modLogChannelId) || await message.guild.channels.fetch(set.modLogChannelId)
+        console.log(ch)
         if (!ch || !ch.isTextBased()) return
 
+        console.log('ch found')
         message.attachments.forEach(att => {
+          console.log('att')
           if (validContentTypes.includes(att.contentType || '')) {
             ImageTool.validateImage(att.url).then(({ report }) => {
 
