@@ -3,10 +3,10 @@ import { ImageTool } from '../utils'
 import { GuildSetting } from '../db/models'
 
 const validContentTypes = [
-  'png',
-  'gif',
-  'jpg',
-  'jpeg',
+  '.png',
+  '.gif',
+  '.jpg',
+  '.jpeg',
 ]
 
 export class ImageManager {
@@ -25,14 +25,10 @@ export class ImageManager {
       .then(async set => {
 
         if (!set || !set.modLogChannelId) return
-
         const ch = message.guild.channels.cache.get(set.modLogChannelId) || await message.guild.channels.fetch(set.modLogChannelId)
-        console.log(ch)
         if (!ch || !ch.isTextBased()) return
 
-        console.log('ch found')
         message.attachments.forEach(att => {
-          console.log('att')
           if (validContentTypes.includes(att.contentType || '')) {
             ImageTool.validateImage(att.url).then(({ report }) => {
 
