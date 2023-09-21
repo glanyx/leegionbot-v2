@@ -1,7 +1,9 @@
 import SlashCommands from './slashCommands'
-import ContextMenus from './contextMenus'
+import UserContextMenus from './userContextMenus'
+import MessageContextMenus from './messageContextMenus'
 
 export default [
   ...SlashCommands,
-  ...ContextMenus,
+  ...UserContextMenus,
+  ...MessageContextMenus,
 ]

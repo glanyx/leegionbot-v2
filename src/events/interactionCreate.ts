@@ -1,6 +1,7 @@
 import { Client, Interaction } from 'discord.js'
 import SlashCommands from '../applicationCommands/slashCommands'
-import ContextMenus from '../applicationCommands/contextMenus'
+import UserContextMenus from '../applicationCommands/userContextMenus'
+import MessageContextMenus from '../applicationCommands/messageContextMenus'
 import { ButtonHandlers } from '../buttonHandlers'
 import { logger } from '../utils'
 
@@ -43,11 +44,26 @@ export class InteractionCreate {
       const command = interaction.commandName.toCamelCase()
       if (!command) return
 
-      const cmd = ContextMenus.find(cm => cm.name.toCamelCase() === command || cm.name.toCamelCase() === `${command}Context`)
+      const cmd = UserContextMenus.find(cm => cm.name.toCamelCase() === command || cm.name.toCamelCase() === `${command}Context`)
 
       if (!cmd) return
 
-      logger.debug(`ContextMenu : ${cmd.name} executed by ${interaction.user.username}#${interaction.user.discriminator} (ID: ${interaction.user.id})`)
+      logger.debug(`UserContextMenu : ${cmd.name} executed by ${interaction.user.username}#${interaction.user.discriminator} (ID: ${interaction.user.id})`)
+
+      cmd.run({ client, interaction })
+
+    }
+
+    if (interaction.isMessageContextMenuCommand()) {
+      
+      const command = interaction.commandName.toCamelCase()
+      if (!command) return
+
+      const cmd = MessageContextMenus.find(cm => cm.name.toCamelCase() === command || cm.name.toCamelCase() === `${command}Context`)
+
+      if (!cmd) return
+
+      logger.debug(`MessageContextMenu : ${cmd.name} executed by ${interaction.user.username}#${interaction.user.discriminator} (ID: ${interaction.user.id})`)
 
       cmd.run({ client, interaction })
 

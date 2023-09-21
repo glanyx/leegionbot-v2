@@ -1,5 +1,5 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType } from "discord.js"
-import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
+import { UserContextMenu, UserContextMenuInteractionArgs } from '../userContextMenu'
 import { User as UserClass } from '../../common'
 
 const desc = 'Displays information about a user.'
@@ -12,7 +12,7 @@ const data = new ContextMenuCommandBuilder()
     "en-US": 'User Info'
   })
 
-export class User extends ContextMenu {
+export class User extends UserContextMenu {
 
   static description = desc
   static data = data
@@ -20,7 +20,7 @@ export class User extends ContextMenu {
   public static async run({
     interaction,
     client
-  }: ContextMenuInteractionArgs) {
+  }: UserContextMenuInteractionArgs) {
 
     UserClass.run({
       client,

@@ -1,26 +1,26 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, GuildMember, User } from 'discord.js'
-import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
-import { Ban } from "../../../utils"
+import { UserContextMenu, UserContextMenuInteractionArgs } from '../userContextMenu'
+import { Kick } from "../../../utils"
 
-const desc = 'Bans a user'
+const desc = 'Kicks a user'
 
 const data = new ContextMenuCommandBuilder()
-  .setName('quickban')
+  .setName('quickkick')
   .setType(ApplicationCommandType.User)
   .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
   .setNameLocalizations({
-    "en-GB": 'Quick Ban',
-    "en-US": 'Quick Ban'
+    "en-GB": 'Quick Kick',
+    "en-US": 'Quick Kick'
   })
 
-export class QuickBan extends ContextMenu {
+export class QuickKick extends UserContextMenu {
 
   static description = desc
   static data = data
 
   public static async run({
     interaction,
-  }: ContextMenuInteractionArgs) {
+  }: UserContextMenuInteractionArgs) {
 
     const { guild, member } = interaction
 
@@ -28,11 +28,11 @@ export class QuickBan extends ContextMenu {
     if (!guild || !member) return
 
     const reason = 'No reason provided (Quick Action)'
-    if (!target) return interaction.editReply('Unable to ban at this time')
+    if (!target) return interaction.editReply('Unable to kick at this time')
 
     if ((member as GuildMember).roles.highest.position <= target.roles.highest.position && member.user.id !== guild.ownerId) return interaction.editReply(`You don't have the required permissions to perform this action!`)
 
-    new Ban({
+    new Kick({
       interaction,
       user: (member as GuildMember),
       target,

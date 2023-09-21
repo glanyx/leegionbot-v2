@@ -1,5 +1,5 @@
 import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, GuildMember, User, ContextMenuCommandInteraction } from 'discord.js'
-import { ContextMenu, ContextMenuInteractionArgs } from '../contextMenu'
+import { UserContextMenu, UserContextMenuInteractionArgs } from '../userContextMenu'
 import { ModLog } from '../../../db/models'
 import { Paginator, logger } from '../../../utils'
 
@@ -14,14 +14,14 @@ const data = new ContextMenuCommandBuilder()
     "en-US": 'Mod Log'
   })
 
-export class Modlog extends ContextMenu {
+export class Modlog extends UserContextMenu {
 
   static description = desc
   static data = data
 
   public static async run({
     interaction,
-  }: ContextMenuInteractionArgs) {
+  }: UserContextMenuInteractionArgs) {
 
     await interaction.deferReply({ ephemeral: true })
     if (!interaction.inGuild()) return interaction.editReply('Please use this action in a server')
