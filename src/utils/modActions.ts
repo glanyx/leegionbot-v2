@@ -46,7 +46,7 @@ export abstract class ModAction {
 
     return new Promise<boolean>(async (resolve, reject) => {
 
-      if (!notify) resolve(false)
+      if (!notify) return resolve(false)
 
       this.notifyUser().then(userMsg => {
 
