@@ -244,7 +244,7 @@ export class Ban extends ModAction {
   }
 
   public action = () => {
-    this.execute(this.target.ban())
+    this.execute(this.target.ban({ deleteMessageSeconds: 604800, reason: this.reason }))
   }
 
 }
@@ -279,7 +279,7 @@ export class Kick extends ModAction {
   }
 
   public action = () => {
-    this.execute(this.target.kick())
+    this.execute(this.target.kick(this.reason))
   }
 
 }
