@@ -39,15 +39,6 @@ export class Ready {
         })
       })
 
-      ModLog.fetchActiveMutes(guild.id).then(({ items: mutes }) => {
-        mutes.forEach(async mute => {
-          const user = guild.members.cache.get(mute.userId) || await guild.members.fetch(mute.userId)
-          const target = guild.members.cache.get(mute.targetId) || await guild.members.fetch(mute.targetId)
-          if (!user || !target || !mute.muteTime) return mute.unmute().update()
-          ModAction.delayedAction(user, target, guild.id, 'mute', mute.muteTime.getTime() - Date.now())
-        })
-      })
-
     }))
 
     /* Get active tickets */

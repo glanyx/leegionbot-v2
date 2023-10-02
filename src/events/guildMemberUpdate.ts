@@ -12,9 +12,9 @@ export class GuildMemberUpdate {
 
       const settings = await GuildSetting.fetchByGuildId(guild.id)
       if (!settings) return
-  
+
       const { memberLogChannelId } = settings
-  
+
       const channel = guild.channels.cache.get(memberLogChannelId) as TextChannel
       if (!channel) return
 
@@ -36,7 +36,7 @@ export class GuildMemberUpdate {
           inline: true,
         })
         .setTimestamp()
-  
+
       channel.send({ embeds: [embed] })
 
     }

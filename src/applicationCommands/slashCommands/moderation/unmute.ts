@@ -30,10 +30,11 @@ export class Unmute extends SlashCommand {
     const { member, guild } = interaction
 
     if (!member || !guild) return
-    
+
     const target = interaction.options.getMember('user') as GuildMember | null
 
     if (!target) return interaction.editReply('Unable to unmute user at this time. Please try again later.')
+    if (!target.isCommunicationDisabled()) return interaction.editReply('This user is not currently muted!')
 
     new UnmuteUtil({
       interaction,

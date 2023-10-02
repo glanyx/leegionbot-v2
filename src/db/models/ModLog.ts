@@ -70,33 +70,6 @@ export class ModLog extends DBModel<IModLog> {
     `, ModLog)
   }
 
-  public static async fetchActiveUserMute(guildId: string, userId: string) {
-    return super.fetchOne<ModLog>(`
-      SELECT * FROM ${collection}
-        WHERE "targetId" = '${userId}'
-        AND "guildId" = '${guildId}'
-        AND action = '${ModeratorAction.MUTE}'
-        AND "muteActive" = ${true}
-    `, ModLog)
-  }
-
-  public static async fetchActiveMutes(guildId?: string) {
-    return super.query<ModLog>(`
-      SELECT * FROM ${collection}
-      WHERE action = '${ModeratorAction.MUTE}'
-      AND "muteActive" = ${true}
-      ${guildId ? `AND "guildId" = '${guildId}'` : ''}
-    `, ModLog)
-  }
-
-  public async update() {
-    return super.edit<ModLog>(`
-      UPDATE ${collection} SET
-        "muteActive" = ${this.data.muteActive}
-      WHERE id = '${this.data.id}'
-    `, ModLog)
-  }
-
   public get id() {
     return this.data.id
   }
@@ -131,11 +104,6 @@ export class ModLog extends DBModel<IModLog> {
 
   public get muteActive() {
     return this.data.muteActive
-  }
-
-  public unmute() {
-    this.data.muteActive = false
-    return this
   }
 
 }

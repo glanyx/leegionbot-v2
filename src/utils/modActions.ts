@@ -51,8 +51,6 @@ export abstract class ModAction {
       this.notifyUser().then(userMsg => {
 
         action.then(() => {
-          if (this.duration) this.delayedUndo()
-          if (this.constructor.name.toLowerCase() === 'unmute' || this.constructor.name.toLowerCase() === 'unban') this.dispose()
           resolve(true)
         }).catch(e => {
           logger.debug(`Unable to ${this.shortActionText} target user. ID: ${this.target.id} | Guild ID ${this.target.guild.id}`)
@@ -162,16 +160,6 @@ export abstract class ModAction {
     this.interaction.editReply({ embeds: [embed] })
   }
 
-  private dispose = () => {
-    ModLog.fetchActiveUserMute(this.user.guild.id, this.target.user.id).then(item => item?.unmute().update())
-    const key = `${this.target.user.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase().substring(2)}`
-    const instance = scheduleMap.get(key)
-    if (instance) {
-      clearTimeout(instance.timer)
-      scheduleMap.delete(key)
-    }
-  }
-
   protected store = () => {
     return ModLog.storeNewAction({
       guildId: this.target.guild.id,
@@ -181,54 +169,6 @@ export abstract class ModAction {
       reason: this.reason,
       muteTime: this.duration ? new Date(Date.now() + this.duration) : undefined
     })
-  }
-
-  private delayedUndo = async () => {
-    if (this.hasExistingEntry()) {
-      await ModLog.fetchActiveUserMute(this.user.guild.id, this.target.user.id).then(item => item?.unmute().update())
-      const key = `${this.target.user.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase()}`
-      const instance = scheduleMap.get(key)
-      if (instance) {
-        clearTimeout(instance.timer)
-        scheduleMap.delete(key)
-      }
-    }
-
-    scheduleMap.set(`${this.target.user.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase()}`, {
-      member: this.target,
-      timer: setTimeout(() => {
-        const func = this.constructor.name.toLowerCase() === 'ban' ? new Unban({
-          user: this.user,
-          targetId: this.target.user.id
-        })
-          : new Unmute({
-            user: this.user,
-            target: this.target,
-          })
-        func.action()
-      }, this.duration)
-    })
-  }
-
-  public static delayedAction = (user: GuildMember, target: GuildMember, guildId: string, action: string, duration: number) => {
-    scheduleMap.set(`${target.user.id}-${guildId}-${action.toLowerCase()}`, {
-      member: target,
-      timer: setTimeout(() => {
-        const func = this.constructor.name.toLowerCase() === 'ban' ? new Unban({
-          user,
-          targetId: target.user.id,
-        })
-          : new Unmute({
-            user,
-            target: target,
-          })
-        func.action()
-      }, duration)
-    })
-  }
-
-  private hasExistingEntry = () => {
-    return scheduleMap.has(`${this.target.user.id}-${this.user.guild.id}-${this.constructor.name.toLowerCase()}`)
   }
 
 }
@@ -332,55 +272,8 @@ export class Mute extends ModAction {
     this.colour = Colors.DarkGold
   }
 
-  private mute = async () => {
-
-    const settings = await this.getSettings()
-    if (!settings) return this.interaction?.editReply('Unable to execute at this time.')
-
-    const role = await (settings.mutedRoleId ? this.getMutedRole(settings.mutedRoleId) : this.createMutedRole(settings))
-    if (!role) return this.interaction?.editReply('Unable to execute at this time.')
-
-    if (this.duration)
-
-      return this.target.roles.add(role)
-
-  }
-
-  private getSettings = () => {
-    return GuildSetting.fetchByGuildId(this.target.guild.id)
-  }
-
-  private createMutedRole = async (settings: GuildSetting) => {
-    const newRole = await this.target.guild.roles.create({
-      name: 'Muted',
-      color: Colors.Red,
-      permissions: [],
-      reason: 'Automated Role Creation'
-    })
-
-    await this.target.guild.channels.fetch()
-
-    this.target.guild.channels.cache.forEach(async channel => {
-      newRole && (channel as GuildChannel).permissionOverwrites.create(newRole, {
-        SendMessages: false,
-        SendMessagesInThreads: false,
-        AttachFiles: false,
-        AddReactions: false,
-        Speak: false
-      })
-    })
-
-    settings.setMutedRole(newRole.id).update()
-
-    return newRole
-  }
-
-  private getMutedRole = (roleId: string) => {
-    return this.target.guild.roles.fetch(roleId, { cache: true })
-  }
-
   public action = () => {
-    this.execute(this.mute())
+    this.execute(this.target.timeout(this.duration || 0, this.reason))
   }
 
 }
@@ -396,28 +289,8 @@ export class Unmute extends ModAction {
     this.colour = Colors.Green
   }
 
-  private unmute = async () => {
-
-    const settings = await this.getSettings()
-    if (!settings || !settings.mutedRoleId) return this.interaction?.editReply('Unable to execute at this time.')
-
-    const role = await this.getMutedRole(settings.mutedRoleId)
-    if (!role) return this.interaction?.editReply('Unable to execute at this time.')
-
-    return this.target.roles.remove(role)
-
-  }
-
-  private getSettings = () => {
-    return GuildSetting.fetchByGuildId(this.target.guild.id)
-  }
-
-  private getMutedRole = (roleId: string) => {
-    return this.target.guild.roles.fetch(roleId, { cache: true })
-  }
-
   public action = () => {
-    this.execute(this.unmute())
+    this.execute(this.target.timeout(null, this.reason))
   }
 
 }
