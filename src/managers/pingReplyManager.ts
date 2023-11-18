@@ -11,14 +11,14 @@ export class PingReplyManager {
 
   private checkMessage = async (message: Message) => {
 
-    const { channel, member } = message
+    const { guild, member, reference } = message
 
-    if (!member) return
+    if (!guild || !member || !reference) return
 
-    if (message.reference && message.reference.messageId) {
-      const ref = channel.messages.cache.get(message.reference.messageId) || await channel.messages.fetch(message.reference.messageId)
+    if (reference.messageId && message.mentions.repliedUser) {
+      const target = guild.members.cache.get(message.mentions.repliedUser.id) || await guild.members.fetch(message.mentions.repliedUser.id)
 
-      if (ref.member && ref.member.permissions.has(PermissionFlagsBits.ManageMessages) && !member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+      if (target.permissions.has(PermissionFlagsBits.ManageMessages) && !member.permissions.has(PermissionFlagsBits.ManageMessages)) {
         message.reply({
           content: `Please do not ping Moderators without reason, or their express permission!`,
           files: [
