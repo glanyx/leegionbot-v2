@@ -3,13 +3,14 @@ import { ActivityType, OAuth2Scopes, PermissionFlagsBits } from 'discord-api-typ
 import { DBClient } from '../db'
 import { Countdown, Ticket, ModLog } from '../db/models'
 import { logger, Blacklist, CountdownTimer, TwitchManager, ModAction } from '../utils'
-import { VoteManager, ApplicationCommandManager, TicketManager } from '../managers'
+import { VoteManager, ApplicationCommandManager, TicketManager, PingReplyManager } from '../managers'
 
 export class Ready {
 
   public static async execute(client: Client) {
     logger.info(`Logged in as ${client.user?.tag}!`)
 
+    new PingReplyManager(client)
     client.managers = {
       applicationCommandManager: new ApplicationCommandManager(client),
       ticketManager: new TicketManager(client),
