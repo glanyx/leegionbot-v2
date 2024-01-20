@@ -21,7 +21,7 @@ export class BirthdayManager {
         guildIds.forEach(async gid => {
           const guild = client.guilds.cache.get(gid) || await client.guilds.fetch(gid)
           const memberIds = birthdays.filter(b => b.guildId === gid).map(b => b.userId)
-          BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.ADD)
+          BirthdayManager.assignRoles(this.client, guild, memberIds, IRoleAction.REMOVE)
         })
       })
 
