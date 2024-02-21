@@ -20,7 +20,7 @@ export class PingReplyManager {
 
       if (target.permissions.has(PermissionFlagsBits.ManageMessages) && !member.permissions.has(PermissionFlagsBits.ManageMessages)) {
         message.reply({
-          content: `Please do not ping Moderators without reason, or their express permission!`,
+          content: `Please do not reply ping Moderators without reason, or their express permission!`,
           files: [
             {
               attachment: 'https://tenor.com/view/discord-reply-discord-reply-off-discord-reply-gif-22150762.gif',
