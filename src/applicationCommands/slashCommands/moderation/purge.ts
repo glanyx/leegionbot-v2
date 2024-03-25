@@ -30,7 +30,7 @@ export class Purge extends SlashCommand {
     const { channel } = interaction
     if (!channel) return interaction.editReply('Unable to purge messages at this time.')
 
-    const messageCount = interaction.options.get('messages', true) as unknown as number
+    const messageCount = interaction.options.getNumber('messages', true)
 
     const cycles = Math.floor(messageCount / 100)
     const remainder = messageCount % 100
