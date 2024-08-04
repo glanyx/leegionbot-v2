@@ -50,7 +50,7 @@ const sendPaginator = async (member: GuildMember, interaction: CommandInteractio
 
   new Paginator(interaction, {
     author: author,
-    items: await Promise.all(logs.map(async item => `**Action:** ${item.action}\n**Actioned by:** ${(await guild.members.cache.get(item.userId)?.fetch())}\n**When:** <t:${Math.round(item.time.getTime()) / 1000}>\n**Reason:** ${item.reason}\n\n`)),
+    items: await Promise.all(logs.map(async item => `**Action:** ${item.action}\n**Actioned by:** ${(await guild.members.cache.get(item.userId)?.fetch())}\n**When:** <t:${Math.round(item.time.getTime() / 1000)}>\n**Reason:** ${item.reason}\n\n`)),
     timeout: 60000
   })
 
