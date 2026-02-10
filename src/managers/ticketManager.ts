@@ -283,7 +283,8 @@ class Ticket {
     while (roleArray.map(r => `${r}`).join('\n').length > 1000) {
       roleArray.pop()
     }
-    return new EmbedBuilder()
+    logger.debug(`Ticket debug instructions embed: RoleArray ${roleArray}`)
+    const embed = new EmbedBuilder()
       .setColor(Colors.Blue)
       .setTitle('A new Ticket has been created!')
       .setDescription(
@@ -303,22 +304,25 @@ class Ticket {
         value: `${this.model.guildTicketId}`,
       })
       .setTimestamp()
+    logger.debug(`Ticket debug instructions embed: Embed ${embed}`)
+    return embed
   }
 
   public initialize = async () => {
+    logger.debug(`Ticket debugger\nGuild id: ${this.member.guild.id}\nChannel ID: ${this.channel.id}\nMember Id: ${this.member.id}`)
     this.model = await TicketModel.storeNew({
       guildId: this.member.guild.id,
       channelId: this.channel.id,
       memberId: this.member.id,
     })
-    await this.postCreate()
+    await this.postCreate().catch(error => { logger.error(`Error in ticket initialization Ticket ID ${this.model.id} | Member ${this.member.id}\nError: ${error.message}`) })
   }
 
   private postCreate = async () => {
     const logsChannel = this.getLogsChannel()
     const ch = this.channel
     if (logsChannel && (logsChannel.type === ChannelType.GuildText || logsChannel.type === ChannelType.PublicThread || logsChannel.type === ChannelType.PrivateThread)) (logsChannel as any).send({ embeds: [this.openedEmbed()] })
-    if (ch.isTextBased()) (ch as any).send({ embeds: [this.instructionsEmbed()] })
+    if (ch.isTextBased()) (ch as any).send({ embeds: [this.instructionsEmbed()] }).catch(error => { logger.error(`Error sending instructions embed member ${this.member.id} | Ticket ${this.model.id}\nError: ${error.message}`) })
   }
 
   public close = async ({
