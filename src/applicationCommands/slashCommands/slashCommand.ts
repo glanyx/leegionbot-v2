@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Client, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, Client, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder } from 'discord.js'
 import { CommandLevel } from '../../utils/constants'
 
 export interface SlashcommandInteractionArgs {
@@ -7,7 +7,7 @@ export interface SlashcommandInteractionArgs {
 }
 
 const desc = ''
-const data: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> = new SlashCommandBuilder()
+const data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> = new SlashCommandBuilder()
 
 export abstract class SlashCommand {
 

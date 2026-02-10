@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
-import { Levels } from '../../../db/models/index.js'
-import { levels, roundedRect, loadingBar } from '../../../utils/index.js'
-import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand.js'
+import { Levels } from '../../../db/models'
+import { levels, roundedRect, loadingBar } from '../../../utils'
+import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 
 import * as PImage from 'pureimage'
 import * as fs from 'fs'

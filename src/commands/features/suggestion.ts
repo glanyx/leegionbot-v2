@@ -1,6 +1,6 @@
 import { Help, Config, IExecuteArgs, TextChannel, EmbedBuilder, PermissionFlagsBits, Message } from "discord.js"
 import { Suggestion as SuggestionModel, GuildSetting } from '../../db/models'
-import { updateSuggestion, SuggestionStatus, SuggestionState, OldPaginator, logger } from '../../utils'
+import { updateSuggestion, SuggestionStatus, SuggestionState, logger } from '../../utils'
 
 
 const configs: Config = {
@@ -57,7 +57,7 @@ export class Suggestion {
   }
 
   public static get subcommands() {
-    return [Edit, Approve, Complete, Decline, List]
+    return [Edit, Approve, Complete, Decline]
   }
 
   public static get help() {
@@ -515,40 +515,40 @@ const listAlias = [
   'l'
 ]
 
-class List {
+// class List {
 
-  public static async run({
-    message,
-    args
-  }: IExecuteArgs) {
+//   public static async run({
+//     message,
+//     args
+//   }: IExecuteArgs) {
 
-    const { guild, channel, member, author } = message
-    if (!guild || !member) return
+//     const { guild, channel, member, author } = message
+//     if (!guild || !member) return
 
-    const { items: suggestions } = await SuggestionModel.fetchByGuildId(guild.id, true)
+//     const { items: suggestions } = await SuggestionModel.fetchByGuildId(guild.id, true)
 
-    if (suggestions.length === 0) return (channel as any).send('There are no open suggestions!')
+//     if (suggestions.length === 0) return (channel as any).send('There are no open suggestions!')
 
-    new OldPaginator({
-      title: 'Submitted or Approved Suggestions',
-      channel,
-      author,
-      items: suggestions.map(sg => `**ID ${sg.id}**\n**Requested by:** <@${sg.userId}>\n**Status:** ${sg.status}\n**Suggestion:** ${sg.updatedText || sg.text}`),
-      displayCount: 5
-    })
+//     new OldPaginator({
+//       title: 'Submitted or Approved Suggestions',
+//       channel,
+//       author,
+//       items: suggestions.map(sg => `**ID ${sg.id}**\n**Requested by:** <@${sg.userId}>\n**Status:** ${sg.status}\n**Suggestion:** ${sg.updatedText || sg.text}`),
+//       displayCount: 5
+//     })
 
-  }
+//   }
 
-  public static get help() {
-    return listHelp
-  }
+//   public static get help() {
+//     return listHelp
+//   }
 
-  public static get configs() {
-    return listConfigs
-  }
+//   public static get configs() {
+//     return listConfigs
+//   }
 
-  public static get alias() {
-    return listAlias
-  }
+//   public static get alias() {
+//     return listAlias
+//   }
 
-}
+// }

@@ -10,7 +10,8 @@ import * as Sentry from '@sentry/node'
 import { logger, TwitchManager, SpamFilter, LevelsManager } from './utils'
 import { BirthdayManager, ClientRoleManager } from './managers'
 
-import { registerFont } from 'canvas'
+import * as PImage from 'pureimage'
+
 
 const client = new Client({
   intents: [
@@ -36,8 +37,8 @@ new BirthdayManager(client)
 
 process.title = 'leegionbot'
 
-registerFont('./src//assets/Roboto-Regular.ttf', { family: 'Roboto' })
-registerFont('./src//assets/Roboto-Bold.ttf', { family: 'Roboto Bold' })
+PImage.registerFont('./src//assets/Roboto-Regular.ttf', 'Roboto')
+PImage.registerFont('./src//assets/Roboto-Bold.ttf', 'Roboto Bold')
 
 if (process.env.SENTRY_DSN) {
   logger.info('Establishing connection to Sentry..')

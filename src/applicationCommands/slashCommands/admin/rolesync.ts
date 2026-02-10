@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import { PermissionFlagsBits, SlashCommandBuilder, TextChannel } from 'discord.js'
 import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
 import { IActionType, IRoleAction } from '../../../managers/roleManager'
 import { v4 as uuid } from 'uuid'
@@ -47,7 +47,7 @@ export class Rolesync extends SlashCommand {
     const legacyMembers = [...guild.members.cache.values()].filter(member => member.roles.cache.map(r => r.id).some(rid => roleIdArray.indexOf(rid) >= 0))
 
     const onComplete = () => {
-      if (channel?.isTextBased()) channel.send('All Legacy roles assigned')
+      if (channel?.isTextBased()) (channel as TextChannel).send('All Legacy roles assigned')
     }
 
     client.roleManager.addMultiple(legacyMembers, legacyRole, IRoleAction.ADD, IActionType.MANUAL, onComplete, actionId)

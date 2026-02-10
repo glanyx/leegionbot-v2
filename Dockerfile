@@ -1,26 +1,4 @@
-FROM node:18-alpine
-
-RUN apk add --no-cache \
-  sudo \
-  python3 \
-  g++ \
-  build-base \
-  cairo-dev \
-  jpeg-dev \
-  pango-dev \
-  musl-dev \
-  giflib-dev \
-  pixman-dev \
-  pangomm-dev \
-  libjpeg-turbo-dev \
-  freetype-dev \
-  fontconfig \
-  ;
-
-RUN sudo \
-  fc-cache -f && \
-  fc-match Arial \
-  ;
+FROM node:24-alpine
 
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
