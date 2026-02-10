@@ -1,9 +1,12 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
-import { Levels } from '../../../db/models'
-import { levels, roundedRect, loadingBar } from '../../../utils'
-import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand'
+import { Levels } from '../../../db/models/index.js'
+import { levels, roundedRect, loadingBar } from '../../../utils/index.js'
+import { SlashCommand, SlashcommandInteractionArgs } from '../slashCommand.js'
 
-import { createCanvas, loadImage } from 'canvas'
+import * as PImage from 'pureimage'
+import * as fs from 'fs'
+import * as https from 'https'
+import { PassThrough, Readable } from "stream"
 
 const WIDTH = 500
 const HEIGHT = 150
@@ -46,6 +49,8 @@ export class Rank extends SlashCommand {
 
     await interaction.deferReply()
 
+    const https_get_P = (url) => new Promise((res) => https.get(url, res));
+
     const userLevel = await Levels.fetchUserData(guild.id, user.id)
 
     const level = userLevel ? levels.findIndex(l => l > userLevel.exp) - 1 : 0
@@ -55,10 +60,10 @@ export class Rank extends SlashCommand {
 
     const remainder = totalExp - prevExp
 
-    const canvas = createCanvas(WIDTH, HEIGHT)
-    const ctx = canvas.getContext('2d')
+    const background = PImage.make(WIDTH, HEIGHT)
+    const ctx = background.getContext('2d')
 
-    const image = await loadImage(URL)
+    const image = await PImage.decodePNGFromStream(fs.createReadStream(URL))
 
     // Background
     ctx.drawImage(image, BANNER.x, BANNER.y, BANNER.dx, BANNER.dy, 0, 0, WIDTH, HEIGHT)
@@ -70,8 +75,8 @@ export class Rank extends SlashCommand {
 
     // Avatar border
     const gradient = ctx.createLinearGradient(75, 75, 110, 110)
-    gradient.addColorStop(0, 'rgba(186, 85, 211, 1.0')
-    gradient.addColorStop(1, 'rgba(0, 255, 255, 1.0')
+    gradient.addColorStop(0, 3126187007)
+    gradient.addColorStop(1, 16777215)
     ctx.save()
     ctx.beginPath()
     ctx.arc(75, 75, AVATAR.radius + 5, 0, 2 * Math.PI, false)
@@ -87,8 +92,9 @@ export class Rank extends SlashCommand {
 
 
     // Avatar
-    const avatarImage = await loadImage(user.displayAvatarURL({ extension: 'png' }))
-    const aCanvas = createCanvas(100, 100)
+    const image_stream = await https_get_P(user.displayAvatarURL({ extension: 'png' })) as Readable
+    const avatarImage = await PImage.decodePNGFromStream(image_stream);
+    const aCanvas = PImage.make(100, 100)
     const aCtx = aCanvas.getContext('2d')
 
     aCtx.drawImage(avatarImage, 0, 0, 100, 100)
@@ -117,16 +123,21 @@ export class Rank extends SlashCommand {
     ctx.textAlign = 'end'
     ctx.fillText(`${remainder}/${expLim}`, 470, 92)
 
-    const buffer = canvas.toBuffer();
+    const passThroughStream = new PassThrough()
+    const pngData: Array<any> = []
 
-    interaction.editReply({
-      files: [{
-        attachment: buffer,
-        name: `rank-${user.id}.png`
-      }]
+    passThroughStream.on('data', (chunk) => pngData.push(chunk))
+    passThroughStream.on('end', () => { })
+
+    PImage.encodePNGToStream(background, passThroughStream).then(() => {
+      const buff = Buffer.concat(pngData);
+      interaction.editReply({
+        files: [{
+          attachment: buff,
+          name: `rank-${user.id}.png`
+        }]
+      })
     })
-
   }
 
-  public st
 }
