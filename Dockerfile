@@ -1,11 +1,17 @@
-FROM node:24-alpine
+FROM node:lts AS base
 
-RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
-COPY package.json /usr/src/bot
-RUN npm install
+# Install deps
+COPY package*.json ./
+RUN npm ci
 
-COPY . /usr/src/bot
+# Copy only build inputs, not the whole repo
+COPY tsconfig*.json ./
+COPY src ./src
 
+# Build inside the image
+RUN npm run build
+
+# Run the built code
 CMD ["npm", "start"]
