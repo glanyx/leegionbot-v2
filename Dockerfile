@@ -1,17 +1,20 @@
 FROM node:lts AS base
 
+# Enable corepack (bundled with recent Node images) so pnpm is available
+RUN corepack enable
+
 WORKDIR /usr/src/bot
 
-# Install deps
-COPY package*.json ./
-RUN npm ci
+# Install dependencies with pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copy only build inputs, not the whole repo
 COPY tsconfig*.json ./
-COPY src ./src
+COPY src .
 
 # Build inside the image
-RUN npm run build
+RUN pnpm run build
 
 # Run the built code
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]

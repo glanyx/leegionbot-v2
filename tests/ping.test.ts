@@ -29,16 +29,16 @@ client.commands.set("ping", require('../src/commands/ping'))
 describe("LeegionBot", () => {
   test("Missing prefix", () => {
     Message(client, message2)
-    expect(Ping).toBeCalledTimes(0)
+    expect(Ping).toHaveBeenCalledTimes(0)
   })
 
   test("Wrong prefix", () => {
     Message(client, message3)
-    expect(Ping).toBeCalledTimes(0)
+    expect(Ping).toHaveBeenCalledTimes(0)
   })
 
   test("Ping pong response", () => {
     Message(client, message)
-    expect(Ping).toBeCalledTimes(1)
+    expect(Ping).toHaveBeenCalledTimes(1)
   })
 })
