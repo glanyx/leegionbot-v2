@@ -17,7 +17,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMessageReactions,
@@ -50,6 +50,7 @@ if (process.env.SENTRY_DSN) {
 
 Events.forEach((event: any) => {
   const eventName = event.name.toCamelCase()
+  console.log(eventName)
   client.on(eventName, event.execute.bind(null, client))
 })
 

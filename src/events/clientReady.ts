@@ -5,7 +5,7 @@ import { Countdown, Ticket, ModLog } from '../db/models'
 import { logger, Blacklist, CountdownTimer, TwitchManager, ModAction } from '../utils'
 import { VoteManager, ApplicationCommandManager, TicketManager, PingReplyManager } from '../managers'
 
-export class Ready {
+export class ClientReady {
 
   public static async execute(client: Client) {
     logger.info(`Logged in as ${client.user?.tag}!`)
@@ -18,9 +18,12 @@ export class Ready {
     client.managers.applicationCommandManager.registerGlobal()
 
     logger.info('Establising DB connection..')
-    await DBClient.connect().then(() => {
+    try {
+      await DBClient.query('SELECT 1')
       logger.info('Successfully connected to DB!')
-    })
+    } catch (error) {
+      logger.error('Failed to connect to DB!', error)
+    }
 
     logger.info('Initiating Countdown timer system..')
     new CountdownTimer(client)
