@@ -9,7 +9,7 @@ const DBClient = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
-  max: 1,
+  max: 2,
   idleTimeoutMillis: 5000,
   connectionTimeoutMillis: 10000,
 })
