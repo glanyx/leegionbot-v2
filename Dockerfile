@@ -7,7 +7,7 @@ WORKDIR /usr/src/bot
 
 # Install dependencies with pnpm
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --allow-build=*
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy only build inputs, not the whole repo
 COPY tsconfig*.json ./
