@@ -139,8 +139,13 @@ export class TwitchClient extends EventEmitter {
           }
           const liveAt = new Date()
           if (!channel.live) {
-            console.log('hello?')
             channel.live = true
+            const now = new Date()
+            const startedAt = new Date(stream.started_at)
+            const diff = now.getTime() - startedAt.getTime()
+            if (diff >= TIMEOUT) {
+              return
+            }
             this.emit('goLive', {
               ...stream,
               started_at: stream.started_at ? liveAt : undefined
@@ -150,7 +155,7 @@ export class TwitchClient extends EventEmitter {
 
         }).catch(e => {
           // if token expired
-          
+
           logger.error(e)
         })
       })
@@ -200,7 +205,7 @@ export class TwitchManager {
   }
 
   private monitor = (client: Client) => {
-    
+
     TwitchEvents.forEach((event: any) => {
       const eventName = event.name.toCamelCase()
       this.client.on(eventName, event.execute.bind(null, {

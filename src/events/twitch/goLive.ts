@@ -24,8 +24,8 @@ export class GoLive {
         .setFooter({ text: `Via Twitch` })
         .setTimestamp()
 
-      // item.channel.send({ content: `<@&${item.mentionId}>`, embeds: [embed] })
-      
+      item.channel.send({ content: `<@&${item.mentionId}>`, embeds: [embed] })
+
     })
 
   }
